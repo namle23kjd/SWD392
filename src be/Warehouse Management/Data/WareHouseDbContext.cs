@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Warehouse_Management.Models;
 
 namespace Warehouse_Management.Data
 {
@@ -9,6 +10,15 @@ namespace Warehouse_Management.Data
         public WareHouseDbContext(DbContextOptions<WareHouseDbContext> options) : base(options)
         {
         }
+
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<StockTransaction> StockTransactions { get; set; }
+        public DbSet<Shelf> Shelves { get; set; }
+        public DbSet<Lot> Lots { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Platform> Platforms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -36,6 +46,28 @@ namespace Warehouse_Management.Data
             
 
             builder.Entity<IdentityRole>().HasData(role);
+
+            // Cascade Delete trên Product -> StockTransaction
+            builder.Entity<StockTransaction>()
+                .HasOne(st => st.Product)
+                .WithMany(p => p.StockTransactions)
+                .HasForeignKey(st => st.ProductId)
+                .OnDelete(DeleteBehavior.Cascade); // Chỉ giữ Cascade Delete ở đây
+
+            // Không Cascade Delete trên Supplier -> StockTransaction
+            builder.Entity<StockTransaction>()
+                .HasOne(st => st.Supplier)
+                .WithMany(s => s.StockTransactions)
+                .HasForeignKey(st => st.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Không Cascade Delete trên Lot -> StockTransaction
+            builder.Entity<StockTransaction>()
+                .HasOne(st => st.Lot)
+                .WithMany(l => l.StockTransactions)
+                .HasForeignKey(st => st.LotId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }
