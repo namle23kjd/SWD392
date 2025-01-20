@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Warehouse_Management.Data;
 
@@ -11,9 +12,11 @@ using Warehouse_Management.Data;
 namespace Warehouse_Management.Migrations
 {
     [DbContext(typeof(WareHouseDbContext))]
-    partial class WareHouseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250118061037_CreateDatabase")]
+    partial class CreateDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,6 +91,80 @@ namespace Warehouse_Management.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator().HasValue("IdentityUser");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -171,75 +248,7 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.ApplicationUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Lot", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Lot", b =>
                 {
                     b.Property<int>("LotId")
                         .ValueGeneratedOnAdd()
@@ -288,7 +297,7 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("Lots");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Order", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Order", b =>
                 {
                     b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
@@ -321,7 +330,7 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.OrderItem", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.OrderItem", b =>
                 {
                     b.Property<int>("OrderItemId")
                         .ValueGeneratedOnAdd()
@@ -350,7 +359,7 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Platform", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Platform", b =>
                 {
                     b.Property<int>("PlatformId")
                         .ValueGeneratedOnAdd()
@@ -372,7 +381,7 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("Platforms");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Product", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
                         .ValueGeneratedOnAdd()
@@ -411,7 +420,7 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Shelf", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Shelf", b =>
                 {
                     b.Property<int>("ShelfId")
                         .ValueGeneratedOnAdd()
@@ -450,7 +459,7 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("Shelves");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.StockTransaction", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.StockTransaction", b =>
                 {
                     b.Property<int>("TransactionId")
                         .ValueGeneratedOnAdd()
@@ -492,7 +501,7 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("StockTransactions");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Supplier", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Supplier", b =>
                 {
                     b.Property<int>("SupplierId")
                         .ValueGeneratedOnAdd()
@@ -517,6 +526,16 @@ namespace Warehouse_Management.Migrations
                     b.ToTable("Suppliers");
                 });
 
+            modelBuilder.Entity("Warehouse_Management.Models.ApplicationUser", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.HasDiscriminator().HasValue("ApplicationUser");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -528,7 +547,7 @@ namespace Warehouse_Management.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -537,7 +556,7 @@ namespace Warehouse_Management.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -552,7 +571,7 @@ namespace Warehouse_Management.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -561,28 +580,28 @@ namespace Warehouse_Management.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Lot", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Lot", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.Product", "Product")
+                    b.HasOne("Warehouse_Management.Models.Product", "Product")
                         .WithMany("Lots")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Warehouse_Management.Models.Domain.Shelf", "Shelf")
+                    b.HasOne("Warehouse_Management.Models.Shelf", "Shelf")
                         .WithMany("Lots")
                         .HasForeignKey("ShelfId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", "User")
+                    b.HasOne("Warehouse_Management.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
@@ -593,9 +612,9 @@ namespace Warehouse_Management.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Order", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Order", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.Platform", "Platform")
+                    b.HasOne("Warehouse_Management.Models.Platform", "Platform")
                         .WithMany("Orders")
                         .HasForeignKey("PlatformId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -604,15 +623,15 @@ namespace Warehouse_Management.Migrations
                     b.Navigation("Platform");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.OrderItem", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.OrderItem", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.Order", "Order")
+                    b.HasOne("Warehouse_Management.Models.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Warehouse_Management.Models.Domain.Product", "Product")
+                    b.HasOne("Warehouse_Management.Models.Product", "Product")
                         .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -623,45 +642,45 @@ namespace Warehouse_Management.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Product", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Product", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", "User")
+                    b.HasOne("Warehouse_Management.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Shelf", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Shelf", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", "User")
+                    b.HasOne("Warehouse_Management.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.StockTransaction", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.StockTransaction", b =>
                 {
-                    b.HasOne("Warehouse_Management.Models.Domain.Lot", "Lot")
+                    b.HasOne("Warehouse_Management.Models.Lot", "Lot")
                         .WithMany("StockTransactions")
                         .HasForeignKey("LotId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Warehouse_Management.Models.Domain.Product", "Product")
+                    b.HasOne("Warehouse_Management.Models.Product", "Product")
                         .WithMany("StockTransactions")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Warehouse_Management.Models.Domain.Supplier", "Supplier")
+                    b.HasOne("Warehouse_Management.Models.Supplier", "Supplier")
                         .WithMany("StockTransactions")
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", "User")
+                    b.HasOne("Warehouse_Management.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
@@ -674,22 +693,22 @@ namespace Warehouse_Management.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Lot", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Lot", b =>
                 {
                     b.Navigation("StockTransactions");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Order", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Platform", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Platform", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Product", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Product", b =>
                 {
                     b.Navigation("Lots");
 
@@ -698,12 +717,12 @@ namespace Warehouse_Management.Migrations
                     b.Navigation("StockTransactions");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Shelf", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Shelf", b =>
                 {
                     b.Navigation("Lots");
                 });
 
-            modelBuilder.Entity("Warehouse_Management.Models.Domain.Supplier", b =>
+            modelBuilder.Entity("Warehouse_Management.Models.Supplier", b =>
                 {
                     b.Navigation("StockTransactions");
                 });
