@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Warehouse_Management.Models;
+using Warehouse_Management.Models.Domain;
 
 namespace Warehouse_Management.Data
 {
-    public class WareHouseDbContext : IdentityDbContext
+    public class WareHouseDbContext : IdentityDbContext<ApplicationUser>
     {
         public WareHouseDbContext(DbContextOptions<WareHouseDbContext> options) : base(options)
         {
