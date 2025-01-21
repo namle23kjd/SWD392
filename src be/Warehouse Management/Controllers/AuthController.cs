@@ -17,6 +17,11 @@ namespace Warehouse_Management.Controllers
             _userService = userService;
         }
         //Post:/ api/auth/register
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDTO request)
         {
@@ -25,6 +30,23 @@ namespace Warehouse_Management.Controllers
                 return BadRequest(ModelState);
             }
             var response = await _userService.RegisterAsync(request);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        //Post:/ api/auth/login
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = await _userService.LoginAsync(request);
             return StatusCode((int)response.StatusCode, response);
         }
     }
