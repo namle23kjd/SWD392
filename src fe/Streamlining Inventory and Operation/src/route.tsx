@@ -15,6 +15,7 @@ import Buttons from './pages/UiElements/Buttons';
 import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
 import { action as logoutAction } from './pages/Authentication/Logout'
+import ErrorPage from './pages/Error/ErrorPage';
 
 export const router = createBrowserRouter([
     {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
             <ScrollToTop />
             <DefaultLayout />
         </>,
+        errorElement: <ErrorPage />,
         children: [
             // role demo
             {
@@ -122,10 +124,18 @@ export const router = createBrowserRouter([
                     },
                 ]
             }
+            , {
+                path: '/staff',
+                element: <></>
+            }, {
+                path: '/admin',
+                element: <></>
+            }
             // other roles here...
         ]
     }, {
         path: '/auth',
+        errorElement: <ErrorPage />,
         children: [
             {
                 path: "signin",
