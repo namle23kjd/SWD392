@@ -20,12 +20,14 @@ namespace Warehouse_Management.Services.Service
         private readonly IMapper _mapper;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration; 
-        public UserService(IUserRepository userRepository, IMapper mapper, UserManager<IdentityUser> userManager, IConfiguration configuration)
+        private readonly ILogger<UserService> _logger;
+        public UserService(IUserRepository userRepository, IMapper mapper, UserManager<IdentityUser> userManager, IConfiguration configuration, ILogger<UserService> logger)
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _userManager = userManager;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<LoginResponseDTO> GenerateJwtToken(IdentityUser user)
@@ -62,20 +64,31 @@ namespace Warehouse_Management.Services.Service
 
         public async Task<ApiResponse> LoginAsync(LoginRequestDTO loginRequestDTO)
         {
+            _logger.LogInformation("Login attempt for username: {Username}", loginRequestDTO.Username);
             var response = new ApiResponse();
 
             try
             {
                 var user = await _userManager.FindByNameAsync(loginRequestDTO.Username);
-                if (user == null || !await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password))
+                if (user == null)
                 {
+                    _logger.LogWarning("Login failed - User not found: {Username}", loginRequestDTO.Username);
                     response.IsSuccess = false;
                     response.StatusCode = HttpStatusCode.Unauthorized;
                     response.ErrorMessages.Add("Invalid username or password.");
                     return response;
                 }
-                var token = await GenerateJwtToken(user);
+                if (!await _userManager.CheckPasswordAsync(user, loginRequestDTO.Password))
+                {
+                    _logger.LogWarning("Login failed - Invalid password for user: {Username}", loginRequestDTO.Username);
+                    response.IsSuccess = false;
+                    response.StatusCode = HttpStatusCode.Unauthorized;
+                    response.ErrorMessages.Add("Invalid username or password.");
+                    return response;
+                }
 
+                var token = await GenerateJwtToken(user);
+                _logger.LogInformation("Login successful for user: {Username}", loginRequestDTO.Username);
                 response.IsSuccess = true;
                 response.StatusCode = HttpStatusCode.OK;
                 response.Result = token;
@@ -91,20 +104,33 @@ namespace Warehouse_Management.Services.Service
 
         public async Task<ApiResponse> RegisterAsync(RegisterRequestDTO registerRequestDTO)
         {
+            _logger.LogInformation("Registration attempt for username: {Username}", registerRequestDTO.Username);
             var response = new ApiResponse();
 
             try
             {
                 var user = _mapper.Map<ApplicationUser>(registerRequestDTO);
-
+                _logger.LogDebug("Mapped registration request to ApplicationUser for {Username}", registerRequestDTO.Username);
                 var result = await _userRepository.RegisterAsync(user, registerRequestDTO.Password, registerRequestDTO.Roles);
-
-                response.IsSuccess = result;
-                response.StatusCode = HttpStatusCode.OK;
-                response.Result = "User registered successfully";
+                if (result)
+                {
+                    _logger.LogInformation("Registration successful for user: {Username}", registerRequestDTO.Username);
+                    response.IsSuccess = result;
+                    response.StatusCode = HttpStatusCode.OK;
+                    response.Result = "User registered successfully";
+                }
+                else
+                {
+                    _logger.LogWarning("Registration failed for user: {Username}", registerRequestDTO.Username);
+                    response.IsSuccess = false;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    response.ErrorMessages.Add("Registration failed");
+                }
             } 
             catch(Exception ex)
             {
+                _logger.LogError(ex, "Error during registration for user {Username}: {ErrorMessage}",
+                    registerRequestDTO.Username, ex.Message);
                 response.IsSuccess = false;
                 response.StatusCode = HttpStatusCode.InternalServerError;
                 response.ErrorMessages.Add(ex.Message);

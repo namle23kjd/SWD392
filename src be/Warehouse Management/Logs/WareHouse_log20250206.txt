@@ -1,0 +1,37 @@
+2025-02-06 12:45:20.038 +07:00 [INF] User profile is available. Using 'C:\Users\PC-PHUONG NAM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-02-06 12:45:20.482 +07:00 [INF] Now listening on: https://localhost:7190
+2025-02-06 12:45:20.484 +07:00 [INF] Now listening on: http://localhost:5299
+2025-02-06 12:45:20.487 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-02-06 12:45:20.488 +07:00 [INF] Hosting environment: Development
+2025-02-06 12:45:20.489 +07:00 [INF] Content root path: C:\Users\PC-PHUONG NAM\Source\Repos\SWD392\src be\Warehouse Management
+2025-02-06 12:45:21.257 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/index.html - null null
+2025-02-06 12:45:21.620 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/index.html - 200 null text/html;charset=utf-8 375.4478ms
+2025-02-06 12:45:23.522 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/_framework/aspnetcore-browser-refresh.js - null null
+2025-02-06 12:45:23.522 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/index.js - null null
+2025-02-06 12:45:23.523 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/_vs/browserLink - null null
+2025-02-06 12:45:23.555 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/index.js - 200 null application/javascript;charset=utf-8 33.3535ms
+2025-02-06 12:45:23.572 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/_framework/aspnetcore-browser-refresh.js - 200 13776 application/javascript; charset=utf-8 60.3999ms
+2025-02-06 12:45:23.611 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/_vs/browserLink - 200 null text/javascript; charset=UTF-8 88.039ms
+2025-02-06 12:45:23.762 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/v1/swagger.json - null null
+2025-02-06 12:45:23.898 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 136.2069ms
+2025-02-06 12:45:51.224 +07:00 [INF] Request starting HTTP/2 POST https://localhost:7190/api/Auth/login - application/json 66
+2025-02-06 12:45:51.307 +07:00 [INF] Executing endpoint 'Warehouse_Management.Controllers.AuthController.Login (Warehouse Management)'
+2025-02-06 12:45:51.332 +07:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(Warehouse_Management.Models.DTO.LoginRequestDTO) on controller Warehouse_Management.Controllers.AuthController (Warehouse Management).
+2025-02-06 12:45:51.647 +07:00 [INF] Login attempt for username: admin1@example.com
+2025-02-06 12:45:52.207 +07:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-06 12:45:52.209 +07:00 [WRN] No store type was specified for the decimal property 'UnitPrice' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-06 12:45:52.210 +07:00 [WRN] No store type was specified for the decimal property 'BasePrice' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-06 12:45:52.917 +07:00 [INF] Executed DbCommand (47ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Discriminator], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName], [a].[Status]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-02-06 12:45:53.113 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+2025-02-06 12:45:53.140 +07:00 [INF] Login successful for user: admin1@example.com
+2025-02-06 12:45:53.147 +07:00 [INF] Executing ObjectResult, writing value of type 'Warehouse_Management.Helpers.ApiResponse'.
+2025-02-06 12:45:53.173 +07:00 [INF] Executed action Warehouse_Management.Controllers.AuthController.Login (Warehouse Management) in 1835.6774ms
+2025-02-06 12:45:53.175 +07:00 [INF] Executed endpoint 'Warehouse_Management.Controllers.AuthController.Login (Warehouse Management)'
+2025-02-06 12:45:53.185 +07:00 [INF] Request finished HTTP/2 POST https://localhost:7190/api/Auth/login - 200 null application/json; charset=utf-8 1960.3273ms
