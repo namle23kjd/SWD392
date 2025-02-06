@@ -8,16 +8,16 @@ namespace Warehouse_Management.Repositories.Repository
     public class UserRepository : IUserRepository
     {
         private readonly WareHouseDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserRepository(WareHouseDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UserRepository(WareHouseDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
         }
-        public async Task<bool> RegisterAsync(ApplicationUser user, string password, string[] roles)
+        public async Task<bool> RegisterAsync(IdentityUser user, string password, string[] roles)
         {
             // Tạo user
             var result = await _userManager.CreateAsync(user, password);

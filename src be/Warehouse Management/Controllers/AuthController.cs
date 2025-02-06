@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse_Management.Models.DTO;
@@ -23,6 +24,7 @@ namespace Warehouse_Management.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("register")]
+        [Authorize]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDTO request)
         {
             if(!ModelState.IsValid)

@@ -1,9 +1,10 @@
-﻿using Warehouse_Management.Models.Domain;
+﻿using Microsoft.AspNetCore.Identity;
+using Warehouse_Management.Models.Domain;
 
 namespace Warehouse_Management.Repositories.IRepository
 {
     public interface IUserRepository
     {
-        Task<bool> RegisterAsync(ApplicationUser user,string password, string[] roles);
+        Task<bool> RegisterAsync(IdentityUser user,string password, string[] roles);
     }
 }

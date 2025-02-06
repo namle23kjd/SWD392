@@ -18,9 +18,9 @@ namespace Warehouse_Management.Services.Service
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration; 
-        public UserService(IUserRepository userRepository, IMapper mapper, UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public UserService(IUserRepository userRepository, IMapper mapper, UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             _mapper = mapper;
             _userRepository = userRepository;
@@ -28,31 +28,26 @@ namespace Warehouse_Management.Services.Service
             _configuration = configuration;
         }
 
-        public async Task<LoginResponseDTO> GenerateJwtToken(ApplicationUser applicationUser)
+        public async Task<LoginResponseDTO> GenerateJwtToken(IdentityUser user)
         {
             var authClaims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, applicationUser.UserName),
-                new Claim(ClaimTypes.NameIdentifier, applicationUser.Id),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            // Thêm role vào token
-            var userRoles = await _userManager.GetRolesAsync(applicationUser);
-            foreach (var userRole in userRoles)
+            var userRoles = await _userManager.GetRolesAsync(user);
+            foreach (var role in userRoles)
             {
-                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                authClaims.Add(new Claim(ClaimTypes.Role, role.ToString()));
             }
 
-            if (string.IsNullOrEmpty(_configuration["JWT:Secret"]))
-            {
-                throw new ArgumentNullException("JWT:Secret", "JWT Secret is missing in configuration.");
-            }
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
 
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
             var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
                 expires: DateTime.Now.AddHours(1),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
