@@ -14,9 +14,9 @@ namespace Warehouse_Management.Models.Domain
         public string? Description { get; set; }
         public decimal? BasePrice { get; set; }
 
-        public DateTime? CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }  = DateTime.UtcNow;
 
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
         [ForeignKey("ApplicationUser")]
         public string? UserId { get; set; }
 
