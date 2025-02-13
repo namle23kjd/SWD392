@@ -84,8 +84,8 @@ namespace Warehouse_Management.Services.Service
                 var product = _mapper.Map<Product>(productDto);
                 var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var nowInVietnam = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
-                product.CreatedAt = DateTime.UtcNow;
-                product.UpdatedAt = DateTime.UtcNow;
+                product.CreatedAt = nowInVietnam;
+                product.UpdatedAt = nowInVietnam;
                 product.UserId = userId;
 
                 await _productRepository.AddProductAsync(product);
