@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using Warehouse_Management.Helpers;
 using Warehouse_Management.Models.DTO;
 using Warehouse_Management.Services.IService;
+using Warehouse_Management.Services.Service;
 
 namespace Warehouse_Management.Controllers
 {
@@ -12,10 +17,16 @@ namespace Warehouse_Management.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IEmailService _emailService;
+        private readonly IMapper _mapper;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, UserManager<IdentityUser> userManager,IEmailService emailService,IMapper mapper)
         {
             _userService = userService;
+            _userManager = userManager;
+            _emailService = emailService;
+            _mapper = mapper;
         }
         //Post:/ api/auth/register
         /// <summary>
@@ -49,6 +60,20 @@ namespace Warehouse_Management.Controllers
                 return BadRequest(ModelState);
             }
             var response = await _userService.LoginAsync(request);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO model)
+        {
+            var response = await _userService.ResetPasswordAsync(model.Email);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpPost("confirm-reset-password")]
+        public async Task<IActionResult> ConfirmResetPassword([FromBody] ConfirmResetPasswordRequest model)
+        {
+            var response = await _userService.ConfirmResetPasswordAsync(model.Email, model.Token, model.NewPassword);
             return StatusCode((int)response.StatusCode, response);
         }
     }

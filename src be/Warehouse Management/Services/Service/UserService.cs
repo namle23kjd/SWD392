@@ -21,13 +21,46 @@ namespace Warehouse_Management.Services.Service
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration; 
         private readonly ILogger<UserService> _logger;
-        public UserService(IUserRepository userRepository, IMapper mapper, UserManager<IdentityUser> userManager, IConfiguration configuration, ILogger<UserService> logger)
+        private readonly IEmailService _emailService;
+        public UserService(IUserRepository userRepository, IMapper mapper, UserManager<IdentityUser> userManager, IConfiguration configuration, ILogger<UserService> logger, IEmailService emailService)
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _userManager = userManager;
             _configuration = configuration;
             _logger = logger;
+            _emailService = emailService;
+        }
+
+        public async Task<ApiResponse> ConfirmResetPasswordAsync(string email, string token, string newPassword)
+        {
+            var response = new ApiResponse();
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                response.ErrorMessages.Add("Email không tồn tại.");
+                return response;
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            if (!result.Succeeded)
+            {
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.IsSuccess = false;
+                foreach (var error in result.Errors)
+                {
+                    response.ErrorMessages.Add(error.Description);
+                }
+                return response;
+            }
+
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            response.Result = "Mật khẩu đã được đặt lại thành công.";
+            return response;
         }
 
         public async Task<LoginResponseDTO> GenerateJwtToken(IdentityUser user)
@@ -137,5 +170,39 @@ namespace Warehouse_Management.Services.Service
             }
             return response;
         }
+
+        public async Task<ApiResponse> ResetPasswordAsync(string email)
+        {
+            var response = new ApiResponse();
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                response.StatusCode = HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                response.ErrorMessages.Add("Email không tồn tại.");
+                return response;
+            }
+
+            // Tạo token đặt lại mật khẩu
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(resetToken));
+            var resetUrl = $"https://yourfrontend.com/reset-password?token={resetToken}&email={email}";
+
+            // Gửi email đặt lại mật khẩu
+            var emailResponse = await _emailService.SendEmailAsync(email, "Reset Password",
+                $"<p>Click vào link sau để đặt lại mật khẩu: <a href='{resetUrl}'>Đặt lại mật khẩu</a></p>");
+
+            if (!emailResponse.IsSuccess)
+            {
+                return emailResponse;
+            }
+
+            response.StatusCode = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            response.Result = "Email đặt lại mật khẩu đã được gửi.";
+            return response;
+        }
+
     }
 }
