@@ -1,20 +1,13 @@
-import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import Loader from './common/Loader';
 import { router } from './route';
+import { ToastContainer } from 'react-toastify'; // Import ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Import style của Toastify
 
 function App() {
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
-
-  return loading ? (
-    <Loader />
-  ) : (
+  return (<>
     <RouterProvider router={router} />
-  );
+    <ToastContainer />
+  </>);
 }
 
 export default App;
