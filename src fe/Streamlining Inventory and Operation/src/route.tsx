@@ -3,9 +3,7 @@ import DefaultLayout from './layout/DefaultLayout';
 import ScrollToTop from './components/ScrollToTop';
 import PageTitle from './components/PageTitle';
 import ECommerce from './pages/Dashboard/ECommerce';
-import Calendar from './pages/Calendar';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
 import Tables from './pages/Tables';
 import Chart from './pages/Chart';
 import FormElements from './pages/Form/FormElements';
@@ -15,6 +13,11 @@ import Buttons from './pages/UiElements/Buttons';
 import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
 import { action as logoutAction } from './pages/Authentication/Logout'
+import Order from './pages/Dashboard/Order';
+import Shelfs from './pages/Shelfs';
+import Lots from './pages/Lots';
+import Products from './pages/Products';
+import Orders from './pages/Orders';
 import ErrorPage from './pages/Error/ErrorPage';
 
 export const router = createBrowserRouter([
@@ -39,12 +42,49 @@ export const router = createBrowserRouter([
                                 <ECommerce />
                             </>
                         )
-                    }, {
-                        path: 'calendar',
+                    },
+                    
+                    {
+                        path: 'order',
                         element: (
                             <>
-                                <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                <Calendar />
+                                <PageTitle title="Order Dashboard" />
+                                <Order />
+                            </>
+                        )
+                    }
+                    , {
+                        path: "shelfs",
+                        element: (
+                            <>
+                                <PageTitle title="Shelfs Manage" />
+                                <Shelfs />
+                            </>
+                        )
+                    }, {
+                        path: "lots",
+                        element: (
+                            <>
+                                <PageTitle title="Lots Manage" />
+                                <Lots />
+                            </>
+                        )
+                    }
+                    
+                    , {
+                        path: 'products',
+                        element: (
+                            <>
+                                <PageTitle title="Product Manage" />
+                                <Products />
+                            </>
+                        )
+                    }, {
+                        path: "orders",
+                        element: (
+                            <>
+                                <PageTitle title="Order Manage" />
+                                <Orders  />
                             </>
                         )
                     }, {
@@ -55,15 +95,7 @@ export const router = createBrowserRouter([
                                 <Profile />
                             </>
                         )
-                    }, {
-                        path: "settings",
-                        element: (
-                            <>
-                                <PageTitle title="Settings | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                <Settings />
-                            </>
-                        )
-                    }, {
+                    },{
                         path: "tables",
                         element: (
                             <>
