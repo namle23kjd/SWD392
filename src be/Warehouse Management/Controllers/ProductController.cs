@@ -68,7 +68,7 @@ namespace Warehouse_Management.Controllers
             var response = await _productService.DeleteProductAsync(id);
             if (response.StatusCode == HttpStatusCode.NoContent)
             {
-                return NoContent(); // ✅ Trả về đúng phản hồi `204 No Content` mà không có body
+                return NoContent(); 
             }
 
             return StatusCode((int)response.StatusCode, response);

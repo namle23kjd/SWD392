@@ -13,6 +13,8 @@ namespace Warehouse_Management.Models.Domain
         public string? OrderStatus { get; set; }
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; }
 
         public Platform? Platform { get; set; }
