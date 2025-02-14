@@ -1,12 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Warehouse_Management.Models;
+using Warehouse_Management.Models.Domain;
 
 namespace Warehouse_Management.Data
 {
     public class WareHouseDbContext : IdentityDbContext
     {
+        public WareHouseDbContext()
+        {
+            
+        }
         public WareHouseDbContext(DbContextOptions<WareHouseDbContext> options) : base(options)
         {
         }
@@ -23,8 +27,9 @@ namespace Warehouse_Management.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            var adminID = "373e112e - 121b - 4f3f - bb3e - dc30c08b9999";
+            var adminID = "373e112e-121b-4f3f-bb3e-dc30c08b9999";
             var staffID = "9116bb38-85b1-4345-bf4a-7c0819a8ef3b";
+            var managerID = "b1234567-89ab-cdef-0123-456789abcdef";
 
             var role = new List<IdentityRole>
             {
@@ -41,6 +46,13 @@ namespace Warehouse_Management.Data
                     ConcurrencyStamp = staffID,
                     Name = "Staff",
                     NormalizedName = "Staff".ToUpper()
+                },
+                new IdentityRole
+                {
+                    Id = managerID,
+                    ConcurrencyStamp = managerID,
+                    Name = "Manager",
+                    NormalizedName = "Manager".ToUpper()
                 }
             };
             

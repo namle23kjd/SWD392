@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Warehouse_Management.Models
+namespace Warehouse_Management.Models.Domain
 {
     public class ApplicationUser : IdentityUser
     {

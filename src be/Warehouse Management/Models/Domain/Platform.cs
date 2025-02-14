@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Warehouse_Management.Models
+namespace Warehouse_Management.Models.Domain
 {
     public class Platform
     {
