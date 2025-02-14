@@ -30,6 +30,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+Console.WriteLine($"[SYSTEM] Current Time Zone: {TimeZoneInfo.Local.StandardName}");
+Console.WriteLine($"[SYSTEM] UTC Now: {DateTime.UtcNow}");
+Console.WriteLine($"[SYSTEM] Vietnam Time: {TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone)}");
+
+
 //AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -99,6 +105,10 @@ builder.Services.AddSwaggerGen(c =>
 //Repo and Service
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 //Handler
 builder.Services.AddScoped<IExceptionHandler, BadRequestExceptionHandler>();

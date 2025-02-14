@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { getUserInfo } from '../util/auth';
 
 const DefaultLayout: React.FC = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const userInfo = getUserInfo();
+    console.log(userInfo);
+    if (userInfo && userInfo?.role === 'admin') {
+      navigate("/");
+    } else if (userInfo && userInfo?.role === 'manager') {
+      navigate("/");
+    } else if (userInfo && userInfo?.role === 'staff') {
+      navigate("/");
+    } else {
+      navigate("/auth/signin");
+    }
+  }, [navigate]);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
