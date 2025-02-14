@@ -11,5 +11,8 @@ namespace Warehouse_Management.Services.IService
         Task<LoginResponseDTO> GenerateJwtToken(IdentityUser applicationUser);
 
         Task<ApiResponse> LoginAsync(LoginRequestDTO loginRequestDTO);
+
+        Task<ApiResponse> ResetPasswordAsync(string email);
+        Task<ApiResponse> ConfirmResetPasswordAsync(string email, string token, string newPassword);
     }
 }
