@@ -282,7 +282,39 @@ namespace Warehouse_Management.Services.Service
             return response;
         }
 
-    
-       
+        public async Task<ApiResponse> GetAllUserAsync()
+        {
+            try
+            {
+                var users = _userManager.Users.ToList();
+
+                var userList = new List<UserDTO>();
+
+                foreach (var user in users)
+                {
+                    var userDto = _mapper.Map<UserDTO>(user);
+                    var roles = await _userManager.GetRolesAsync(user);
+                    userDto.Roles = roles.ToList();
+                    userList.Add(userDto);
+                }
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = userList
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi xảy ra khi lấy danh sách người dùng");
+                return new ApiResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    ErrorMessages = { "Không thể lấy danh sách người dùng." }
+                };
+            }
+        }
     }
 }

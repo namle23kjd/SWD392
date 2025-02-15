@@ -20,5 +20,7 @@ namespace Warehouse_Management.Services.IService
         Task<ApiResponse> DeleteUserAsync(string userId);
         Task<ApiResponse> ModifyUserRoleAsync(string userId, string[] newRoles);
         //Task<IEnumerable<UserDTO>> GetAllUsersAsync();
+
+        Task<ApiResponse> GetAllUserAsync();
     }
 }

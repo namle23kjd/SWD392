@@ -128,5 +128,12 @@ namespace Warehouse_Management.Controllers
             var response = await _userService.ConfirmResetPasswordAsync(model.Email, model.Token, model.NewPassword);
             return StatusCode((int)response.StatusCode, response);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllUser()
+        {
+            var response = await _userService.GetAllUserAsync();
+            return StatusCode((int)response.StatusCode, response);
+        }
     }
 }
