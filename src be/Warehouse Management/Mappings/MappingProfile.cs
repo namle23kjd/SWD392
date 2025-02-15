@@ -1,9 +1,13 @@
 ﻿using AutoMapper;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO;
+using Warehouse_Management.Models.DTO.Lot;
 using Warehouse_Management.Models.DTO.Order;
 using Warehouse_Management.Models.DTO.OrderItem;
 using Warehouse_Management.Models.DTO.Product;
+using Warehouse_Management.Models.DTO.Shelf;
+using Warehouse_Management.Models.DTO.StockTransaction;
+using Warehouse_Management.Models.DTO.Supplier;
 
 namespace Warehouse_Management.Mappings
 {
@@ -36,6 +40,32 @@ namespace Warehouse_Management.Mappings
 
             // Ánh xạ từ UpdateOrderItemDTO sang OrderItem (cập nhật các mục trong đơn hàng)
             CreateMap<UpdateOrderItemDTO, OrderItem>();
+
+
+            CreateMap<StockTransaction, StockTransactionDTO>()
+            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
+            .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier!.Name))
+            .ForMember(dest => dest.LotCode, opt => opt.MapFrom(src => src.Lot!.LotCode))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
+
+            CreateMap<CreateStockTransactionDTO, StockTransaction>();
+
+            CreateMap<Supplier, SupplierDTO>();
+            CreateMap<CreateSupplierDTO, Supplier>();
+            CreateMap<UpdateSupplierDTO, Supplier>();
+
+            CreateMap<Shelf, ShelfDTO>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
+            CreateMap<CreateShelfDTO, Shelf>();
+
+            // **Lot Mapping**
+            CreateMap<CreateLotDTO, Lot>();
+
+            CreateMap<Lot, LotDTO>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
+                .ForMember(dest => dest.ShelfName, opt => opt.MapFrom(src => src.Shelf!.Name));
+
+            CreateMap<UpdateLotDTO, Lot>();
         }
 
     }
