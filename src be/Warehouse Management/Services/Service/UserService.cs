@@ -9,6 +9,7 @@ using System.Text;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO;
+using Warehouse_Management.Models.DTO.Product;
 using Warehouse_Management.Repositories.IRepository;
 using Warehouse_Management.Services.IService;
 
@@ -62,6 +63,81 @@ namespace Warehouse_Management.Services.Service
             response.Result = "Mật khẩu đã được đặt lại thành công.";
             return response;
         }
+
+        public async Task<ApiResponse> DeleteUserAsync(string userId)
+        {
+            var response = new ApiResponse();
+
+            try
+            {
+                response = await _userRepository.DeleteUserAsync(userId);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMessages.Add($"Error occurred while deleting user: {ex.Message}");
+            }
+
+            return response;
+        }
+
+        public async Task<ApiResponse> EditUserAsync(string userId, EditUserDTO userDto)
+        {
+            var response = new ApiResponse();
+
+            try
+            {
+                response = await _userRepository.EditUserAsync(userId, userDto);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMessages.Add($"Error occurred while editing user: {ex.Message}");
+            }
+
+            return response;
+        }
+
+        public async Task<ApiResponse> ModifyUserRoleAsync(string userId, string[] newRoles)
+        {
+            var response = new ApiResponse();
+
+            try
+            {
+                response = await _userRepository.ModifyUserRoleAsync(userId, newRoles);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMessages.Add($"Error occurred while modifying user roles: {ex.Message}");
+            }
+
+            return response;
+        }
+
+        //public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
+        //{
+        //    var response = new ApiResponse<IEnumerable<UserDTO>>();
+
+        //    try
+        //    {
+        //        var users = await _userRepository.GetAllUsersAsync(); // Giả sử đây là danh sách người dùng trả về từ repo
+        //        response.Result = users;
+        //        response.StatusCode = HttpStatusCode.OK;
+        //        response.IsSuccess = true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.IsSuccess = false;
+        //        response.StatusCode = HttpStatusCode.InternalServerError;
+        //        response.ErrorMessages.Add($"Error occurred while fetching all users: {ex.Message}");
+        //    }
+
+        //    return response;
+        //}
 
         public async Task<LoginResponseDTO> GenerateJwtToken(IdentityUser user)
         {
@@ -135,6 +211,8 @@ namespace Warehouse_Management.Services.Service
             return response;          
         }
 
+        
+
         public async Task<ApiResponse> RegisterAsync(RegisterRequestDTO registerRequestDTO)
         {
             _logger.LogInformation("Registration attempt for username: {Username}", registerRequestDTO.Username);
@@ -204,5 +282,7 @@ namespace Warehouse_Management.Services.Service
             return response;
         }
 
+    
+       
     }
 }
