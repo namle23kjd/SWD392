@@ -35,10 +35,10 @@ namespace Warehouse_Management.Mappings
             CreateMap<OrderItem, OrderItemDTO>();
 
             CreateMap<UpdateOrderDTO, Order>()
-           .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())  // Không thay đổi CreatedAt khi cập nhật
+           .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
            .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
 
-            // Ánh xạ từ UpdateOrderItemDTO sang OrderItem (cập nhật các mục trong đơn hàng)
+           
             CreateMap<UpdateOrderItemDTO, OrderItem>();
 
 
@@ -58,7 +58,7 @@ namespace Warehouse_Management.Mappings
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
             CreateMap<CreateShelfDTO, Shelf>();
 
-            // **Lot Mapping**
+            
             CreateMap<CreateLotDTO, Lot>();
 
             CreateMap<Lot, LotDTO>()
