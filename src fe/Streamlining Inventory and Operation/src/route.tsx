@@ -19,6 +19,18 @@ import Lots from './pages/Lots';
 import Products from './pages/Products';
 import Orders from './pages/Orders';
 import ErrorPage from './pages/Error/ErrorPage';
+import ForgotPassword from './pages/Authentication/ForgotPassword';
+import RecoverPassword from './pages/Authentication/RecoverPassword';
+import ImportProduct from './pages/Manager/ImportProduct';
+import ExportProduct from './pages/Manager/ExportProduct';
+import Report from './pages/Manager/Report';
+import TransactionManagement from './pages/Manager/TransactionManagement';
+import InventoryTracking from './pages/Manager/InventoryTracking';
+import ManageAccount from './pages/Admin/ListAccount';
+import ListAccount from './pages/Admin/ListAccount';
+import AddAccount from './pages/Admin/AddAccount';
+import EditAccount from './pages/Admin/EditAccount';
+import OrderHistory from './pages/OrderHistory';
 
 export const router = createBrowserRouter([
     {
@@ -43,7 +55,7 @@ export const router = createBrowserRouter([
                             </>
                         )
                     },
-                    
+
                     {
                         path: 'order',
                         element: (
@@ -70,7 +82,7 @@ export const router = createBrowserRouter([
                             </>
                         )
                     }
-                    
+
                     , {
                         path: 'products',
                         element: (
@@ -84,7 +96,7 @@ export const router = createBrowserRouter([
                         element: (
                             <>
                                 <PageTitle title="Order Manage" />
-                                <Orders  />
+                                <Orders />
                             </>
                         )
                     }, {
@@ -95,7 +107,7 @@ export const router = createBrowserRouter([
                                 <Profile />
                             </>
                         )
-                    },{
+                    }, {
                         path: "tables",
                         element: (
                             <>
@@ -157,11 +169,99 @@ export const router = createBrowserRouter([
                 ]
             }
             , {
-                path: '/staff',
-                element: <></>
+                path: 'staff',
+                children: [
+                    {
+                        path: 'reports',
+                        element: (
+                            <>
+                                <PageTitle title="Reports" />
+                                <Report />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'import-product',
+                        element: (
+                            <>
+                                <PageTitle title="Import Product" />
+                                <ImportProduct />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'export-product',
+                        element: (
+                            <>
+                                <PageTitle title="Export Product" />
+                                <ExportProduct />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'transaction-management',
+                        element: (
+                            <>
+                                <PageTitle title="Transaction Management" />
+                                <TransactionManagement />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'confirm-stock-daily',
+                        element: (
+                            <>
+                                <PageTitle title="Confirm Stock Daily" />
+                                <InventoryTracking />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'order-history',
+                        element: (
+                            <>
+                                <PageTitle title="Order History" />
+                                <OrderHistory />
+                            </>
+                        )
+                    }
+                ]
             }, {
-                path: '/admin',
-                element: <></>
+                path: 'admin',
+                children: [
+                    {
+                        path: 'accounts',
+                        element: (
+                            <>
+                                <PageTitle title="Account List" />
+                                <ListAccount />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'add-account',
+                        element: (
+                            <>
+                                <PageTitle title="Add new Account" />
+                                <AddAccount />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'edit-account/:id',
+                        element: (
+                            <>
+                                <PageTitle title="Edit Account" />
+                                <EditAccount />
+                            </>
+                        )
+                    },
+                ]
+            }, {
+                path: 'manager',
+                children: [
+
+                ]
             }
             // other roles here...
         ]
@@ -172,18 +272,31 @@ export const router = createBrowserRouter([
             {
                 path: "signin",
                 element: (<>
-                    <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                    <PageTitle title="Signin | Warehouse management" />
                     <SignIn />
                 </>)
             }, {
                 path: "signup",
                 element: (<>
-                    <PageTitle title="Sign Up | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                    <PageTitle title="Sign Up | Warehouse management" />
                     <SignUp />
                 </>)
             }, {
                 path: 'logout',
                 action: logoutAction,
+            }, {
+                path: 'forgot-password',
+                element: (<>
+                    <PageTitle title="Forgot Password | Warehouse management" />
+                    <ForgotPassword />
+                </>)
+            }
+            , {
+                path: 'recover-password',
+                element: (<>
+                    <PageTitle title="Recover Password | Warehouse management" />
+                    <RecoverPassword />
+                </>)
             }
         ]
     }
