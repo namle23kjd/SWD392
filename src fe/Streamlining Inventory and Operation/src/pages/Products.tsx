@@ -6,43 +6,7 @@ const Products = () => {
     <>
       <Breadcrumb pageName="Product Manage" />
       <div className="container mx-auto p-6">
-        {/* Form Thêm Sản Phẩm */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold mb-4">Add Product</h2>
-          <form className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="SKU"
-              className="border p-2 rounded w-full"
-            />
-            <input
-              type="text"
-              placeholder="Barcode"
-              className="border p-2 rounded w-full"
-            />
-            <input
-              type="text"
-              placeholder="Product Name"
-              className="border p-2 rounded w-full"
-            />
-            <input
-              type="text"
-              placeholder="Created By"
-              className="border p-2 rounded w-full"
-            />
-            <textarea
-              placeholder="Description"
-              className="border p-2 rounded w-full col-span-2"
-            />
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 col-span-2"
-            >
-              Add Product
-            </button>
-          </form>
-        </div>
-
+    
         {/* Danh sách sản phẩm */}
         <div className="mt-6">
           <h2 className="text-xl font-semibold mb-2">Product List</h2>
@@ -85,3 +49,39 @@ const Products = () => {
 };
 
 export default Products;
+    {/* Form Thêm Sản Phẩm */}
+        {/* <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold mb-4">Add Product</h2>
+          <form className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="SKU"
+              className="border p-2 rounded w-full"
+            />
+            <input
+              type="text"
+              placeholder="Barcode"
+              className="border p-2 rounded w-full"
+            />
+            <input
+              type="text"
+              placeholder="Product Name"
+              className="border p-2 rounded w-full"
+            />
+            <input
+              type="text"
+              placeholder="Created By"
+              className="border p-2 rounded w-full"
+            />
+            <textarea
+              placeholder="Description"
+              className="border p-2 rounded w-full col-span-2"
+            />
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 col-span-2"
+            >
+              Add Product
+            </button>
+          </form>
+        </div> */}
