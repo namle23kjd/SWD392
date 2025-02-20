@@ -1,4 +1,4 @@
-import { CheckSquareOutlined, ExportOutlined, FileTextOutlined, HddOutlined, HistoryOutlined, ImportOutlined, InboxOutlined, ProductOutlined, ReconciliationOutlined, ShopOutlined, TransactionOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
+import { CheckSquareOutlined, ExportOutlined, FileAddOutlined, FileTextOutlined, HddOutlined, HistoryOutlined, ImportOutlined, InboxOutlined, ProductOutlined, ReconciliationOutlined, ShopOutlined, TransactionOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import Logo from '../../images/logo/logo.svg';
@@ -423,6 +423,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             >
                               <HistoryOutlined />
                               Order History
+                            </NavLink>
+                          </li>
+                          <li>
+                            <NavLink
+                              to="/staff/create-order"
+                              className={({ isActive }) =>
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+                                (isActive && '!text-white')
+                              }
+                            >
+                              <FileAddOutlined />
+                              Create Order
                             </NavLink>
                           </li>
                         </ul>

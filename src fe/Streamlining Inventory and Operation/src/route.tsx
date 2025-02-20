@@ -31,6 +31,7 @@ import ListAccount from './pages/Admin/ListAccount';
 import AddAccount from './pages/Admin/AddAccount';
 import EditAccount from './pages/Admin/EditAccount';
 import OrderHistory from './pages/OrderHistory';
+import CreateOrder from './pages/CreateOrder';
 
 export const router = createBrowserRouter([
     {
@@ -222,6 +223,15 @@ export const router = createBrowserRouter([
                             <>
                                 <PageTitle title="Order History" />
                                 <OrderHistory />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'create-order',
+                        element: (
+                            <>
+                                <PageTitle title="Order History" />
+                                <CreateOrder />
                             </>
                         )
                     }
