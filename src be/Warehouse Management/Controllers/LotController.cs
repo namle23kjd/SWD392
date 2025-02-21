@@ -17,9 +17,9 @@ namespace Warehouse_Management.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllLots()
+        public async Task<IActionResult> GetAllLots([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var response = await _lotService.GetAllLotsAsync();
+            var response = await _lotService.GetAllLotsAsync(pageNumber, pageSize);
             return StatusCode((int)response.StatusCode, response);
         }
 

@@ -19,9 +19,9 @@ namespace Warehouse_Management.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetAllSuppliers()
+        public async Task<IActionResult> GetAllSuppliers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var response = await _supplierService.GetAllSuppliersAsync();
+            var response = await _supplierService.GetAllSuppliersAsync(pageNumber,pageSize);
             return StatusCode((int)response.StatusCode, response);
         }
 

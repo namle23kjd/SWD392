@@ -4,6 +4,8 @@ using Warehouse_Management.Models.DTO;
 using Warehouse_Management.Models.DTO.Lot;
 using Warehouse_Management.Models.DTO.Order;
 using Warehouse_Management.Models.DTO.OrderItem;
+using Warehouse_Management.Models.DTO.Platform;
+using Warehouse_Management.Models.DTO.PlatformDTO;
 using Warehouse_Management.Models.DTO.Product;
 using Warehouse_Management.Models.DTO.Shelf;
 using Warehouse_Management.Models.DTO.StockTransaction;
@@ -66,6 +68,21 @@ namespace Warehouse_Management.Mappings
                 .ForMember(dest => dest.ShelfName, opt => opt.MapFrom(src => src.Shelf!.Name));
 
             CreateMap<UpdateLotDTO, Lot>();
+
+            CreateMap<Platform, PlatfromDTO>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.ApiKey, opt => opt.MapFrom(src => src.ApiKey))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
+
+            CreateMap<CreatePlatformDTO, Platform>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.ApiKey, opt => opt.MapFrom(src => src.ApiKey))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
+
+            CreateMap<UpdatePlatformDTO, Platform>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.ApiKey, opt => opt.MapFrom(src => src.ApiKey))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
         }
 
     }

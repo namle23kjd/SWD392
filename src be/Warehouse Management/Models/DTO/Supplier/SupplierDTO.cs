@@ -8,5 +8,7 @@
         public string? Phone { get; set; }
         public DateTime? CreateAt { get; set; }
 
+        public bool IsDeleted { get; set; } = false;
+
     }
 }

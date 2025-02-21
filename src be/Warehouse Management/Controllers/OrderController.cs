@@ -21,9 +21,9 @@ namespace Warehouse_Management.Controllers
         /// Lấy danh sách tất cả đơn hàng
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAllOrders()
+        public async Task<IActionResult> GetAllOrders([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var response = await _orderService.GetAllOrdersAsync();
+            var response = await _orderService.GetAllOrdersAsync(pageNumber,pageSize);
             return StatusCode((int)response.StatusCode, response);
         }
 

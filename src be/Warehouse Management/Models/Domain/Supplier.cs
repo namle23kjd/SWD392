@@ -10,6 +10,8 @@ namespace Warehouse_Management.Models.Domain
         public string? Email { get; set; }
         public string? Phone { get; set; }
         public DateTime? CreateAt { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
         public ICollection<StockTransaction>? StockTransactions { get; set; }
     }
 }

@@ -109,6 +109,16 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
+builder.Services.AddScoped<IPlatformService, PlatformService>();
+builder.Services.AddScoped<IStockTransactionRepository, StockTransactionRepository>();
+builder.Services.AddScoped<IStockTransactionService, StockTransactionService>();
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<ILotRepository, LotRepository>();
+builder.Services.AddScoped<ILotService, LotService>();
+builder.Services.AddScoped<IShelfRepository, ShelfRepository>();
+builder.Services.AddScoped<IShelfService, ShelfService>();
 
 //Handler
 builder.Services.AddScoped<IExceptionHandler, BadRequestExceptionHandler>();

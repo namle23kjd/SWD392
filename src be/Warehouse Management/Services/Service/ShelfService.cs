@@ -49,19 +49,24 @@ namespace Warehouse_Management.Services.Service
             }
         }
 
-        public async Task<ApiResponse> GetAllShelvesAsync()
+        public async Task<ApiResponse> GetAllShelvesAsync(int page = 1, int pageSize = 10)
         {
             try
             {
-                var shelves = await _shelfRepository.GetAllAsync();
+                var (shelves, totalCount) = await _shelfRepository.GetAllAsync(page, pageSize);
+
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
-                    Result = _mapper.Map<IEnumerable<ShelfDTO>>(shelves)
+                    Result = new
+                    {
+                        TotalCount = totalCount,
+                        Shelves = _mapper.Map<IEnumerable<ShelfDTO>>(shelves)
+                    }
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
@@ -71,7 +76,7 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var shelf = await _shelfRepository.GetAllAsync();
+                var shelf = await _shelfRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Shelf with ID {id} not found");
                 return new ApiResponse
                 {
                     IsSuccess = true,

@@ -4,7 +4,7 @@ namespace Warehouse_Management.Repositories.IRepository
 {
     public interface IShelfRepository
     {
-        Task<IEnumerable<Shelf>> GetAllAsync();
+        Task<(IEnumerable<Shelf> shelves, int totalCount)> GetAllAsync(int page, int pageSize);
         Task<Shelf?> GetByIdAsync(int id);
         Task<Shelf?> GetByCodeAsync(string code);
         Task<bool> IsCodeUniqueAsync(string code);

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using System.Net;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Middlewares;
 using Warehouse_Management.Models.Domain;
@@ -49,23 +50,29 @@ namespace Warehouse_Management.Services.Service
             }
         }
 
-        public async Task<ApiResponse> GetAllSuppliersAsync()
+        public async Task<ApiResponse> GetAllSuppliersAsync(int page = 1, int pageSize = 10)
         {
             try
             {
-                var suppliers = await _supplierRepository.GetAllAsync();
+                var (suppliers, totalCount) = await _supplierRepository.GetAllAsync(page, pageSize);
+
                 return new ApiResponse
                 {
                     IsSuccess = true,
-                    StatusCode = System.Net.HttpStatusCode.OK,
-                    Result = _mapper.Map<IEnumerable<SupplierDTO>>(suppliers),
+                    StatusCode = HttpStatusCode.OK,
+                    Result = new
+                    {
+                        TotalCount = totalCount,
+                        Suppliers = _mapper.Map<IEnumerable<SupplierDTO>>(suppliers)
+                    }
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
         }
+
 
         public async Task<ApiResponse> GetSupplierByIdAsync(int id)
         {
@@ -101,7 +108,23 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
+                
                 var supplier = await _supplierRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"No supplier found with ID {id}");
+
+                if (supplier.Email != dto.Email)
+                {
+                    var existingSupplier = await _supplierRepository.GetByEmailAsync(dto.Email);
+                    if (existingSupplier != null && existingSupplier.SupplierId != id)
+                    {
+                        return new ApiResponse
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.BadRequest,
+                            ErrorMessages = { $"Email {dto.Email} already used by another provider." }
+                        };
+                    }
+                }
+
                 _mapper.Map(dto, supplier);
 
                 await _supplierRepository.UpdateAsync(supplier);

@@ -16,7 +16,7 @@ namespace Warehouse_Management.Controllers
 
         public StockTransactionController(IStockTransactionService stockTransactionService)
         {
-            stockTransactionService = _stockTransactionService;
+            _stockTransactionService = stockTransactionService;
         }
 
         [HttpGet]

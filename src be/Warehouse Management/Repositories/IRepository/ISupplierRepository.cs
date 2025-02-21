@@ -4,7 +4,8 @@ namespace Warehouse_Management.Repositories.IRepository
 {
     public interface ISupplierRepository
     {
-        Task<IEnumerable<Supplier>> GetAllAsync();
+        Task<(IEnumerable<Supplier> suppliers, int totalCount)> GetAllAsync(int page, int pageSize);
+
         Task<Supplier?> GetByIdAsync(int id);
         Task<Supplier?> GetByEmailAsync(string email);
         Task CreateAsync(Supplier supplier);

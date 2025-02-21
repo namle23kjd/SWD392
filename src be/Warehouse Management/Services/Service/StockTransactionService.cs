@@ -63,7 +63,7 @@ namespace Warehouse_Management.Services.Service
                 // Kiểm tra số lượng nếu xuất kho
                 if (dto.Type == TransactionType.OUT && lot.Quantity < dto.Quantity)
                 {
-                    throw new BadHttpRequestException($"Số lượng hàng trong kho không đủ. Yêu cầu: {dto.Quantity}, Tồn kho: {lot.Quantity}.");
+                    throw new InvalidOperationException($"Số lượng hàng trong kho không đủ. Yêu cầu: {dto.Quantity}, Tồn kho: {lot.Quantity}.");
                 }
 
                 // Tạo giao dịch kho

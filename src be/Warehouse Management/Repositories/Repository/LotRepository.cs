@@ -17,13 +17,22 @@ namespace Warehouse_Management.Repositories.Repository
             await _db.Lots.AddAsync(lot);
         }
 
-        public async Task<IEnumerable<Lot>> GetAllAsync()
+        public async Task<(IEnumerable<Lot> lots, int totalCount)> GetAllAsync(int page, int pageSize)
         {
-            return await _db.Lots
-            .Include(l => l.Product)
-            .Include(l => l.Shelf)
-            .ToListAsync();
+            var query = _db.Lots
+                .Include(l => l.Product)
+                .Include(l => l.Shelf)
+                .AsQueryable();
+
+            var totalCount = await query.CountAsync();
+            var lots = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (lots, totalCount);
         }
+
 
         public async Task<Lot?> GetByIdAsync(int id)
         {

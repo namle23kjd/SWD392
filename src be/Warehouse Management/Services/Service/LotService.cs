@@ -37,6 +37,28 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
+                var productExists = await _productService.GetProductByIdAsync(dto.ProductId);
+                if (productExists == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { $"Sản phẩm với ID {dto.ProductId} không tồn tại." }
+                    };
+                }
+
+                // Kiểm tra kệ hàng có tồn tại không
+                var shelfExists = await _shelfService.GetShelfByIdAsync(dto.ShelfId);
+                if (shelfExists == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { $"Kệ hàng với ID {dto.ShelfId} không tồn tại." }
+                    };
+                }
                 var lot = _mapper.Map<Lot>(dto);
                 lot.CreateAt = DateTime.UtcNow;
 
@@ -56,16 +78,21 @@ namespace Warehouse_Management.Services.Service
             }
         }
 
-        public async Task<ApiResponse> GetAllLotsAsync()
+        public async Task<ApiResponse> GetAllLotsAsync(int page = 1, int pageSize = 10)
         {
             try
             {
-                var lots = await _lotRepository.GetAllAsync();
+                var (lots, totalCount) = await _lotRepository.GetAllAsync(page, pageSize);
+
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
-                    Result = _mapper.Map<IEnumerable<LotDTO>>(lots)
+                    Result = new
+                    {
+                        TotalCount = totalCount,
+                        Lots = _mapper.Map<IEnumerable<LotDTO>>(lots)
+                    }
                 };
             }
             catch (Exception ex)
@@ -99,7 +126,17 @@ namespace Warehouse_Management.Services.Service
             try
             {
                 var lot = await _lotRepository.GetByIdAsync(id)
-                    ?? throw new KeyNotFoundException($"Không tìm thấy lô hàng với ID {id}.");
+                    ?? throw new KeyNotFoundException($"No shipment found with ID {id}.");
+
+                if (lot.Quantity + quantityChange < 0)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "The lot quantity cannot be less than 0." }
+                    };
+                }
 
                 lot.Quantity += quantityChange;
                 await _lotRepository.UpdateAsync(lot);

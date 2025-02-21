@@ -24,10 +24,19 @@ namespace Warehouse_Management.Repositories.Repository
                 _db.Suppliers.Remove(supplier);            
         }
 
-        public async Task<IEnumerable<Supplier>> GetAllAsync()
+        public async Task<(IEnumerable<Supplier> suppliers, int totalCount)> GetAllAsync(int page, int pageSize)
         {
-            return await _db.Suppliers.ToListAsync();
+            var query = _db.Suppliers.Where(s => !s.IsDeleted).AsQueryable();
+
+            int totalCount = await query.CountAsync();
+            var suppliers = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (suppliers, totalCount);
         }
+
 
         public async Task<Supplier?> GetByEmailAsync(string email)
         {

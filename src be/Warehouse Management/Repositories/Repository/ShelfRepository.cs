@@ -17,10 +17,22 @@ namespace Warehouse_Management.Repositories.Repository
             await _db.Shelves.AddAsync(shelf);
         }
 
-        public async Task<IEnumerable<Shelf>> GetAllAsync()
+        public async Task<(IEnumerable<Shelf> shelves, int totalCount)> GetAllAsync(int page, int pageSize)
         {
-            return await _db.Shelves.Include(x => x.User).ToListAsync();
+            var query = _db.Shelves.AsQueryable();
+
+            // Tính tổng số bản ghi
+            int totalCount = await query.CountAsync();
+
+            // Phân trang
+            var shelves = await query
+                .Skip((page - 1) * pageSize)  // Bỏ qua (page-1)*pageSize bản ghi đầu
+                .Take(pageSize)              // Lấy số bản ghi bằng pageSize
+                .ToListAsync();
+
+            return (shelves, totalCount);
         }
+
 
         public async Task<Shelf?> GetByCodeAsync(string code)
         {

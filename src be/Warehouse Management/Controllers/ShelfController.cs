@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Warehouse_Management.Models.DTO.Shelf;
+using Warehouse_Management.Services.IService;
 using Warehouse_Management.Services.Service;
 
 namespace Warehouse_Management.Controllers
@@ -9,17 +10,17 @@ namespace Warehouse_Management.Controllers
     [ApiController]
     public class ShelfController : ControllerBase
     {
-        private readonly ShelfService _shelfService;
+        private readonly IShelfService _shelfService;
 
-        public ShelfController(ShelfService shelfService)
+        public ShelfController(IShelfService shelfService)
         {
             _shelfService = shelfService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllShelves()
+        public async Task<IActionResult> GetAllShelves([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var response = await _shelfService.GetAllShelvesAsync();
+            var response = await _shelfService.GetAllShelvesAsync(pageNumber, pageSize);
             return StatusCode((int)response.StatusCode, response);
         }
 
