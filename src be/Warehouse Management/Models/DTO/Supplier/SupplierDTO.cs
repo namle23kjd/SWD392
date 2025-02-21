@@ -1,10 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Warehouse_Management.Models.Domain
+﻿namespace Warehouse_Management.Models.DTO.Supplier
 {
-    public class Supplier
+    public class SupplierDTO
     {
-        [Key]
         public int SupplierId { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
@@ -12,6 +9,6 @@ namespace Warehouse_Management.Models.Domain
         public DateTime? CreateAt { get; set; }
 
         public bool IsDeleted { get; set; } = false;
-        public ICollection<StockTransaction>? StockTransactions { get; set; }
+
     }
 }

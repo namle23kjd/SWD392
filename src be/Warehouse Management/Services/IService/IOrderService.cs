@@ -5,7 +5,7 @@ namespace Warehouse_Management.Services.IService
 {
     public interface IOrderService
     {
-        Task<ApiResponse> GetAllOrdersAsync();
+        Task<ApiResponse> GetAllOrdersAsync(int pageNumber, int pageSize);
         Task<ApiResponse> GetOrderByIdAsync(int id);
         Task<ApiResponse> CreateOrderAsync(CreateOrderDTO orderDto);
         Task<ApiResponse> DeleteOrderAsync(int id);
