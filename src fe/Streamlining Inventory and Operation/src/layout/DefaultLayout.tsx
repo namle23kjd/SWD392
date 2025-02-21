@@ -10,11 +10,11 @@ const DefaultLayout: React.FC = () => {
     const userInfo = getUserInfo();
     console.log(userInfo);
     if (userInfo && userInfo?.role === 'admin') {
-      navigate("/");
+      navigate("/staff/reports");
     } else if (userInfo && userInfo?.role === 'manager') {
-      navigate("/");
+      navigate("/staff/reports");
     } else if (userInfo && userInfo?.role === 'staff') {
-      navigate("/");
+      navigate("/staff/reports");
     } else {
       navigate("/auth/signin");
     }

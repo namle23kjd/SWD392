@@ -42,31 +42,10 @@ export const router = createBrowserRouter([
         </>,
         errorElement: <ErrorPage />,
         children: [
-            // role demo
             {
-                path: '',
+                path: 'staff',
                 children: [
                     {
-                        index: true,
-                        path: '',
-                        element: (
-                            <>
-                                <PageTitle title="eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                <ECommerce />
-                            </>
-                        )
-                    },
-
-                    {
-                        path: 'order',
-                        element: (
-                            <>
-                                <PageTitle title="Order Dashboard" />
-                                <Order />
-                            </>
-                        )
-                    }
-                    , {
                         path: "shelfs",
                         element: (
                             <>
@@ -92,86 +71,7 @@ export const router = createBrowserRouter([
                                 <Products />
                             </>
                         )
-                    }, {
-                        path: "orders",
-                        element: (
-                            <>
-                                <PageTitle title="Order Manage" />
-                                <Orders />
-                            </>
-                        )
-                    }, {
-                        path: "profile",
-                        element: (
-                            <>
-                                <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                <Profile />
-                            </>
-                        )
-                    }, {
-                        path: "tables",
-                        element: (
-                            <>
-                                <PageTitle title="Tables | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                <Tables />
-                            </>
-                        )
-                    }, {
-                        path: "chart",
-                        element: (
-                            <>
-                                <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                <Chart />
-                            </>
-                        )
                     },
-                    {
-                        path: 'forms',
-                        children: [
-                            {
-                                path: "form-elements",
-                                element: (<>
-                                    <PageTitle title="Form Elements | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                    <FormElements />
-                                </>)
-                            }, {
-                                path: "form-layout",
-                                element: (
-                                    <>
-                                        <PageTitle title="Form Layout | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                        <FormLayout />
-                                    </>
-                                )
-                            },
-                        ]
-                    },
-                    {
-                        path: 'ui',
-                        children: [
-                            {
-                                path: "alerts",
-                                element: (
-                                    <>
-                                        <PageTitle title="Alerts | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                        <Alerts />
-                                    </>
-                                )
-                            }, {
-                                path: "buttons",
-                                element: (
-                                    <>
-                                        <PageTitle title="Buttons | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                                        <Buttons />
-                                    </>
-                                )
-                            },
-                        ]
-                    },
-                ]
-            }
-            , {
-                path: 'staff',
-                children: [
                     {
                         path: 'reports',
                         element: (

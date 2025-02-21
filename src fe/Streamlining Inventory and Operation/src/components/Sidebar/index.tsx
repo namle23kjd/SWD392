@@ -64,7 +64,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         }`}
     >
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-        <NavLink to="/">
+        <NavLink to="/staff/reports">
           <img src={Logo} alt="Logo" />
         </NavLink>
 
@@ -140,7 +140,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
                           <li>
                             <NavLink
-                              to="/shelfs"
+                              to="/staff/shelfs"
                               className={({ isActive }) =>
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
                                 (isActive && '!text-white')
@@ -152,7 +152,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <NavLink
-                              to="/lots"
+                              to="/staff/lots"
                               className={({ isActive }) =>
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
                                 (isActive && '!text-white')
@@ -164,7 +164,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                           </li>
                           <li>
                             <NavLink
-                              to="/products"
+                              to="/staff/products"
                               className={({ isActive }) =>
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
                                 (isActive && '!text-white')
