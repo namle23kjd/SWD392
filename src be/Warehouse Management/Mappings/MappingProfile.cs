@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO;
 using Warehouse_Management.Models.DTO.Lot;
@@ -17,6 +18,13 @@ namespace Warehouse_Management.Mappings
     {
         public MappingProfile()
         {
+            CreateMap<IdentityUser, UserDTO>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.LockoutEnd == null || src.LockoutEnd <= DateTimeOffset.UtcNow))
+            .ForMember(dest => dest.Roles, opt => opt.Ignore());
+
+
             CreateMap<RegisterRequestDTO, ApplicationUser>()
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Username))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username));
