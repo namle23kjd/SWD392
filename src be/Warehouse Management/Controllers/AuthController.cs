@@ -63,6 +63,11 @@ namespace Warehouse_Management.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
+        /// <summary>
+        /// Reset Password
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO model)
         {
@@ -70,6 +75,12 @@ namespace Warehouse_Management.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
+
+        /// <summary>
+        /// Confirm Reset Password
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("confirm-reset-password")]
         public async Task<IActionResult> ConfirmResetPassword([FromBody] ConfirmResetPasswordRequest model)
         {
