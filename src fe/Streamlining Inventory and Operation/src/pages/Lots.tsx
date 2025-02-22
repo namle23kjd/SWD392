@@ -1,120 +1,268 @@
-import React, { useState } from 'react'
-import Breadcrumb from '../components/Breadcrumbs/Breadcrumb'
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import { useNavigate } from 'react-router-dom';
+import { Button, Collapse, DatePicker, Form, Input, InputNumber, Select, Table } from 'antd';
+import { toast } from 'react-toastify';
+import { lotColumns } from '../util/lotColumns';
+import '../css/buttonSearch.css';
+import { LAYOUT_LOT, VALIDATE_MESSAGES } from '../validate/validateMessages';
+import { useStyle } from '../css/useStyle';
 
-interface Lot {
+export interface Lot {
   id: number;
   productId: number;
   shelfId: number;
-  code: string;
-  name: string;
-  location: string;
-  capacity: number;
+  lotCode: string;
+  manafactureDate: string;
+  expiryDate: string;
+  quantity: number;
+  status: string;
+  createAt: string;
+  updateAt: string;
+  createBy: string;
 }
 
-
-const Lots:React.FC = () => {
+const Lots: React.FC = () => {
   const navigate = useNavigate();
-  const [search, setSearch] = useState<string>('');
-  const [lots,setLots] = useState<Lot[]>([
-    {
-      id: 1,
-      productId: 1,
-      shelfId: 1,
-      code: 'L001',
-      name: 'A',
-      location: 'A14',
-      capacity: 10,
-    },
-    {
-      id: 2,
-      productId: 1,
-      shelfId: 2,
-      code: 'L003',
-      name: 'B',
-      location: 'A31',
-      capacity: 10,
-    },
-    {
-      id: 3,
-      productId: 3,
-      shelfId: 2,
-      code: 'L004',
-      name: 'C',
-      location: 'A12',
-      capacity: 10,
-    },
-    {
-      id: 4,
-      productId: 4,
-      shelfId: 1,
-      code: 'L001',
-      name: 'D',
-      location: 'A11',
-      capacity: 10,
-    },
-  ])
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      console.log('search lots', search);
-    }
-  }
-  return (
+  const { Search } = Input;
+  const { Panel } = Collapse;
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [searchLoading, setSearchLoading] = useState<boolean>(false);
+  const [activeKey, setActiveKey] = useState<string[]>([]);
+  const [lots, setLots] = useState<Lot[]>([]);
+  const [shelfIds, setShelfIds] = useState<number[]>([]);
+  const [productIds, setProductIds] = useState<number[]>([]);
+  const { styles } = useStyle();
+  const dateFormat = 'DD-MM-YYYY';
+  useEffect(() => {
+    const fecthLots = async () => {
+      try {
+        const fetchLots: Lot[] = [
+          {
+            id: 1,
+            productId: 101,
+            shelfId: 1,
+            lotCode: 'L001',
+            manafactureDate: '2024-01-10',
+            expiryDate: '2025-01-10',
+            quantity: 100,
+            status: 'Active',
+            createAt: new Date().toISOString(),
+            updateAt: new Date().toISOString(),
+            createBy: 'Admin',
+          },
+          {
+            id: 2,
+            productId: 102,
+            shelfId: 2,
+            lotCode: 'L002',
+            manafactureDate: '2024-02-15',
+            expiryDate: '2025-02-15',
+            quantity: 150,
+            status: 'Active',
+            createAt: new Date().toISOString(),
+            updateAt: new Date().toISOString(),
+            createBy: 'Admin',
+          },
+          {
+            id: 3,
+            productId: 103,
+            shelfId: 3,
+            lotCode: 'L003',
+            manafactureDate: '2024-03-20',
+            expiryDate: '2025-03-20',
+            quantity: 200,
+            status: 'Inactive',
+            createAt: new Date().toISOString(),
+            updateAt: new Date().toISOString(),
+            createBy: 'Admin',
+          },
+          {
+            id: 4,
+            productId: 104,
+            shelfId: 4,
+            lotCode: 'L004',
+            manafactureDate: '2024-04-10',
+            expiryDate: '2025-04-10',
+            quantity: 250,
+            status: 'Active',
+            createAt: new Date().toISOString(),
+            updateAt: new Date().toISOString(),
+            createBy: 'Admin',
+          },
+        ];
+        console.log('fecthlots', fetchLots);
+        setLots(fetchLots);
+      } catch (error) {
+        toast.error('Failed to fetch lots');
+      }     
+    };
+    const fetchShelfIds = async () => {
+      try {
+        const fetchShelfIds: number[] = [1, 2, 3, 4]; // Replace with actual API call
+        setShelfIds(fetchShelfIds);
+      } catch (error) {
+        toast.error('Failed to fetch shelf IDs');
+      }
+    };
+    const fetchProductIds = async () => {
+      try {
+        const fetchProductIds: number[] = [101, 102, 103, 104]; // Replace with actual API call
+        setProductIds(fetchProductIds);
+      } catch (error) {
+        toast.error('Failed to fetch product IDs');
+      }
+    };
 
+    fetchShelfIds();
+    fetchProductIds();
+    fecthLots();
+  }, []);
+
+  const handleSearch = (record: any) => {
+    setSearchLoading(true);
+    console.log('search Lot', record);
+    setSearchLoading(false);
+  };
+  const handleEdit = (record: Lot) => {
+    console.log('edit Lot', record);
+  };
+  const handleDelete = (record: Lot) => {
+    console.log('delete Lot', record);
+  };
+  const handleView = (record: Lot) => {
+    console.log('view Lot', record);
+  };
+
+  const onFinish = (values: any) => {
+    console.log(values);
+    setOpenModal(false);
+  };
+  const toggleCollapse = () => {
+    console.log('activeKey', activeKey);
+    console.log('activeKey', activeKey.length);
+    setActiveKey(activeKey.length ? [] : ['1']);
+  };
+  return (
     <>
-    <Breadcrumb pageName="Lots" />
-     <div className="p-4  relative">
-        <button className="mb-4 p-2 bg-blue-500 text-white rounded hover:-translate-y-1 hover:shadow-lg transition-transform">
-          Create Lots
-        </button>
-        <input
-          type="text"
-          placeholder="Search by Code, Name,..."
-          onChange={(e) => setSearch(e.target.value)}
-          value={search}
-          onKeyDown={handleSearch}
-          className="p-2 border border-gray-400  rounded w-2/5 absolute right-4"
+  
+      <Breadcrumb pageName="Lots" />
+      <Collapse  activeKey={activeKey} onChange={toggleCollapse} style={{ marginBottom: '20px' }}>
+          <Panel header="Create New Lot" key="1">
+            <div className="bg-white p-8 rounded-md w-full">
+              <Form
+                {...LAYOUT_LOT}
+                name="lots"
+                onFinish={onFinish}
+                style={{ maxWidth: 600 }}
+                validateMessages={VALIDATE_MESSAGES}
+              >
+                <Form.Item
+                  name={['lotCode']}
+                  label="Lot Code"
+                  rules={[{ required: true }]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                name={['shelfId']}
+                label="Shelf ID"
+                rules={[{ required: true }]}
+              >
+                <Select>
+                  {shelfIds.map(id => (
+                    <Select.Option key={id} value={id}>
+                      {id}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name={['productId']}
+                label="Product ID"
+                rules={[{ required: true }]}
+              >
+                <Select>
+                  {productIds.length > 0 ? (
+                    productIds.map(id => (
+                      <Select.Option key={id} value={id}>
+                        {id}
+                      </Select.Option>
+                    ))
+                  ) : (
+                    <Select.Option value={null}>None</Select.Option>
+                  )}
+                </Select>
+              </Form.Item>
+
+                <Form.Item
+                  name={['managefactureDate']}
+                  label="Managefacture Date"
+                  rules={[{ required: true, type: 'object' }]}
+                >
+                   <DatePicker format={dateFormat} />
+                </Form.Item>
+                <Form.Item
+                  name={['expiryDate']}
+                  label="Expiry Date"
+                  rules={[{ required: true, type: 'object' }]}
+                >
+                  <DatePicker format={dateFormat} />
+                </Form.Item>
+                <Form.Item
+                  name={['quantity']}
+                  label="Quantity"
+                  rules={[{ type: 'number', required: true, min: 0, max: 200 }]}
+                >
+                  <InputNumber />
+                </Form.Item>
+                  <Form.Item label={null}>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      style={{
+                        backgroundColor: '#1890ff',
+                        borderColor: '#1890ff',
+                        color: '#fff',
+                        marginRight: '20px',
+                      }}
+                    >
+                      Submit
+                    </Button>
+                  </Form.Item>
+              </Form>
+            </div>
+          </Panel>
+        </Collapse>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginBottom: '20px',
+        }}
+      >
+        <Search
+          placeholder="Search by Code"
+          enterButton="Search"
+          size="large"
+          loading={searchLoading}
+          onSearch={handleSearch}
+          className="custom-search-button"
+          style={{ width: '50%' }}
         />
-        <table className="w-full  table-auto border-collapse">
-          <thead>
-            <tr>
-              <th className="border p-2 bg-yellow-100">ID</th>
-              <th className="border p-2 bg-gray-200">Code</th>
-              <th className="border p-2 bg-gray-200">Name</th>
-              <th className="border p-2 bg-gray-200">Location</th>
-              <th className="border p-2 bg-gray-200">Capacity</th>
-              <th className="border p-2 bg-gray-200">Shelf</th>
-              <th className="border p-2 bg-gray-200" >Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lots.map((lot) => (
-              <tr key={lot.id}>
-               
-                <td className="border p-2 text-center"> {lot.id}</td>
-                <td className="border p-2 text-center">{lot.code}</td>
-                <td className="border p-2 text-center" >{lot.name}</td>
-                <td className="border p-2 text-center">{lot.location}</td>
-                <td className="border p-2 text-center">{lot.capacity}</td>
-                <td className="border p-2 text-center">{lot.shelfId}</td>
-                <td className="border p-2 flex justify-center ">
-                  <button className="p-2 bg-yellow-500 text-white rounded mr-2 hover:-translate-y-1 hover:shadow-lg transition-transform">
-                    Update
-                  </button>
-                  <button className="p-2 mr-2 bg-red-500 text-white rounded hover:-translate-y-1 hover:shadow-lg transition-transform">
-                    Delete
-                  </button>
-                  <button onClick={() => navigate(`/products?lotId=${lot.id}&shelfId=${lot.shelfId}`)} className="p-2 bg-green-500 text-white rounded hover:-translate-y-1 hover:shadow-lg transition-transform">
-                    View Products
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      </div>
+      <div>
+        <Table<Lot>
+          className={styles.customTable}
+          rowKey="id"
+          pagination={{ pageSize: 2 }}
+          columns={lotColumns(handleEdit, handleDelete, handleView)}
+          dataSource={lots}
+          scroll={{ x: 'max-content' }}
+        />
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Lots
+export default Lots;
