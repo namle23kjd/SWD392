@@ -4,7 +4,7 @@ namespace Warehouse_Management.Repositories.IRepository
 {
     public interface IOrderRepository
     {
-        Task<IEnumerable<Order>> GetAllOrdersAsync();
+        Task<IEnumerable<Order>> GetAllOrdersAsync(int pageNumber, int pageSize);
         Task<Order?> GetOrderByIdAsync(int id);
         Task AddOrderAsync(Order order);
         Task UpdateOrderAsync(Order order);

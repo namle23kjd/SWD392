@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Warehouse_Management.Data;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Models.Domain;
-using Warehouse_Management.Models.DTO;
 using Warehouse_Management.Models.DTO.Product;
 using Warehouse_Management.Repositories.IRepository;
 
@@ -84,8 +82,6 @@ namespace Warehouse_Management.Repositories.Repository
             };
         }
 
-        
-
         public async Task<ApiResponse> ModifyUserRoleAsync(string userId, string[] newRoles)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -110,13 +106,6 @@ namespace Warehouse_Management.Repositories.Repository
                 Result = "User roles updated successfully."
             };
         }
-        //public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
-        //{
-        //    => await ApplicationUser.ToListAsyc();
-
-        //}
-
-
 
         public async Task<bool> RegisterAsync(IdentityUser user, string password, string[] roles)
         {
@@ -152,7 +141,5 @@ namespace Warehouse_Management.Repositories.Repository
 
 
         }
-
-        
     }
 }

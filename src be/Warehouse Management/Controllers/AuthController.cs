@@ -29,6 +29,54 @@ namespace Warehouse_Management.Controllers
             _emailService = emailService;
             _mapper = mapper;
         }
+        //Post:/ api/auth/register
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("register")]
+        //[Authorize]
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDTO request)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = await _userService.RegisterAsync(request);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        //Post:/ api/auth/login
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = await _userService.LoginAsync(request);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO model)
+        {
+            var response = await _userService.ResetPasswordAsync(model.Email);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpPost("confirm-reset-password")]
+        public async Task<IActionResult> ConfirmResetPassword([FromBody] ConfirmResetPasswordRequest model)
+        {
+            var response = await _userService.ConfirmResetPasswordAsync(model.Email, model.Token, model.NewPassword);
+            return StatusCode((int)response.StatusCode, response);
+        }
 
         // POST: /api/auth/edit-user
         /// <summary>
@@ -79,55 +127,7 @@ namespace Warehouse_Management.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
-        
-        //Post:/ api/auth/register
-        /// <summary>
-        ///  
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("register")]
-        //[Authorize]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDTO request)
-        {
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var response = await _userService.RegisterAsync(request);
-            return StatusCode((int)response.StatusCode, response);
-        }
 
-        //Post:/ api/auth/login
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var response = await _userService.LoginAsync(request);
-            return StatusCode((int)response.StatusCode, response);
-        }
-
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO model)
-        {
-            var response = await _userService.ResetPasswordAsync(model.Email);
-            return StatusCode((int)response.StatusCode, response);
-        }
-
-        [HttpPost("confirm-reset-password")]
-        public async Task<IActionResult> ConfirmResetPassword([FromBody] ConfirmResetPasswordRequest model)
-        {
-            var response = await _userService.ConfirmResetPasswordAsync(model.Email, model.Token, model.NewPassword);
-            return StatusCode((int)response.StatusCode, response);
-        }
 
         [HttpGet]
         public async Task<IActionResult> GetAllUser()

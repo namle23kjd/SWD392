@@ -22,9 +22,13 @@ namespace Warehouse_Management.Repositories.Repository
             _db.Orders.Remove(order);
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        public async Task<IEnumerable<Order>> GetAllOrdersAsync(int pageNumber = 1, int pageSize = 10)
         {
-            return await _db.Orders.Include(o => o.OrderItems).ToListAsync();
+            return await _db.Orders
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Include(o => o.OrderItems)
+                    .ToListAsync();
         }
 
         public async Task<Order?> GetOrderByIdAsync(int id)

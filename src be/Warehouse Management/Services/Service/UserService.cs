@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Azure.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -100,45 +101,6 @@ namespace Warehouse_Management.Services.Service
             return response;
         }
 
-        public async Task<ApiResponse> ModifyUserRoleAsync(string userId, string[] newRoles)
-        {
-            var response = new ApiResponse();
-
-            try
-            {
-                response = await _userRepository.ModifyUserRoleAsync(userId, newRoles);
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                response.ErrorMessages.Add($"Error occurred while modifying user roles: {ex.Message}");
-            }
-
-            return response;
-        }
-
-        //public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
-        //{
-        //    var response = new ApiResponse<IEnumerable<UserDTO>>();
-
-        //    try
-        //    {
-        //        var users = await _userRepository.GetAllUsersAsync(); // Giả sử đây là danh sách người dùng trả về từ repo
-        //        response.Result = users;
-        //        response.StatusCode = HttpStatusCode.OK;
-        //        response.IsSuccess = true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        response.IsSuccess = false;
-        //        response.StatusCode = HttpStatusCode.InternalServerError;
-        //        response.ErrorMessages.Add($"Error occurred while fetching all users: {ex.Message}");
-        //    }
-
-        //    return response;
-        //}
-
         public async Task<LoginResponseDTO> GenerateJwtToken(IdentityUser user)
         {
             var authClaims = new List<Claim>
@@ -169,6 +131,41 @@ namespace Warehouse_Management.Services.Service
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expiration = token.ValidTo
             };
+        }
+
+        public async Task<ApiResponse> GetAllUserAsync()
+        {
+            try
+            {
+                var users = _userManager.Users.ToList();
+
+                var userList = new List<UserDTO>();
+
+                foreach (var user in users)
+                {
+                    var userDto = _mapper.Map<UserDTO>(user);
+                    var roles = await _userManager.GetRolesAsync(user);
+                    userDto.Roles = roles.ToList();
+                    userList.Add(userDto);
+                }
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = userList
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi xảy ra khi lấy danh sách người dùng");
+                return new ApiResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    ErrorMessages = { "Không thể lấy danh sách người dùng." }
+                };
+            }
         }
 
         public async Task<ApiResponse> LoginAsync(LoginRequestDTO loginRequestDTO)
@@ -211,7 +208,23 @@ namespace Warehouse_Management.Services.Service
             return response;          
         }
 
-        
+        public async Task<ApiResponse> ModifyUserRoleAsync(string userId, string[] newRoles)
+        {
+            var response = new ApiResponse();
+
+            try
+            {
+                response = await _userRepository.ModifyUserRoleAsync(userId, newRoles);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                response.ErrorMessages.Add($"Error occurred while modifying user roles: {ex.Message}");
+            }
+
+            return response;
+        }
 
         public async Task<ApiResponse> RegisterAsync(RegisterRequestDTO registerRequestDTO)
         {
@@ -282,39 +295,5 @@ namespace Warehouse_Management.Services.Service
             return response;
         }
 
-        public async Task<ApiResponse> GetAllUserAsync()
-        {
-            try
-            {
-                var users = _userManager.Users.ToList();
-
-                var userList = new List<UserDTO>();
-
-                foreach (var user in users)
-                {
-                    var userDto = _mapper.Map<UserDTO>(user);
-                    var roles = await _userManager.GetRolesAsync(user);
-                    userDto.Roles = roles.ToList();
-                    userList.Add(userDto);
-                }
-
-                return new ApiResponse
-                {
-                    IsSuccess = true,
-                    StatusCode = HttpStatusCode.OK,
-                    Result = userList
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi xảy ra khi lấy danh sách người dùng");
-                return new ApiResponse
-                {
-                    IsSuccess = false,
-                    StatusCode = HttpStatusCode.InternalServerError,
-                    ErrorMessages = { "Không thể lấy danh sách người dùng." }
-                };
-            }
-        }
     }
 }

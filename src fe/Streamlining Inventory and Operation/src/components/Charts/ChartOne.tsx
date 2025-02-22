@@ -178,6 +178,9 @@ const ChartOne: React.FC = () => {
             <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
               Month
             </button>
+            <button className="rounded bg-white py-1 px-3 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark">
+              Year
+            </button>
           </div>
         </div>
       </div>

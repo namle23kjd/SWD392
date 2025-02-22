@@ -69,11 +69,11 @@ namespace Warehouse_Management.Services.Service
             }
         }
 
-        public async Task<ApiResponse> GetAllOrdersAsync()
+        public async Task<ApiResponse> GetAllOrdersAsync(int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                var orders = await _orderRepository.GetAllOrdersAsync();
+                var orders = await _orderRepository.GetAllOrdersAsync(pageNumber, pageSize);
                 return new ApiResponse
                 {
                     IsSuccess = true,
