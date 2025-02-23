@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Security.Claims;
 using Warehouse_Management.Models.DTO.Shelf;
 using Warehouse_Management.Services.IService;
 using Warehouse_Management.Services.Service;
@@ -35,7 +36,11 @@ namespace Warehouse_Management.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateShelf([FromBody] CreateShelfDTO dto)
         {
-            var response = await _shelfService.CreateShelfAsync(dto);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return Unauthorized(new { message = "User not found" });
+
+            var response = await _shelfService.CreateShelfAsync(dto, userId);
             return StatusCode((int)response.StatusCode, response);
         }
 

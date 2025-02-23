@@ -23,7 +23,7 @@ namespace Warehouse_Management.Repositories.Repository
         }
 
         public async Task<IEnumerable<Product>> GetALlProductsAsync()
-        => await _db.Products.ToListAsync();
+        => await _db.Products.Include(p => p.User).ToListAsync();
 
         public async Task<Product?> GetProductByIdAsync(int id)
         => await _db.Products.FirstOrDefaultAsync(p => p.ProductId == id);

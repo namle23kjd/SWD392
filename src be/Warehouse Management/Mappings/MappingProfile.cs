@@ -28,7 +28,9 @@ namespace Warehouse_Management.Mappings
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Username))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username));
 
-            CreateMap<Product, ProductDTO>().ReverseMap();
+            CreateMap<Product, ProductDTO>()
+ .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown"))
+ .ReverseMap();
             CreateMap<Product, CreateProductDTO>().ReverseMap();
             CreateMap<Product, UpdateProductDTO>().ReverseMap();
 

@@ -24,7 +24,7 @@ namespace Warehouse_Management.Services.Service
             _mapper = mapper;
             _shelfRepository = shelfRepository;
         }
-        public  async Task<ApiResponse> CreateShelfAsync(CreateShelfDTO dto)
+        public  async Task<ApiResponse> CreateShelfAsync(CreateShelfDTO dto, string userId)
         {
             try
             { 
@@ -33,6 +33,7 @@ namespace Warehouse_Management.Services.Service
                 var shelf = _mapper.Map<Shelf>(dto);
                 shelf.CreatedAt = DateTime.UtcNow;
                 shelf.UpdatedAt = DateTime.UtcNow;
+                shelf.UserId = userId;
 
                 await _shelfRepository.CreateAsync(shelf);
                 await _shelfRepository.SaveChangesAsync();
