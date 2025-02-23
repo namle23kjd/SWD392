@@ -92,8 +92,8 @@ namespace Warehouse_Management.Services.Service
                 await _productRepository.SaveChangesAsync();
 
                 return new ApiResponse { IsSuccess = true, StatusCode = HttpStatusCode.Created, Result = _mapper.Map<ProductDTO>(product) };
-            }catch(Exception ex)
-            {
+            }catch(Exception ex) { 
+                
                 return await HandleExceptionAsync(ex);
             }
         }

@@ -64,5 +64,18 @@ namespace Warehouse_Management.Controllers
             return StatusCode((int)response.StatusCode, response);
         }
 
+
+
+        // <summary>
+        /// Delete a supplier by ID
+        /// </summary>
+        /// <param name="id">The ID of the supplier to be deleted</param>
+        /// /// <returns>Returns an IActionResult with the API response</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteSupplier(int id)
+        {
+            var response = await _supplierService.DeleteSupplierAsync(id);
+            return StatusCode((int)response.StatusCode, response);
+        }
     }
 }

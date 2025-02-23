@@ -25,3 +25,4 @@ namespace Warehouse_Management.Models.DTO.Lot
         public DateTime ExpiryDate { get; set; }
     }
 }
+    

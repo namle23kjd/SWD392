@@ -62,6 +62,7 @@ namespace Warehouse_Management.Mappings
             CreateMap<Supplier, SupplierDTO>();
             CreateMap<CreateSupplierDTO, Supplier>();
             CreateMap<UpdateSupplierDTO, Supplier>();
+           
 
             CreateMap<Shelf, ShelfDTO>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
