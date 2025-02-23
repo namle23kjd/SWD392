@@ -61,8 +61,11 @@ namespace Warehouse_Management.Services.Service
                     StatusCode = HttpStatusCode.OK,
                     Result = new
                     {
+                        Items = _mapper.Map<IEnumerable<ShelfDTO>>(shelves),
                         TotalCount = totalCount,
-                        Shelves = _mapper.Map<IEnumerable<ShelfDTO>>(shelves)
+                        PageSize = pageSize,
+                        CurrentPage = page,
+                        TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
                     }
                 };
             }
