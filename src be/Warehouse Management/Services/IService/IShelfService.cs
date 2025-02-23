@@ -9,7 +9,7 @@ namespace Warehouse_Management.Services.IService
         Task<ApiResponse> GetShelfByIdAsync(int id);
         Task<ApiResponse> CreateShelfAsync(CreateShelfDTO dto);
         Task<ApiResponse> UpdateShelfAsync(int id, CreateShelfDTO dto);
-
+        Task<ApiResponse> DeleteShelfAsync(int id);
         Task<ApiResponse> HandleExceptionAsync (Exception ex);
     }
 }

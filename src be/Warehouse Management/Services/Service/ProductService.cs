@@ -3,6 +3,7 @@ using System.Net;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Middlewares;
 using Warehouse_Management.Models.Domain;
+using Warehouse_Management.Models.DTO.Order;
 using Warehouse_Management.Models.DTO.Product;
 using Warehouse_Management.Repositories.IRepository;
 using Warehouse_Management.Services.IService;
@@ -33,7 +34,7 @@ namespace Warehouse_Management.Services.Service
                     Result = _mapper.Map<IEnumerable<ProductDTO>>(products)
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
@@ -57,7 +58,7 @@ namespace Warehouse_Management.Services.Service
 
         public async Task<ApiResponse> SearchProductsAsync(string? sku, string? barcode, string? name)
         {
-                var products = await _productRepository.SearchProductAsync(sku, barcode, name);
+            var products = await _productRepository.SearchProductAsync(sku, barcode, name);
             if (products == null || !products.Any()) // Nếu không tìm thấy kết quả
             {
                 return new ApiResponse
@@ -92,7 +93,8 @@ namespace Warehouse_Management.Services.Service
                 await _productRepository.SaveChangesAsync();
 
                 return new ApiResponse { IsSuccess = true, StatusCode = HttpStatusCode.Created, Result = _mapper.Map<ProductDTO>(product) };
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
@@ -104,7 +106,12 @@ namespace Warehouse_Management.Services.Service
             {
                 var product = await _productRepository.GetProductByIdAsync(id);
                 if (product == null)
-                    return new ApiResponse { IsSuccess = false, StatusCode = HttpStatusCode.NotFound, ErrorMessages = { "Product not found" } };
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { "Product not found" }
+                    };
 
                 _mapper.Map(productDto, product);
                 product.UpdatedAt = DateTime.UtcNow;
@@ -112,13 +119,19 @@ namespace Warehouse_Management.Services.Service
                 _productRepository.UpdateProductAsync(product);
                 await _productRepository.SaveChangesAsync();
 
-                return new ApiResponse { IsSuccess = true, StatusCode = HttpStatusCode.NoContent };
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = _mapper.Map<ProductDTO>(product)
+                };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                   return await HandleExceptionAsync(ex);
+                return await HandleExceptionAsync(ex);
             }
         }
+
 
         public async Task<ApiResponse> DeleteProductAsync(int id)
         {
@@ -130,8 +143,18 @@ namespace Warehouse_Management.Services.Service
 
                 await _productRepository.DeleteProductAsync(product);
 
-                return new ApiResponse { IsSuccess = true, StatusCode = HttpStatusCode.NoContent };
-            } catch(Exception ex)
+                return new ApiResponse 
+                { 
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = new
+                    {
+                        Message = "Product delete successfully",
+                        productID = product.ProductId,
+                    }
+                };
+            }
+            catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }

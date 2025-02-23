@@ -5,6 +5,7 @@ using Warehouse_Management.Middlewares;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO.Shelf;
 using Warehouse_Management.Repositories.IRepository;
+using Warehouse_Management.Repositories.Repository;
 using Warehouse_Management.Services.IService;
 
 namespace Warehouse_Management.Services.Service
@@ -76,12 +77,22 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var shelf = await _shelfRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Shelf with ID {id} not found");
+                var shelf = await _shelfRepository.GetByIdAsync(id);
+                if (shelf == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Shelf with ID {id} not found" }
+                    };
+                }
+
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
-                    Result = _mapper.Map<IEnumerable<ShelfDTO>>(shelf)
+                    Result = _mapper.Map<ShelfDTO>(shelf)
                 };
             }
             catch (Exception ex)
@@ -107,8 +118,16 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var shelf = await _shelfRepository.GetByIdAsync(id)
-                ?? throw new KeyNotFoundException($"Shelf with ID {id} not found");
+                var shelf = await _shelfRepository.GetByIdAsync(id);
+                if (shelf == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Shelf with ID {id} not found" }
+                    };
+                }
 
                 _mapper.Map(dto, shelf);
                 shelf.UpdatedAt = DateTime.UtcNow;
@@ -121,6 +140,33 @@ namespace Warehouse_Management.Services.Service
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
                     Result = _mapper.Map<ShelfDTO>(shelf)
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
+        public async Task<ApiResponse> DeleteShelfAsync(int id)
+        {
+            try
+            {
+                var shelf = await _shelfRepository.GetByIdAsync(id);
+                if (shelf == null)
+                    return new ApiResponse { IsSuccess = false, StatusCode = HttpStatusCode.NotFound, ErrorMessages = { "Shelf not found" } };
+
+                await _shelfRepository.DeleteAsync(shelf);
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = new
+                    {
+                        Message = "Shelf delete successfully",
+                        shelfID = shelf.ShelfId,
+                    }
                 };
             }
             catch (Exception ex)

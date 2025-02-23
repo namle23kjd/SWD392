@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using Warehouse_Management.Models.DTO.Shelf;
 using Warehouse_Management.Services.IService;
 using Warehouse_Management.Services.Service;
@@ -42,6 +43,18 @@ namespace Warehouse_Management.Controllers
         public async Task<IActionResult> UpdateShelf(int id, [FromBody] CreateShelfDTO dto)
         {
             var response = await _shelfService.UpdateShelfAsync(id, dto);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var response = await _shelfService.DeleteShelfAsync(id);
+            if (response.StatusCode == HttpStatusCode.NoContent)
+            {
+                return NoContent();
+            }
+
             return StatusCode((int)response.StatusCode, response);
         }
     }

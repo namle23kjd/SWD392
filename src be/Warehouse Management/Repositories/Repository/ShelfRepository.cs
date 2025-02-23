@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using Warehouse_Management.Data;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Repositories.IRepository;
@@ -57,6 +58,11 @@ namespace Warehouse_Management.Repositories.Repository
         public async Task UpdateAsync(Shelf shelf)
         {
             _db.Shelves.Update(shelf);
+        }
+        public async Task DeleteAsync(Shelf shelf)
+        {
+            _db.Shelves.Remove(shelf);
+            await _db.SaveChangesAsync();
         }
     }
 }
