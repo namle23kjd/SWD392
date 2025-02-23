@@ -1,5 +1,6 @@
 ﻿using Warehouse_Management.Helpers;
 using Warehouse_Management.Models.DTO.Lot;
+using Warehouse_Management.Models.DTO.Order;
 
 namespace Warehouse_Management.Services.IService
 {
@@ -9,5 +10,6 @@ namespace Warehouse_Management.Services.IService
         Task<ApiResponse> GetLotByIdAsync(int id);
         Task<ApiResponse> CreateLotAsync(CreateLotDTO dto);
         Task<ApiResponse> UpdateLotQuantityAsync(int id, int quantityChange);
+        Task<ApiResponse> UpdateLotAsync(int id, UpdateLotDTO dto);
     }
 }

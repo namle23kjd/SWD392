@@ -40,9 +40,17 @@ namespace Warehouse_Management.Controllers
 
 
         [HttpPut("{id:int}/quantity")]
-        public async Task<IActionResult> UpdateLotQuantity(int id, [FromBody] UpdateLotDTO dto)
+        public async Task<IActionResult> UpdateLotQuantity(int id, [FromBody] UpdateLotQuantityDTO dto)
         {
             var response = await _lotService.UpdateLotQuantityAsync(id, dto.Quantity);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateLot(int id, UpdateLotDTO dto)
+        {
+            var response = await _lotService.UpdateLotAsync(id, dto);
             return StatusCode((int)response.StatusCode, response);
         }
 

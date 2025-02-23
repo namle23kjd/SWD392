@@ -5,6 +5,7 @@ using Warehouse_Management.Helpers;
 using Warehouse_Management.Middlewares;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO.Lot;
+using Warehouse_Management.Models.DTO.Order;
 using Warehouse_Management.Repositories.IRepository;
 using Warehouse_Management.Services.IService;
 
@@ -128,6 +129,81 @@ namespace Warehouse_Management.Services.Service
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
                     Result = _mapper.Map<LotDTO>(lot)
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
+        public async Task<ApiResponse> UpdateLotAsync(int id, UpdateLotDTO dto)
+        {
+            try
+            {
+                var lot = await _lotRepository.GetByIdAsync(id);
+                
+                if (lot == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Lot with ID {id} not found." }
+                    };
+                }
+                var productExists = await _productRepository.GetProductByIdAsync(dto.ProductId);
+                if (productExists == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"Product with ID {dto.ProductId} doesn't exist." }
+                    };
+                }
+
+                // Kiểm tra kệ hàng có tồn tại không
+                var shelfExists = await _shelfRepository.GetByIdAsync(dto.ShelfId);
+                if (shelfExists == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"Shelf with ID {dto.ShelfId} doesn't exist." }
+                    };
+                }
+                if (lot.Quantity + dto.Quantity < 0)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "The lot quantity cannot be less than 0." }
+                    };
+                }
+
+                lot.Quantity = dto.Quantity;
+                lot.ProductId = dto.ProductId;
+                lot.ShelfId = dto.ShelfId;
+                lot.LotCode = dto.LotCode;
+                await _lotRepository.UpdateAsync(lot);
+                await _lotRepository.SaveChangesAsync();
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = new
+                    {
+                        Message = "Updated lot successfully",
+                        LotID = lot.LotId,
+                        productId = lot.ProductId,
+                        shelfId = lot.ShelfId,
+                        lotCode = lot.LotCode,
+                        Quantity = lot.Quantity
+                    }
                 };
             }
             catch (Exception ex)
