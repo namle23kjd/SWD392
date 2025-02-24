@@ -1,8 +1,6 @@
 name: swd-api
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: 
     - main
