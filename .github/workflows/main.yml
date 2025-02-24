@@ -1,0 +1,25 @@
+name: swd-api
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: 
+    - main
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-lastest
+    steps:
+      - name: 🛎 Checkout
+        uses: actions/checkout@v4.2.2
+      - name: ⚙️ Setup .NET Core SDK
+        uses: actions/setup-dotnet@v4.3.0
+        with:
+          dotnet-version: 8.0.x
+      - name: 📦 Restore dependencies
+        run: dotnet restore
+      - name: 🏗 Build
+        run: dotnet build --no-restore
