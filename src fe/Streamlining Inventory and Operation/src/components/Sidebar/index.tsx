@@ -1,8 +1,7 @@
 import { CheckSquareOutlined, ExportOutlined, FileAddOutlined, FileTextOutlined, HddOutlined, HistoryOutlined, ImportOutlined, InboxOutlined, ProductOutlined, ReconciliationOutlined, ShopOutlined, TransactionOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import React, { useEffect, useRef, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import Logo from '../../images/logo/logo.svg';
-import DemoMenu from './DemoMenu';
 import SidebarLinkGroup from './SidebarLinkGroup';
 
 interface SidebarProps {
@@ -11,9 +10,6 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
-  const location = useLocation();
-  const { pathname } = location;
-
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
 
