@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Middlewares;
@@ -15,12 +17,14 @@ namespace Warehouse_Management.Services.Service
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
         private readonly IEnumerable<IExceptionHandler> _exceptionhandlers;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ProductService(IMapper mapper, IProductRepository productRepository, IEnumerable<IExceptionHandler> exceptionHandlers)
+        public ProductService(IMapper mapper, IProductRepository productRepository, IEnumerable<IExceptionHandler> exceptionHandlers, UserManager<IdentityUser> userManager)
         {
             _mapper = mapper;
             _productRepository = productRepository;
             _exceptionhandlers = exceptionHandlers;
+            _userManager = userManager;
         }
         public async Task<ApiResponse> GetAllProductsAsync()
         {
@@ -46,9 +50,26 @@ namespace Warehouse_Management.Services.Service
             {
                 var product = await _productRepository.GetProductByIdAsync(id);
                 if (product == null)
-                    return new ApiResponse { IsSuccess = false, StatusCode = HttpStatusCode.NotFound, ErrorMessages = { "Product not found" } };
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { "Product not found" }
+                    };
+                }
 
-                return new ApiResponse { IsSuccess = true, StatusCode = HttpStatusCode.OK, Result = _mapper.Map<ProductDTO>(product) };
+                // Lấy thông tin user
+                var user = await _userManager.FindByIdAsync(product.UserId);
+                var productDto = _mapper.Map<ProductDTO>(product);
+                productDto.UserName = user != null ? user.UserName : "Unknown"; // Gán UserName
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = productDto
+                };
             }
             catch (Exception ex)
             {
@@ -69,6 +90,17 @@ namespace Warehouse_Management.Services.Service
                 };
             }
 
+            var userIds = products.Select(p => p.UserId).Distinct().ToList();
+            var users = await _userManager.Users.Where(u => userIds.Contains(u.Id)).ToDictionaryAsync(u => u.Id, u => u.UserName);
+
+            var productDtos = _mapper.Map<List<ProductDTO>>(products);
+
+            // Gán tên người dùng vào DTO
+            foreach (var productDto in productDtos)
+            {
+                productDto.UserName = users.ContainsKey(productDto.UserName) ? users[productDto.UserName] : "Unknown";
+            }
+
             return new ApiResponse
             {
                 IsSuccess = true,
@@ -82,6 +114,16 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { "User not found" }
+                    };
+                }
                 var product = _mapper.Map<Product>(productDto);
                 var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var nowInVietnam = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
@@ -92,7 +134,15 @@ namespace Warehouse_Management.Services.Service
                 await _productRepository.AddProductAsync(product);
                 await _productRepository.SaveChangesAsync();
 
-                return new ApiResponse { IsSuccess = true, StatusCode = HttpStatusCode.Created, Result = _mapper.Map<ProductDTO>(product) };
+                var productResponse = _mapper.Map<ProductDTO>(product);
+                productResponse.UserName = user.UserName; // Gán UserName trước khi trả về
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.Created,
+                    Result = productResponse
+                };
             }
             catch (Exception ex)
             {
@@ -118,6 +168,10 @@ namespace Warehouse_Management.Services.Service
 
                 _productRepository.UpdateProductAsync(product);
                 await _productRepository.SaveChangesAsync();
+
+                var user = await _userManager.FindByIdAsync(product.UserId);
+                var productResponse = _mapper.Map<ProductDTO>(product);
+                productResponse.UserName = user?.UserName ?? "Unknown";  // Gán UserName vào DTO
 
                 return new ApiResponse
                 {
