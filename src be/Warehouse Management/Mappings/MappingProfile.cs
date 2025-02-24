@@ -68,7 +68,8 @@ namespace Warehouse_Management.Mappings
 
             CreateMap<Shelf, ShelfDTO>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
-            CreateMap<CreateShelfDTO, Shelf>();
+            CreateMap<CreateShelfDTO, Shelf>()
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             
             CreateMap<CreateLotDTO, Lot>();
