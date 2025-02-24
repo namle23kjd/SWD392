@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.Design;
 using System.Net;
 using Warehouse_Management.Helpers;
@@ -21,6 +22,7 @@ namespace Warehouse_Management.Services.Service
         private readonly IEnumerable<IExceptionHandler> _exceptionHandlers;
         private readonly IProductRepository _productRepository;
         private readonly IShelfRepository _shelfRepository;
+        private readonly UserManager<IdentityUser> _userManager;
         public LotService(
             ILotRepository lotRepository,
             IProductService productService,
@@ -29,7 +31,8 @@ namespace Warehouse_Management.Services.Service
             ILogger<LotService> logger,
             IEnumerable<IExceptionHandler> exceptionHandlers,
             IProductRepository productRepository,
-            IShelfRepository shelfRepository)
+            IShelfRepository shelfRepository, 
+            UserManager<IdentityUser> userManager)
         {
             _lotRepository = lotRepository;
             _productService = productService;
@@ -39,11 +42,23 @@ namespace Warehouse_Management.Services.Service
             _exceptionHandlers = exceptionHandlers;
             _productRepository = productRepository;
             _shelfRepository = shelfRepository;
+            _userManager = userManager;
         }
-        public async Task<ApiResponse> CreateLotAsync(CreateLotDTO dto)
+        public async Task<ApiResponse> CreateLotAsync(CreateLotDTO dto, string userId)
         {
             try
             {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { "User not found" }
+                    };
+                }
+
                 var productExists = await _productRepository.GetProductByIdAsync(dto.ProductId);
                 if (productExists == null)
                 {
@@ -68,15 +83,19 @@ namespace Warehouse_Management.Services.Service
                 }
                 var lot = _mapper.Map<Lot>(dto);
                 lot.CreateAt = DateTime.UtcNow;
-
+                lot.UpdateAt = DateTime.UtcNow;
+                lot.UserId = userId;
                 await _lotRepository.CreateAsync(lot);
                 await _lotRepository.SaveChangesAsync();
+
+                var lotResponse = _mapper.Map<LotDTO>(lot);
+                lotResponse.UserName = user.UserName;
 
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.Created,
-                    Result = _mapper.Map<LotDTO>(lot)   
+                    Result = lotResponse
                 };
             }
             catch (Exception ex)
@@ -188,6 +207,7 @@ namespace Warehouse_Management.Services.Service
                 lot.ProductId = dto.ProductId;
                 lot.ShelfId = dto.ShelfId;
                 lot.LotCode = dto.LotCode;
+                lot.UpdateAt = DateTime.Now;
                 await _lotRepository.UpdateAsync(lot);
                 await _lotRepository.SaveChangesAsync();
 

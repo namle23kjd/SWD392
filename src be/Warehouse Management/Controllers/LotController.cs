@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Warehouse_Management.Models.DTO.Lot;
 using Warehouse_Management.Services.IService;
+using Warehouse_Management.Services.Service;
 
 namespace Warehouse_Management.Controllers
 {
@@ -34,7 +36,10 @@ namespace Warehouse_Management.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateLot([FromBody] CreateLotDTO dto)
         {
-            var response = await _lotService.CreateLotAsync(dto);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return Unauthorized(new { message = "User not found" });
+            var response = await _lotService.CreateLotAsync(dto, userId);
             return StatusCode((int)response.StatusCode, response);
         }
 
