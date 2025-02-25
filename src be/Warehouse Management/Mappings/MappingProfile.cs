@@ -28,8 +28,11 @@ namespace Warehouse_Management.Mappings
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Username))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username));
 
-            CreateMap<Product, ProductDTO>().ReverseMap();
-            CreateMap<Product, CreateProductDTO>().ReverseMap();
+            CreateMap<Product, ProductDTO>()
+                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown"))
+                 .ReverseMap();
+            CreateMap<CreateProductDTO, Product>()
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
             CreateMap<Product, UpdateProductDTO>().ReverseMap();
 
             CreateMap<CreateOrderDTO, Order>()
@@ -65,7 +68,8 @@ namespace Warehouse_Management.Mappings
 
             CreateMap<Shelf, ShelfDTO>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
-            CreateMap<CreateShelfDTO, Shelf>();
+            CreateMap<CreateShelfDTO, Shelf>()
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             
             CreateMap<CreateLotDTO, Lot>();
