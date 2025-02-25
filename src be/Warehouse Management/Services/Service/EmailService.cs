@@ -41,14 +41,14 @@ namespace Warehouse_Management.Services.Service
 
                     response.StatusCode = HttpStatusCode.OK;
                     response.IsSuccess = true;
-                    response.Result = "Email đã được gửi thành công.";
+                    response.Result = "Email sent successfully.";
                 }
             }
             catch (Exception ex)
             {
                 response.StatusCode = HttpStatusCode.InternalServerError;
                 response.IsSuccess = false;
-                response.ErrorMessages.Add("Lỗi khi gửi email: " + ex.Message);
+                response.ErrorMessages.Add("Error while sending email: " + ex.Message);
             }
 
             return response;

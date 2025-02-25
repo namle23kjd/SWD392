@@ -9,6 +9,7 @@ namespace Warehouse_Management.Services.IService
         Task<ApiResponse> GetSupplierByIdAsync(int id);
         Task<ApiResponse> CreateSupplierAsync(CreateSupplierDTO dto);
         Task<ApiResponse> UpdateSupplierAsync(int id, UpdateSupplierDTO dto);
+        Task<ApiResponse> DeleteSupplierAsync(int id);
         Task<ApiResponse> HandleExceptionAsync(Exception ex);
     }
 }

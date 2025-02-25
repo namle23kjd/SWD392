@@ -50,6 +50,37 @@ namespace Warehouse_Management.Services.Service
             }
         }
 
+        public async Task<ApiResponse> DeleteSupplierAsync(int id)
+        {
+            try
+            {
+                // Tìm nhà cung cấp theo ID
+                var supplier = await _supplierRepository.GetByIdAsync(id);
+
+                if (supplier == null)
+                    throw new BadHttpRequestException($"Supplier with ID {id} not found");
+
+                // Xóa nhà cung cấp khỏi cơ sở dữ liệu
+                await _supplierRepository.DeleteAsync(id);
+                await _supplierRepository.SaveChangesAsync();
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Result = new
+                    {
+                        Message = "Supplier delete successfully",
+                        supplierId = supplier.SupplierId
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
         public async Task<ApiResponse> GetAllSuppliersAsync(int page = 1, int pageSize = 10)
         {
             try
@@ -110,7 +141,7 @@ namespace Warehouse_Management.Services.Service
             {
                 
                 var supplier = await _supplierRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"No supplier found with ID {id}");
-
+                
                 if (supplier.Email != dto.Email)
                 {
                     var existingSupplier = await _supplierRepository.GetByEmailAsync(dto.Email);
