@@ -20,8 +20,13 @@ namespace Warehouse_Management.Repositories.Repository
         public async Task DeleteAsync(int id)
         {
             var supplier = await GetByIdAsync(id);
-            if (supplier != null)       
-                _db.Suppliers.Remove(supplier);            
+    if (supplier != null)
+    {
+        // Cập nhật trạng thái isDeleted thay vì xóa khỏi cơ sở dữ liệu
+        supplier.IsDeleted = true;
+        await UpdateAsync(supplier);
+        await SaveChangesAsync();
+    }            
         }
 
         public async Task<(IEnumerable<Supplier> suppliers, int totalCount)> GetAllAsync(int page, int pageSize)

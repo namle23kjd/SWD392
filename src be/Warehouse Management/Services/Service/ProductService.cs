@@ -117,7 +117,6 @@ namespace Warehouse_Management.Services.Service
 
                 await _productRepository.AddProductAsync(product);
                 await _productRepository.SaveChangesAsync();
-
                 var productResponse = _mapper.Map<ProductDTO>(product);
                 productResponse.UserName = user.UserName; // Gán UserName trước khi trả về
 

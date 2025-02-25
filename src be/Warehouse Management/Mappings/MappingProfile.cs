@@ -65,18 +65,21 @@ namespace Warehouse_Management.Mappings
             CreateMap<Supplier, SupplierDTO>();
             CreateMap<CreateSupplierDTO, Supplier>();
             CreateMap<UpdateSupplierDTO, Supplier>();
+           
 
             CreateMap<Shelf, ShelfDTO>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
             CreateMap<CreateShelfDTO, Shelf>()
                 .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
-            
-            CreateMap<CreateLotDTO, Lot>();
+
+            CreateMap<CreateLotDTO, Lot>()
+               .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             CreateMap<Lot, LotDTO>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
-                .ForMember(dest => dest.ShelfName, opt => opt.MapFrom(src => src.Shelf!.Name));
+                .ForMember(dest => dest.ShelfName, opt => opt.MapFrom(src => src.Shelf!.Name))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown"));
 
             CreateMap<UpdateLotDTO, Lot>();
 
