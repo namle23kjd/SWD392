@@ -1,37 +1,27 @@
 import { createBrowserRouter } from 'react-router-dom';
-import DefaultLayout from './layout/DefaultLayout';
-import ScrollToTop from './components/ScrollToTop';
 import PageTitle from './components/PageTitle';
-import ECommerce from './pages/Dashboard/ECommerce';
-import Profile from './pages/Profile';
-import Tables from './pages/Tables';
-import Chart from './pages/Chart';
-import FormElements from './pages/Form/FormElements';
-import FormLayout from './pages/Form/FormLayout';
-import Alerts from './pages/UiElements/Alerts';
-import Buttons from './pages/UiElements/Buttons';
-import SignIn from './pages/Authentication/SignIn';
-import SignUp from './pages/Authentication/SignUp';
-import { action as logoutAction } from './pages/Authentication/Logout'
-import Order from './pages/Dashboard/Order';
-import Shelfs from './pages/Shelfs';
-import Lots from './pages/Lots';
-import Products from './pages/Products';
-import Orders from './pages/Orders';
-import ErrorPage from './pages/Error/ErrorPage';
-import ForgotPassword from './pages/Authentication/ForgotPassword';
-import RecoverPassword from './pages/Authentication/RecoverPassword';
-import ImportProduct from './pages/Manager/ImportProduct';
-import ExportProduct from './pages/Manager/ExportProduct';
-import Report from './pages/Manager/Report';
-import TransactionManagement from './pages/Manager/TransactionManagement';
-import InventoryTracking from './pages/Manager/InventoryTracking';
-import ManageAccount from './pages/Admin/ListAccount';
-import ListAccount from './pages/Admin/ListAccount';
+import ScrollToTop from './components/ScrollToTop';
+import DefaultLayout from './layout/DefaultLayout';
 import AddAccount from './pages/Admin/AddAccount';
 import EditAccount from './pages/Admin/EditAccount';
-import OrderHistory from './pages/OrderHistory';
+import ListAccount from './pages/Admin/ListAccount';
+import ForgotPassword from './pages/Authentication/ForgotPassword';
+import { action as logoutAction } from './pages/Authentication/Logout';
+import RecoverPassword from './pages/Authentication/RecoverPassword';
+import SignIn from './pages/Authentication/SignIn';
+import SignUp from './pages/Authentication/SignUp';
 import CreateOrder from './pages/CreateOrder';
+import ErrorPage from './pages/Error/ErrorPage';
+import Lots from './pages/Lots';
+import ExportProduct from './pages/Manager/ExportProduct';
+import ImportProduct from './pages/Manager/ImportProduct';
+import InventoryTracking from './pages/Manager/InventoryTracking';
+import Report from './pages/Manager/Report';
+import TransactionManagement from './pages/Manager/TransactionManagement';
+import OrderHistory from './pages/OrderHistory';
+import Products from './pages/Products';
+import Profile from './pages/Profile';
+import Shelfs from './pages/Shelfs';
 
 export const router = createBrowserRouter([
     {
@@ -42,6 +32,10 @@ export const router = createBrowserRouter([
         </>,
         errorElement: <ErrorPage />,
         children: [
+            {
+                path: 'profile',
+                element: <Profile />
+            },
             {
                 path: 'staff',
                 children: [
