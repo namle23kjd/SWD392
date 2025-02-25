@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Middlewares;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO.Shelf;
 using Warehouse_Management.Repositories.IRepository;
+using Warehouse_Management.Repositories.Repository;
 using Warehouse_Management.Services.IService;
 
 namespace Warehouse_Management.Services.Service
@@ -15,35 +18,56 @@ namespace Warehouse_Management.Services.Service
         private readonly IMapper _mapper;
         private readonly ILogger<ShelfService> _logger;
         private readonly IEnumerable<IExceptionHandler> _exceptionHandlers;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ShelfService(IShelfRepository shelfRepository, IMapper mapper, ILogger<ShelfService> logger, IEnumerable<IExceptionHandler> exceptionHandlers)
+        public ShelfService(IShelfRepository shelfRepository, IMapper mapper, ILogger<ShelfService> logger, IEnumerable<IExceptionHandler> exceptionHandlers, UserManager<IdentityUser> userManager)
         {
             _exceptionHandlers = exceptionHandlers;
             _logger = logger;
             _mapper = mapper;
             _shelfRepository = shelfRepository;
+            _userManager = userManager;
         }
-        public  async Task<ApiResponse> CreateShelfAsync(CreateShelfDTO dto)
+
+        public async Task<ApiResponse> CreateShelfAsync(CreateShelfDTO dto, string userId)
         {
             try
-            { 
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { "User not found" }
+                    };
+                }
+
                 if (!await _shelfRepository.IsCodeUniqueAsync(dto.Code))
                     throw new Exception($"Shelf code {dto.Code} is already taken");
+
                 var shelf = _mapper.Map<Shelf>(dto);
-                shelf.CreatedAt = DateTime.UtcNow;
-                shelf.UpdatedAt = DateTime.UtcNow;
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var nowInVietnam = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
+                shelf.CreatedAt = nowInVietnam;
+                shelf.UpdatedAt = nowInVietnam;
+                shelf.UserId = userId;
 
                 await _shelfRepository.CreateAsync(shelf);
                 await _shelfRepository.SaveChangesAsync();
+
+                var shelfResponse = _mapper.Map<ShelfDTO>(shelf);
+                shelfResponse.UserName = user.UserName; // Gán UserName vào DTO
 
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.Created,
-                    Result = _mapper.Map<ShelfDTO>(shelf)
+                    Result = shelfResponse
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
@@ -61,8 +85,11 @@ namespace Warehouse_Management.Services.Service
                     StatusCode = HttpStatusCode.OK,
                     Result = new
                     {
+                        Items = _mapper.Map<IEnumerable<ShelfDTO>>(shelves),
                         TotalCount = totalCount,
-                        Shelves = _mapper.Map<IEnumerable<ShelfDTO>>(shelves)
+                        PageSize = pageSize,
+                        CurrentPage = page,
+                        TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
                     }
                 };
             }
@@ -76,12 +103,93 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var shelf = await _shelfRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Shelf with ID {id} not found");
+                var shelf = await _shelfRepository.GetByIdAsync(id);
+                if (shelf == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Shelf with ID {id} not found" }
+                    };
+                }
+
+                var user = await _userManager.FindByIdAsync(shelf.UserId);
+                var shelfDto = _mapper.Map<ShelfDTO>(shelf);
+                shelfDto.UserName = user != null ? user.UserName : "Unknown"; // Gán UserName vào DTO
+
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
-                    Result = _mapper.Map<IEnumerable<ShelfDTO>>(shelf)
+                    Result = shelfDto
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
+        public async Task<ApiResponse> UpdateShelfAsync(int id, CreateShelfDTO dto)
+        {
+            try
+            {
+                var shelf = await _shelfRepository.GetByIdAsync(id);
+                if (shelf == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Shelf with ID {id} not found" }
+                    };
+                }
+
+                _mapper.Map(dto, shelf);
+                shelf.UpdatedAt = DateTime.UtcNow;
+
+                await _shelfRepository.UpdateAsync(shelf);
+                await _shelfRepository.SaveChangesAsync();
+
+                var user = await _userManager.FindByIdAsync(shelf.UserId);
+                var shelfResponse = _mapper.Map<ShelfDTO>(shelf);
+                shelfResponse.UserName = user?.UserName ?? "Unknown"; // Gán UserName vào DTO
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = shelfResponse
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
+        public async Task<ApiResponse> DeleteShelfAsync(int id)
+        {
+            try
+            {
+                var shelf = await _shelfRepository.GetByIdAsync(id);
+                if (shelf == null)
+                {
+                    return new ApiResponse { IsSuccess = false, StatusCode = HttpStatusCode.NotFound, ErrorMessages = { "Shelf not found" } };
+                }
+
+                await _shelfRepository.DeleteAsync(shelf);
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = new
+                    {
+                        Message = "Shelf deleted successfully",
+                        shelfID = shelf.ShelfId,
+                    }
                 };
             }
             catch (Exception ex)
@@ -100,33 +208,6 @@ namespace Warehouse_Management.Services.Service
                 StatusCode = HttpStatusCode.InternalServerError,
                 ErrorMessages = { "Internal Server Error" }
             };
-            
-        }
-
-        public async Task<ApiResponse> UpdateShelfAsync(int id, CreateShelfDTO dto)
-        {
-            try
-            {
-                var shelf = await _shelfRepository.GetByIdAsync(id)
-                ?? throw new KeyNotFoundException($"Shelf with ID {id} not found");
-
-                _mapper.Map(dto, shelf);
-                shelf.UpdatedAt = DateTime.UtcNow;
-
-                await _shelfRepository.UpdateAsync(shelf);
-                await _shelfRepository.SaveChangesAsync();
-
-                return new ApiResponse
-                {
-                    IsSuccess = true,
-                    StatusCode = HttpStatusCode.OK,
-                    Result = _mapper.Map<ShelfDTO>(shelf)
-                };
-            }
-            catch (Exception ex)
-            {
-                return await HandleExceptionAsync(ex);
-            }
         }
     }
 }
