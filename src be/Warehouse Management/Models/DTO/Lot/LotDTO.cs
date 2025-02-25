@@ -11,5 +11,7 @@
         public int Quantity { get; set; }
         public DateTime ManufactureDate { get; set; }
         public DateTime ExpiryDate { get; set; }
+        public string? UserName { get; set; }
+
     }
 }

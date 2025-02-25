@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.Design;
 using System.Net;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Middlewares;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO.Lot;
+using Warehouse_Management.Models.DTO.Order;
 using Warehouse_Management.Repositories.IRepository;
 using Warehouse_Management.Services.IService;
 
@@ -18,13 +20,19 @@ namespace Warehouse_Management.Services.Service
         private readonly IMapper _mapper;
         private readonly ILogger<LotService> _logger;
         private readonly IEnumerable<IExceptionHandler> _exceptionHandlers;
+        private readonly IProductRepository _productRepository;
+        private readonly IShelfRepository _shelfRepository;
+        private readonly UserManager<IdentityUser> _userManager;
         public LotService(
             ILotRepository lotRepository,
             IProductService productService,
             IShelfService shelfService,
             IMapper mapper,
             ILogger<LotService> logger,
-            IEnumerable<IExceptionHandler> exceptionHandlers)
+            IEnumerable<IExceptionHandler> exceptionHandlers,
+            IProductRepository productRepository,
+            IShelfRepository shelfRepository, 
+            UserManager<IdentityUser> userManager)
         {
             _lotRepository = lotRepository;
             _productService = productService;
@@ -32,44 +40,62 @@ namespace Warehouse_Management.Services.Service
             _mapper = mapper;
             _logger = logger;
             _exceptionHandlers = exceptionHandlers;
+            _productRepository = productRepository;
+            _shelfRepository = shelfRepository;
+            _userManager = userManager;
         }
-        public async Task<ApiResponse> CreateLotAsync(CreateLotDTO dto)
+        public async Task<ApiResponse> CreateLotAsync(CreateLotDTO dto, string userId)
         {
             try
             {
-                var productExists = await _productService.GetProductByIdAsync(dto.ProductId);
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { "User not found" }
+                    };
+                }
+
+                var productExists = await _productRepository.GetProductByIdAsync(dto.ProductId);
                 if (productExists == null)
                 {
                     return new ApiResponse
                     {
                         IsSuccess = false,
-                        StatusCode = HttpStatusCode.BadRequest,
-                        ErrorMessages = { $"Sản phẩm với ID {dto.ProductId} không tồn tại." }
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"Product with ID {dto.ProductId} doesn't exist." }
                     };
                 }
 
                 // Kiểm tra kệ hàng có tồn tại không
-                var shelfExists = await _shelfService.GetShelfByIdAsync(dto.ShelfId);
+                var shelfExists = await _shelfRepository.GetByIdAsync(dto.ShelfId);
                 if (shelfExists == null)
                 {
                     return new ApiResponse
                     {
                         IsSuccess = false,
-                        StatusCode = HttpStatusCode.BadRequest,
-                        ErrorMessages = { $"Kệ hàng với ID {dto.ShelfId} không tồn tại." }
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"Shelf with ID {dto.ShelfId} doesn't exist." }
                     };
                 }
                 var lot = _mapper.Map<Lot>(dto);
                 lot.CreateAt = DateTime.UtcNow;
-
+                lot.UpdateAt = DateTime.UtcNow;
+                lot.UserId = userId;
                 await _lotRepository.CreateAsync(lot);
                 await _lotRepository.SaveChangesAsync();
+
+                var lotResponse = _mapper.Map<LotDTO>(lot);
+                lotResponse.UserName = user.UserName;
 
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.Created,
-                    Result = _mapper.Map<LotDTO>(lot)
+                    Result = lotResponse
                 };
             }
             catch (Exception ex)
@@ -82,7 +108,7 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var (lots, totalCount) = await _lotRepository.GetAllAsync(page, pageSize);
+                var pagedLots = await _lotRepository.GetAllAsync(page, pageSize);
 
                 return new ApiResponse
                 {
@@ -90,8 +116,11 @@ namespace Warehouse_Management.Services.Service
                     StatusCode = HttpStatusCode.OK,
                     Result = new
                     {
-                        TotalCount = totalCount,
-                        Lots = _mapper.Map<IEnumerable<LotDTO>>(lots)
+                        TotalCount = pagedLots.TotalCount,
+                        PageSize = pagedLots.PageSize,
+                        CurrentPage = pagedLots.CurrentPage,
+                        TotalPages = pagedLots.TotalPages,
+                        Lots = _mapper.Map<IEnumerable<LotDTO>>(pagedLots)
                     }
                 };
             }
@@ -105,14 +134,99 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var lot = await _lotRepository.GetByIdAsync(id)
-                    ?? throw new KeyNotFoundException($"Không tìm thấy lô hàng với ID {id}.");
+                var lot = await _lotRepository.GetByIdAsync(id);
+
+                if (lot == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Lot with ID {id} not found." }
+                    };
+                }
 
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
                     Result = _mapper.Map<LotDTO>(lot)
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
+        public async Task<ApiResponse> UpdateLotAsync(int id, UpdateLotDTO dto)
+        {
+            try
+            {
+                var lot = await _lotRepository.GetByIdAsync(id);
+                
+                if (lot == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Lot with ID {id} not found." }
+                    };
+                }
+                var productExists = await _productRepository.GetProductByIdAsync(dto.ProductId);
+                if (productExists == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"Product with ID {dto.ProductId} doesn't exist." }
+                    };
+                }
+
+                // Kiểm tra kệ hàng có tồn tại không
+                var shelfExists = await _shelfRepository.GetByIdAsync(dto.ShelfId);
+                if (shelfExists == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"Shelf with ID {dto.ShelfId} doesn't exist." }
+                    };
+                }
+                if (lot.Quantity + dto.Quantity < 0)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "The lot quantity cannot be less than 0." }
+                    };
+                }
+
+                lot.Quantity = dto.Quantity;
+                lot.ProductId = dto.ProductId;
+                lot.ShelfId = dto.ShelfId;
+                lot.LotCode = dto.LotCode;
+                lot.UpdateAt = DateTime.Now;
+                await _lotRepository.UpdateAsync(lot);
+                await _lotRepository.SaveChangesAsync();
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = new
+                    {
+                        Message = "Updated lot successfully",
+                        LotID = lot.LotId,
+                        productId = lot.ProductId,
+                        shelfId = lot.ShelfId,
+                        lotCode = lot.LotCode,
+                        Quantity = lot.Quantity
+                    }
                 };
             }
             catch (Exception ex)
@@ -125,9 +239,17 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var lot = await _lotRepository.GetByIdAsync(id)
-                    ?? throw new KeyNotFoundException($"No shipment found with ID {id}.");
+                var lot = await _lotRepository.GetByIdAsync(id);
 
+                if (lot == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = new List<string> { $"Lot with ID {id} not found." }
+                    };
+                }
                 if (lot.Quantity + quantityChange < 0)
                 {
                     return new ApiResponse
@@ -138,7 +260,7 @@ namespace Warehouse_Management.Services.Service
                     };
                 }
 
-                lot.Quantity += quantityChange;
+                lot.Quantity = quantityChange;
                 await _lotRepository.UpdateAsync(lot);
                 await _lotRepository.SaveChangesAsync();
 
@@ -146,7 +268,12 @@ namespace Warehouse_Management.Services.Service
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
-                    Result = _mapper.Map<LotDTO>(lot)
+                    Result = new
+                    {
+                        Message = "Updated quantity successfully",
+                        LotID = lot.LotId,
+                        Quantity = lot.Quantity
+                    }
                 };
             }
             catch (Exception ex)
@@ -157,13 +284,13 @@ namespace Warehouse_Management.Services.Service
 
         private async Task<ApiResponse> HandleExceptionAsync(Exception ex)
         {
-            _logger.LogError(ex, "Lỗi xảy ra trong LotService");
+            _logger.LogError(ex, "Error in LotService");
 
             return new ApiResponse
             {
                 IsSuccess = false,
                 StatusCode = HttpStatusCode.InternalServerError,
-                ErrorMessages = { "Đã xảy ra lỗi không mong muốn." }
+                ErrorMessages = { "Unexpected error." }
             };
         }
     }

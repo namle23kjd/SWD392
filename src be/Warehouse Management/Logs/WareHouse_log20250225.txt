@@ -1,0 +1,84 @@
+2025-02-25 10:07:37.762 +07:00 [INF] User profile is available. Using 'C:\Users\PC-PHUONG NAM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-02-25 10:07:37.978 +07:00 [INF] Now listening on: https://localhost:7190
+2025-02-25 10:07:37.979 +07:00 [INF] Now listening on: http://localhost:5299
+2025-02-25 10:07:37.982 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-02-25 10:07:37.983 +07:00 [INF] Hosting environment: Development
+2025-02-25 10:07:37.984 +07:00 [INF] Content root path: C:\Users\PC-PHUONG NAM\source\repos\SWD392\src be\Warehouse Management
+2025-02-25 10:07:38.702 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/index.html - null null
+2025-02-25 10:07:38.941 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/index.html - 200 null text/html;charset=utf-8 246.4992ms
+2025-02-25 10:07:40.299 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/_vs/browserLink - null null
+2025-02-25 10:07:40.299 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/index.js - null null
+2025-02-25 10:07:40.299 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/_framework/aspnetcore-browser-refresh.js - null null
+2025-02-25 10:07:40.314 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/index.js - 200 null application/javascript;charset=utf-8 13.9525ms
+2025-02-25 10:07:40.330 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/_framework/aspnetcore-browser-refresh.js - 200 13776 application/javascript; charset=utf-8 31.1457ms
+2025-02-25 10:07:40.346 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/_vs/browserLink - 200 null text/javascript; charset=UTF-8 46.5626ms
+2025-02-25 10:07:40.496 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/v1/swagger.json - null null
+2025-02-25 10:07:40.677 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 181.1014ms
+2025-02-25 10:07:55.192 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/api/Product/sku?sku=Sua - null null
+2025-02-25 10:07:55.253 +07:00 [INF] Executing endpoint 'Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management)'
+2025-02-25 10:07:55.277 +07:00 [INF] Route matched with {action = "SearchProducts", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SearchProducts(System.String, System.String, System.String) on controller Warehouse_Management.Controllers.ProductController (Warehouse Management).
+2025-02-25 10:07:55.994 +07:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-25 10:07:55.996 +07:00 [WRN] No store type was specified for the decimal property 'UnitPrice' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-25 10:07:55.997 +07:00 [WRN] No store type was specified for the decimal property 'BasePrice' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-25 10:07:56.594 +07:00 [INF] Executed DbCommand (41ms) [Parameters=[@__sku_0_contains='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[ProductId], [p].[Barcode], [p].[BasePrice], [p].[CreatedAt], [p].[Description], [p].[ProductName], [p].[SKU], [p].[UpdatedAt], [p].[UserId]
+FROM [Products] AS [p]
+WHERE [p].[SKU] LIKE @__sku_0_contains ESCAPE N'\'
+2025-02-25 10:07:56.618 +07:00 [INF] Executing ObjectResult, writing value of type 'Warehouse_Management.Helpers.ApiResponse'.
+2025-02-25 10:07:56.643 +07:00 [INF] Executed action Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management) in 1360.0598ms
+2025-02-25 10:07:56.646 +07:00 [INF] Executed endpoint 'Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management)'
+2025-02-25 10:07:56.653 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/api/Product/sku?sku=Sua - 404 null application/json; charset=utf-8 1460.8366ms
+2025-02-25 10:08:08.122 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/api/Product/sku?sku=Milk - null null
+2025-02-25 10:08:08.127 +07:00 [INF] Executing endpoint 'Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management)'
+2025-02-25 10:08:08.128 +07:00 [INF] Route matched with {action = "SearchProducts", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SearchProducts(System.String, System.String, System.String) on controller Warehouse_Management.Controllers.ProductController (Warehouse Management).
+2025-02-25 10:08:08.151 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[@__sku_0_contains='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[ProductId], [p].[Barcode], [p].[BasePrice], [p].[CreatedAt], [p].[Description], [p].[ProductName], [p].[SKU], [p].[UpdatedAt], [p].[UserId]
+FROM [Products] AS [p]
+WHERE [p].[SKU] LIKE @__sku_0_contains ESCAPE N'\'
+2025-02-25 10:08:08.274 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[@__userIds_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Discriminator], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName], [a].[Status]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[Id] IN (
+    SELECT [u].[value]
+    FROM OPENJSON(@__userIds_0) WITH ([value] nvarchar(450) '$') AS [u]
+)
+2025-02-25 10:08:08.327 +07:00 [INF] Executing ObjectResult, writing value of type 'Warehouse_Management.Helpers.ApiResponse'.
+2025-02-25 10:08:08.342 +07:00 [INF] Executed action Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management) in 211.5002ms
+2025-02-25 10:08:08.345 +07:00 [INF] Executed endpoint 'Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management)'
+2025-02-25 10:08:08.346 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/api/Product/sku?sku=Milk - 200 null application/json; charset=utf-8 225.058ms
+2025-02-25 10:08:47.340 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/api/Product/sku?sku=M - null null
+2025-02-25 10:08:47.348 +07:00 [INF] Executing endpoint 'Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management)'
+2025-02-25 10:08:47.350 +07:00 [INF] Route matched with {action = "SearchProducts", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SearchProducts(System.String, System.String, System.String) on controller Warehouse_Management.Controllers.ProductController (Warehouse Management).
+2025-02-25 10:08:47.403 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[@__sku_0_contains='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[ProductId], [p].[Barcode], [p].[BasePrice], [p].[CreatedAt], [p].[Description], [p].[ProductName], [p].[SKU], [p].[UpdatedAt], [p].[UserId]
+FROM [Products] AS [p]
+WHERE [p].[SKU] LIKE @__sku_0_contains ESCAPE N'\'
+2025-02-25 10:08:47.409 +07:00 [INF] Executed DbCommand (3ms) [Parameters=[@__userIds_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Discriminator], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName], [a].[Status]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[Id] IN (
+    SELECT [u].[value]
+    FROM OPENJSON(@__userIds_0) WITH ([value] nvarchar(450) '$') AS [u]
+)
+2025-02-25 10:08:47.413 +07:00 [INF] Executing ObjectResult, writing value of type 'Warehouse_Management.Helpers.ApiResponse'.
+2025-02-25 10:08:47.414 +07:00 [INF] Executed action Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management) in 62.1162ms
+2025-02-25 10:08:47.416 +07:00 [INF] Executed endpoint 'Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management)'
+2025-02-25 10:08:47.417 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/api/Product/sku?sku=M - 200 null application/json; charset=utf-8 77.3583ms
+2025-02-25 10:09:01.360 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/api/Product/sku?sku=i - null null
+2025-02-25 10:09:01.363 +07:00 [INF] Executing endpoint 'Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management)'
+2025-02-25 10:09:01.365 +07:00 [INF] Route matched with {action = "SearchProducts", controller = "Product"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SearchProducts(System.String, System.String, System.String) on controller Warehouse_Management.Controllers.ProductController (Warehouse Management).
+2025-02-25 10:09:01.371 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[@__sku_0_contains='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [p].[ProductId], [p].[Barcode], [p].[BasePrice], [p].[CreatedAt], [p].[Description], [p].[ProductName], [p].[SKU], [p].[UpdatedAt], [p].[UserId]
+FROM [Products] AS [p]
+WHERE [p].[SKU] LIKE @__sku_0_contains ESCAPE N'\'
+2025-02-25 10:09:01.379 +07:00 [INF] Executed DbCommand (1ms) [Parameters=[@__userIds_0='?' (Size = 4000)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Discriminator], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName], [a].[Status]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[Id] IN (
+    SELECT [u].[value]
+    FROM OPENJSON(@__userIds_0) WITH ([value] nvarchar(450) '$') AS [u]
+)
+2025-02-25 10:09:01.382 +07:00 [INF] Executing ObjectResult, writing value of type 'Warehouse_Management.Helpers.ApiResponse'.
+2025-02-25 10:09:01.383 +07:00 [INF] Executed action Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management) in 16.6959ms
+2025-02-25 10:09:01.385 +07:00 [INF] Executed endpoint 'Warehouse_Management.Controllers.ProductController.SearchProducts (Warehouse Management)'
+2025-02-25 10:09:01.386 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/api/Product/sku?sku=i - 200 null application/json; charset=utf-8 26.698ms

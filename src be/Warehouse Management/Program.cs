@@ -10,8 +10,10 @@ using Warehouse_Management.Middlewares;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Repositories.IRepository;
 using Warehouse_Management.Repositories.Repository;
+using Warehouse_Management.Seeder;
 using Warehouse_Management.Services.IService;
 using Warehouse_Management.Services.Service;
+using Warehouse_Management.Seeder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,6 +129,18 @@ builder.Services.AddScoped<IExceptionHandler, NotFoundExceptionHandler>();
 builder.Services.AddScoped<IExceptionHandler, InternalServerErrorHandler>();
 builder.Services.AddScoped<IExceptionHandler, UnauthorizedExceptionHandler>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -139,10 +153,22 @@ app.UseMiddleware<GlobalExceptionHandler>();
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAllOrigins");
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<WareHouseDbContext>();
+    var log = scope.ServiceProvider.GetRequiredService<ILogger<DbSeeder>>();
+
+    // Apply migrations and seed data
+    DbSeeder.SeedData(dbContext, log);
+}
+
 
 app.Run();
