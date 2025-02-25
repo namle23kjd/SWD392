@@ -26,23 +26,7 @@ namespace Warehouse_Management.Services.Service
             _exceptionhandlers = exceptionHandlers;
             _userManager = userManager;
         }
-        public async Task<ApiResponse> GetAllProductsAsync()
-        {
-            try
-            {
-                var products = await _productRepository.GetALlProductsAsync();
-                return new ApiResponse
-                {
-                    IsSuccess = true,
-                    StatusCode = HttpStatusCode.OK,
-                    Result = _mapper.Map<IEnumerable<ProductDTO>>(products)
-                };
-            }
-            catch (Exception ex)
-            {
-                return await HandleExceptionAsync(ex);
-            }
-        }
+
 
         public async Task<ApiResponse> GetProductByIdAsync(int id)
         {
@@ -235,6 +219,32 @@ namespace Warehouse_Management.Services.Service
                 StatusCode = HttpStatusCode.InternalServerError,
                 ErrorMessages = { ex.Message }
             };
+        }
+
+        public async Task<ApiResponse> GetAllProductsAsync(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var pagedProducts = await _productRepository.GetALlProductsAsync(pageNumber, pageSize);
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = new
+                    {
+                        TotalCount = pagedProducts.TotalCount,
+                        PageSize = pagedProducts.PageSize,
+                        CurrentPage = pagedProducts.CurrentPage,
+                        TotalPages = pagedProducts.TotalPages,
+                        Products = _mapper.Map<IEnumerable<ProductDTO>>(pagedProducts)
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
         }
     }
 }
