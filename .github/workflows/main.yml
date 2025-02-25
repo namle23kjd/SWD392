@@ -1,0 +1,30 @@
+name: swd-api
+
+on:
+  pull_request:
+    branches: 
+    - main
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎 Checkout
+        uses: actions/checkout@v4.2.2
+        
+      - name: ⚙️ Setup .NET Core SDK
+        uses: actions/setup-dotnet@v4.3.0
+        with:
+          dotnet-version: 8.0.x
+          
+      - name: 📦 Restore dependencies
+        run: |
+          cd "src be"
+          dotnet restore "Warehouse Management.sln"
+      
+      - name: 🏗 Build
+        run: |
+          cd "src be"
+          dotnet build "Warehouse Management.sln" --no-restore
