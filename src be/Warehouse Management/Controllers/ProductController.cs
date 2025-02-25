@@ -24,9 +24,9 @@ namespace Warehouse_Management.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts([FromQuery] int pageName = 1, [FromQuery] int pageSize = 10)
         {
-            var products = await _productService.GetAllProductsAsync();
+            var products = await _productService.GetAllProductsAsync(pageName,pageSize);
             return StatusCode((int)products.StatusCode, products);
         }
 

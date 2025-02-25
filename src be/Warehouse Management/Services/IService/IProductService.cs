@@ -5,7 +5,7 @@ namespace Warehouse_Management.Services.IService
 {
     public interface IProductService
     {
-        Task<ApiResponse> GetAllProductsAsync();
+        Task<ApiResponse> GetAllProductsAsync(int pageNumber, int pageSize);
         Task<ApiResponse> GetProductByIdAsync(int id);
         Task<ApiResponse> SearchProductsAsync(string? sku, string? barcode, string? name);
         Task<ApiResponse> CreateProductAsync(CreateProductDTO productDto, string userId);

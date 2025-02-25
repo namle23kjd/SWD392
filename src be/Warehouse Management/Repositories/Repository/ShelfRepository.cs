@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using Warehouse_Management.Data;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Repositories.IRepository;
@@ -19,7 +20,7 @@ namespace Warehouse_Management.Repositories.Repository
 
         public async Task<(IEnumerable<Shelf> shelves, int totalCount)> GetAllAsync(int page, int pageSize)
         {
-            var query = _db.Shelves.AsQueryable();
+            var query = _db.Shelves.Include(s => s.User).AsQueryable();
 
             // Tính tổng số bản ghi
             int totalCount = await query.CountAsync();
@@ -57,6 +58,11 @@ namespace Warehouse_Management.Repositories.Repository
         public async Task UpdateAsync(Shelf shelf)
         {
             _db.Shelves.Update(shelf);
+        }
+        public async Task DeleteAsync(Shelf shelf)
+        {
+            _db.Shelves.Remove(shelf);
+            await _db.SaveChangesAsync();
         }
     }
 }

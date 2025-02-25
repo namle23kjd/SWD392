@@ -1,10 +1,11 @@
-﻿using Warehouse_Management.Models.Domain;
+﻿using Warehouse_Management.Helpers;
+using Warehouse_Management.Models.Domain;
 
 namespace Warehouse_Management.Repositories.IRepository
 {
     public interface IProductRepository
     {
-        Task<IEnumerable<Product>> GetALlProductsAsync();
+        Task<PagedList<Product>> GetALlProductsAsync(int pageNumber, int pageSize);
         Task<Product?> GetProductByIdAsync(int id);
 
         Task<IEnumerable<Product>> SearchProductAsync(string? sku, string? barcode, string? name);

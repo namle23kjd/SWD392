@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Warehouse_Management.Data;
+using Warehouse_Management.Helpers;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Repositories.IRepository;
 
@@ -22,8 +23,11 @@ namespace Warehouse_Management.Repositories.Repository
             await _db.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetALlProductsAsync()
-        => await _db.Products.ToListAsync();
+        public async Task<PagedList<Product>> GetALlProductsAsync(int pageNumber, int pageSize)
+        {
+            var query = _db.Products.Include(p => p.User).AsQueryable();
+            return await PagedList<Product>.CreateAsync(query, pageNumber, pageSize);
+        }
 
         public async Task<Product?> GetProductByIdAsync(int id)
         => await _db.Products.FirstOrDefaultAsync(p => p.ProductId == id);
