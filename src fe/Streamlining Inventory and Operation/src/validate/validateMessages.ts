@@ -15,5 +15,6 @@ export const VALIDATE_MESSAGES = {
   },
   number: {
     range: '${label} must be between ${min} and ${max}',
-  },
+  }
+
 };

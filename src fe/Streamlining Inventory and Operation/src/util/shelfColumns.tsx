@@ -1,6 +1,6 @@
 // src/columns/shelfColumns.ts
 
-import { Button, InputNumber, Space, TableProps, Tag } from 'antd';
+import { Button, InputNumber, Space, TableColumnsType, TableProps, Tag } from 'antd';
 import { Shelf } from '../pages/Shelfs';
 import {
   DeleteOutlined,
@@ -11,23 +11,34 @@ import {
 
 export const shelfColumns = (
   handleEdit: (record: Shelf) => void,
-  handleDelete: (record: Shelf) => void,
+  handleSelectedDelete: (record: Shelf) => void,
   handleView: (record: Shelf) => void,
-): TableProps<Shelf>['columns'] => [
+): TableColumnsType<Shelf>  => [
   {
     title: 'Id',
-    dataIndex: 'id',
-    key: 'id',
-  },
+    dataIndex: 'shelfId',
+    key: 'shelfId',
+    fixed: 'left',
+  }
+  ,
   {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
+    title: 'Create By',
+    dataIndex: 'userName',
+    key: 'userName',
+    fixed: 'left',
+    render: (text) => <div className="text-blue-600">{text}</div>,
   },
   {
     title: 'Code',
     dataIndex: 'code',
     key: 'code',
+    fixed: 'left',
+  },
+  {
+    title: 'Name',
+    dataIndex: 'name',
+    key: 'name',
+    
   },
   {
     title: 'Location',
@@ -51,19 +62,20 @@ export const shelfColumns = (
   },
   {
     title: 'Create At',
-    dataIndex: 'createAt',
+    dataIndex: 'createdAt',
     key: 'createAt',
-    render: (text) => <div className="text-red">{text}</div>,
+    render: (text) => <div className="text-green-700">{text}</div>,
   },
   {
     title: 'Update At',
-    dataIndex: 'updateAt',
+    dataIndex: 'updatedAt',
     key: 'updateAt',
     render: (text) => <div className="text-red">{text}</div>,
   },
   {
     title: 'Action',
     key: 'action',
+    fixed: 'right',
     render: (_, record: Shelf) => (
       <Space size="middle">
         <EditOutlined
@@ -71,7 +83,7 @@ export const shelfColumns = (
           style={{ fontSize: 18, color: '#1890ff', cursor: 'pointer' }}
         />
         <DeleteOutlined
-          onClick={() => handleDelete(record)}
+          onClick={() => handleSelectedDelete(record)}
           style={{ fontSize: 18, color: '#ff4d4f', cursor: 'pointer' }}
         />
         <ZoomInOutlined

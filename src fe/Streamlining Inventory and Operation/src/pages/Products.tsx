@@ -3,7 +3,6 @@ import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import {
   Button,
   Collapse,
-  DatePicker,
   Form,
   Input,
   InputNumber,
@@ -14,9 +13,19 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { LAYOUT_LOT, VALIDATE_MESSAGES } from '../validate/validateMessages';
 import { productColumns } from '../util/productColumns';
+import {
+  createProducts,
+  deleteProducts,
+  getProducts,
+  updateProducts,
+} from '../services/productApi';
+import { useStyle } from '../css/useStyle';
+import DeleteModal from '../components/ModalDelete';
+import { getAllShelfs } from '../services/shelfApi';
+import { getAllLots } from '../services/lotApi';
 
 export interface Product {
-  id: number;
+  productId: number;
   sku: string;
   barcode: string;
   name: string;
@@ -38,103 +47,137 @@ const Products = () => {
   const [shelfIds, setShelfIds] = useState<number[]>([]);
   const [lotIds, setLotIds] = useState<number[]>([]);
   const dateFormat = 'DD-MM-YYYY';
+  const { styles } = useStyle();
+  const [pagination, setPagination] = useState({
+    pageNumber: 1,
+    pageSize: 3,
+    total: 0,
+  });
+  const [openModalDelete, setModalDelete] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProductDelete, setSelectedProductDelete] =
+    useState<Product | null>(null);
+  const [shelfs, setShelfs] = useState<any[]>([]);
+  const [lots, setLots] = useState<any[]>([]);
+  const fetchProducts = async (pageNumber: number, pageSize: number) => {
+    try {
+      const response = await getProducts(pageNumber, pageSize);
+      console.log('response', response.data);
+
+      setProducts(response.data.result.products);
+      setPagination({
+        pageNumber: response.data.result.currentPage,
+        pageSize: response.data.result.pageSize,
+        total: response.data.result.totalCount,
+      });
+    } catch (error) {
+      toast.error('Failed to fetch products');
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    fetchProducts(pagination.pageNumber, pagination.pageSize);
+    const fetchShelfs = async () => {
       try {
-        const fetchProducts: Product[] = [
-          {
-            id: 1,
-            sku: 'P001',
-            barcode: '1234567890123',
-            name: 'Product A',
-            description: 'This is product A description.',
-            basePrice: 100.0,
-            createAt: new Date().toISOString(),
-            updateAt: new Date().toISOString(),
-            createById: 'Admin',
-          },
-          {
-            id: 2,
-            sku: 'P002',
-            barcode: '1234567890124',
-            name: 'Product B',
-            description: 'This is product B description.',
-            basePrice: 150.0,
-            createAt: new Date().toISOString(),
-            updateAt: new Date().toISOString(),
-            createById: 'Admin',
-          },
-          {
-            id: 3,
-            sku: 'P003',
-            barcode: '1234567890125',
-            name: 'Product C',
-            description: 'This is product C description.',
-            basePrice: 200.0,
-            createAt: new Date().toISOString(),
-            updateAt: new Date().toISOString(),
-            createById: 'Admin',
-          },
-          {
-            id: 4,
-            sku: 'P004',
-            barcode: '1234567890126',
-            name: 'Product D',
-            description: 'This is product D description.',
-            basePrice: 250.0,
-            createAt: new Date().toISOString(),
-            updateAt: new Date().toISOString(),
-            createById: 'Admin',
-          },
-        ];
-        console.log('fecthlots', fetchProducts);
-        setProducts(fetchProducts);
-      } catch (error) {
-        toast.error('Failed to fetch lots');
-      }
-    };
-    const fetchShelfIds = async () => {
-      try {
-        const fetchShelfIds: number[] = [1, 2, 3, 4]; // Replace with actual API call
-        setShelfIds(fetchShelfIds);
+        const response = await getAllShelfs();
+        setShelfs(response.data.result.items);
       } catch (error) {
         toast.error('Failed to fetch shelf IDs');
       }
     };
-    const fetchLotIds = async () => {
+    const fetchLots = async () => {
       try {
-        const fetchLotIds: number[] = [12, 43, 2, 12]; // Replace with actual API call
-        setLotIds(fetchLotIds);
+        const response = await getAllLots();
+        setLots(response.data.result.lots);
       } catch (error) {
         toast.error('Failed to fetch product IDs');
       }
     };
-
-    fetchShelfIds();
-    fetchLotIds();
-    fetchProducts();
+    fetchShelfs();
+    fetchLots();
   }, []);
+
+  const handleTalbeChange = (pagination: any) => {
+    console.log('pagination', pagination);
+
+    fetchProducts(pagination.current, pagination.pageSize);
+  };
 
   const handleSearch = (record: any) => {
     setSearchLoading(true);
-    console.log('search Lot', record);
+    console.log('search Product', record);
     setSearchLoading(false);
   };
+
   const handleEdit = (record: Product) => {
-    console.log('edit Lot', record);
-  };
-  const handleDelete = (record: Product) => {
-    console.log('delete Lot', record);
-  };
-  const handleView = (record: Product) => {
-    console.log('view Lot', record);
+    setSelectedProduct(record);
+    setOpenModal(true);
+    console.log('edit Product', record);
   };
 
-  const onFinish = (values: any) => {
-    console.log(values);
-    setOpenModal(false);
+  const handleSelectedDelete = (record: Product) => {
+    setSelectedProductDelete(record);
+    setModalDelete(true);
   };
+
+  const handleDelete = async () => {
+    if (selectedProductDelete) {
+      try {
+        const response = await deleteProducts(selectedProductDelete.productId);
+        console.log(response);
+        setProducts(
+          products.filter(
+            (product) => product.productId !== selectedProductDelete.productId,
+          ),
+        );
+        toast.success('Delete Product success');
+      } catch (error) {
+        console.log(error);
+        toast.error('Delete Product failed');
+      }
+    }
+    setModalDelete(false);
+  };
+
+  const handleView = (record: Product) => {
+    console.log('view Product', record);
+  };
+
+  const onFinish = async (values: any) => {
+    console.log('value', values);
+    try {
+      if (selectedProduct) {
+        const response = await updateProducts(
+          selectedProduct.productId,
+          values,
+        );
+        console.log(response);
+        toast.success('Update Product success');
+        setProducts(
+          products.map((product) =>
+            product.productId === selectedProduct.productId
+              ? response.data.result
+              : product,
+          ),
+        );
+      } else {
+        const response = await createProducts(values);
+        console.log(response);
+        toast.success('Create Product success');
+        setProducts([...products, response.data.result]);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        selectedProduct ? 'Update Product failed' : 'Create Product failed',
+      );
+    }
+    setOpenModal(false);
+    setIsEditMode(false);
+    setSelectedProduct(null);
+  };
+
   const toggleCollapse = () => {
     console.log('activeKey', activeKey);
     console.log('activeKey', activeKey.length);
@@ -173,7 +216,7 @@ const Products = () => {
                 <Input />
               </Form.Item>
               <Form.Item
-                name={['name']}
+                name={['productName']}
                 label="Product Name"
                 rules={[{ required: true }]}
               >
@@ -199,9 +242,9 @@ const Products = () => {
                 rules={[{ required: true }]}
               >
                 <Select>
-                  {shelfIds.map((id) => (
-                    <Select.Option key={id} value={id}>
-                      {id}
+                  {shelfs.map((item) => (
+                    <Select.Option key={item.shelfId} value={item.shelfId}>
+                      {item.shelfId}
                     </Select.Option>
                   ))}
                 </Select>
@@ -212,9 +255,9 @@ const Products = () => {
                 rules={[{ required: true }]}
               >
                 <Select>
-                  {lotIds.map((id) => (
-                    <Select.Option key={id} value={id}>
-                      {id}
+                  {lots.map((item) => (
+                    <Select.Option key={item.lotId} value={item.lotId}>
+                      {item.lotId}
                     </Select.Option>
                   ))}
                 </Select>
@@ -255,11 +298,108 @@ const Products = () => {
           style={{ width: '50%' }}
         />
       </div>
-      <Table
-        rowKey="id"
-        pagination={{ pageSize: 2 }}
-        columns={productColumns(handleEdit, handleDelete, handleView)}
+      <Table<Product>
+        className={styles.customTable}
+        rowKey="productId"
+        pagination={{
+          current: pagination.pageNumber,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+        }}
+        onChange={handleTalbeChange}
+        columns={productColumns(handleEdit, handleSelectedDelete, handleView)}
         dataSource={products}
+        scroll={{ x: 'max-content' }}
+      />
+      {openModal && (
+        <div className="fixed z-999 inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-8 rounded-md w-1/3">
+            <h2 className="text-center text-2xl font-bold mb-8">
+              Edit Product
+            </h2>
+            <Form
+              {...LAYOUT_LOT}
+              name="products"
+              onFinish={onFinish}
+              style={{ maxWidth: 600 }}
+              validateMessages={VALIDATE_MESSAGES}
+              initialValues={selectedProduct || undefined}
+            >
+              <Form.Item
+                name={['sku']}
+                label="SKU"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name={['barcode']}
+                label="BarCode"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name={['productName']}
+                label="Product Name"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name={['description']}
+                label="Description"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name={['basePrice']}
+                label="Base Price"
+                rules={[{ required: true }]}
+              >
+                <InputNumber min={0} step={0.01} />
+              </Form.Item>
+              <div className="flex justify-center">
+                <Form.Item label={null}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{
+                      backgroundColor: '#1890ff',
+                      borderColor: '#1890ff',
+                      color: '#fff',
+                      marginRight: '20px',
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </Form.Item>
+                <Form.Item label={null}>
+                  <Button
+                    type="primary"
+                    onClick={() => setOpenModal(false)}
+                    style={{
+                      backgroundColor: 'red',
+                      borderColor: 'red',
+                      color: '#fff',
+                    }}
+                    htmlType="button"
+                  >
+                    Close
+                  </Button>
+                </Form.Item>
+              </div>
+            </Form>
+          </div>
+        </div>
+      )}
+      <DeleteModal
+        open={openModalDelete}
+        onClose={() => setModalDelete(false)}
+        onDelete={handleDelete}
+        selected={selectedProductDelete}
+        type="Product"
       />
     </>
   );

@@ -1,5 +1,5 @@
 // src/columns/shelfColumns.ts
-import { Space, TableProps, Tag } from 'antd';
+import { Space, TableColumnsType, TableProps, Tag } from 'antd';
 import {
   DeleteOutlined,
   EditOutlined,
@@ -9,28 +9,31 @@ import { Product } from '../pages/Products';
 
 export const productColumns = (
   handleEdit: (record: Product) => void,
-  handleDelete: (record: Product) => void,
+  handleSelectedDelete: (record: Product) => void,
   handleView: (record: Product) => void,
-): TableProps<Product>['columns'] => [
+): TableColumnsType<Product> => [
   {
     title: 'Product Id',
-    dataIndex: 'id',
-    key: 'id',
+    dataIndex: 'productId',
+    key: 'productId',
     render: (text) => <a>{text}</a>,
+    fixed: 'left',
   },
   {
     title: 'SKU',
     dataIndex: 'sku',
     key: 'sku',
+    fixed: 'left',
   },
   {
     title: 'BarCode',
     dataIndex: 'barcode',
     key: 'barCode',
+    fixed: 'left',
   },
   {
     title: 'Name',
-    dataIndex: 'name',
+    dataIndex: 'productName',
     key: 'name',
   },
   {
@@ -45,25 +48,26 @@ export const productColumns = (
   },
   {
     title: 'Create At',
-    dataIndex: 'createAt',
-    key: 'createAt',
+    dataIndex: 'createdAt',
+    key: 'createdAt',
     render: (text) => <div className="text-green-700">{text}</div>,
   },
   {
     title: 'Update At',
-    dataIndex: 'updateAt',
-    key: 'updateAt',
+    dataIndex: 'updatedAt',
+    key: 'updatedAt',
     render: (text) => <div className="text-red">{text}</div>,
   },
   {
-    title: 'Create By Id',
-    dataIndex: 'createById',
-    key: 'createById',
+    title: 'User Name',
+    dataIndex: 'userName',
+    key: 'userName',
     render: (text) => <div className="text-blue-600">{text}</div>,
   },
   {
     title: 'Action',
     key: 'action',
+    fixed: 'right',
     render: (_, record: Product) => (
       <Space size="middle">
         <EditOutlined
@@ -71,7 +75,7 @@ export const productColumns = (
           style={{ fontSize: 18, color: '#1890ff', cursor: 'pointer' }}
         />
         <DeleteOutlined
-          onClick={() => handleDelete(record)}
+          onClick={() => handleSelectedDelete(record)}
           style={{ fontSize: 18, color: '#ff4d4f', cursor: 'pointer' }}
         />
         <ZoomInOutlined

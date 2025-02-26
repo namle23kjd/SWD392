@@ -10,19 +10,10 @@ import { Lot } from '../pages/Lots';
 
 export const lotColumns = (
   handleEdit: (record: Lot) => void,
-  handleDelete: (record: Lot) => void,
+  handleSelectedDelete: (record: Lot) => void,
   handleView: (record: Lot) => void,
 ): TableColumnsType<Lot> => [
-  {title: 'Id',
-    dataIndex: 'id',
-    key: 'id',
-    fixed: 'left',},
-  {
-    title: 'Lot Code',
-    dataIndex: 'lotCode',
-    key: 'lotCode',
-    fixed: 'left',
-  },
+  { title: 'Id', dataIndex: 'lotId', key: 'lotId', fixed: 'left' },
   {
     title: 'Product Id',
     dataIndex: 'productId',
@@ -36,9 +27,21 @@ export const lotColumns = (
     fixed: 'left',
   },
   {
+    title: 'Create By',
+    dataIndex: 'userName',
+    key: 'userName',
+    fixed: 'left',
+    render: (text) => <div className="text-blue-600">{text}</div>,
+  },
+  {
+    title: 'Lot Code',
+    dataIndex: 'lotCode',
+    key: 'lotCode',
+  },
+  {
     title: 'Manafacture Date',
-    dataIndex: 'manafactureDate',
-    key: 'manafactureDate',
+    dataIndex: 'manufactureDate',
+    key: 'manufactureDate',
     render: (text) => <div className="text-green-800">{text}</div>,
   },
   {
@@ -82,21 +85,15 @@ export const lotColumns = (
   },
   {
     title: 'Create At',
-    dataIndex: 'createAt',
-    key: 'createAt',
+    dataIndex: 'createdAt',
+    key: 'createdAt',
     render: (text) => <div className="text-green">{text}</div>,
   },
   {
     title: 'Update At',
-    dataIndex: 'updateAt',
-    key: 'updateAt',
+    dataIndex: 'updatedAt',
+    key: 'updatedAt',
     render: (text) => <div className="text-yellow-600">{text}</div>,
-  },
-  {
-    title: 'Create By',
-    dataIndex: 'createBy',
-    key: 'createBy',
-    render: (text) => <div className="text-blue-600">{text}</div>,
   },
   {
     title: 'Action',
@@ -109,7 +106,7 @@ export const lotColumns = (
           style={{ fontSize: 18, color: '#1890ff', cursor: 'pointer' }}
         />
         <DeleteOutlined
-          onClick={() => handleDelete(record)}
+          onClick={() => handleSelectedDelete(record)}
           style={{ fontSize: 18, color: '#ff4d4f', cursor: 'pointer' }}
         />
         <ZoomInOutlined
