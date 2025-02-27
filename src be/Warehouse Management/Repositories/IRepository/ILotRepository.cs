@@ -10,5 +10,6 @@ namespace Warehouse_Management.Repositories.IRepository
         Task CreateAsync(Lot lot);
         Task UpdateAsync(Lot lot);
         Task SaveChangesAsync();
+        Task<Lot?> GetByProductIdAsync(int productId);
     }
 }

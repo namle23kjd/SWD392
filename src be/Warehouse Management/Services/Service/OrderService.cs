@@ -5,6 +5,7 @@ using Warehouse_Management.Middlewares;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO.Order;
 using Warehouse_Management.Repositories.IRepository;
+using Warehouse_Management.Repositories.Repository;
 using Warehouse_Management.Services.IService;
 
 namespace Warehouse_Management.Services.Service
@@ -12,25 +13,85 @@ namespace Warehouse_Management.Services.Service
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly ILotRepository _lotRepository;
         private readonly IMapper _mapper;
         private readonly IEnumerable<IExceptionHandler> _exceptionHandlers;
+        private readonly IProductRepository _productRepository;
         private readonly ILogger<OrderService> _logger;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IEnumerable<IExceptionHandler> exceptionHandlers, ILogger<OrderService> logger)
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IEnumerable<IExceptionHandler> exceptionHandlers, ILogger<OrderService> logger, ILotRepository lotRepository, IProductRepository productRepository)
         {
             _exceptionHandlers = exceptionHandlers;
             _mapper = mapper;
             _orderRepository = orderRepository;
             _logger = logger;
+            _lotRepository = lotRepository;
+            _productRepository = productRepository;
         }
 
         public async Task<ApiResponse> CreateOrderAsync(CreateOrderDTO orderDto)
         {
             try
             {
-               
                 var order = _mapper.Map<Order>(orderDto);
                 order.CreatedAt = DateTime.UtcNow;
+                order.OrderStatus = true;
+                decimal totalAmount = 0;
+
+                // 🚀 Đảm bảo OrderItems không bị null
+                order.OrderItems = new List<OrderItem>();
+
+                _logger.LogInformation("🚀 Starting CreateOrderAsync...");
+                Dictionary<int, int> productQuantityCheck = new Dictionary<int, int>();
+
+                _logger.LogInformation("📌 Dictionary initialized successfully.");
+
+                foreach (var itemDto in orderDto.OrderItems)
+                {
+                    var product = await _productRepository.GetProductByIdAsync(itemDto.ProductId);
+                    if (product == null)
+                    {
+                        return new ApiResponse
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.BadRequest,
+                            ErrorMessages = { $"Product ID {itemDto.ProductId} does not exist." }
+                        };
+                    }
+
+                    // 🔹 Lấy giá UnitPrice từ Product
+                    decimal unitPrice = product.BasePrice ?? 0;
+
+                    // 🔹 Kiểm tra tồn kho Lot
+                    var lot = await _lotRepository.GetByProductIdAsync(itemDto.ProductId);
+                    if (lot == null || lot.Quantity < itemDto.Quantity)
+                    {
+                        return new ApiResponse
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.BadRequest,
+                            ErrorMessages = { $"Not enough stock for Product ID {itemDto.ProductId}" }
+                        };
+                    }
+
+                    // 🔹 Trừ kho Lot
+                    lot.Quantity -= itemDto.Quantity;
+                    await _lotRepository.UpdateAsync(lot);
+
+                    // 🔹 Tạo OrderItem và gán UnitPrice
+                    var orderItem = new OrderItem
+                    {
+                        ProductId = itemDto.ProductId,
+                        Quantity = itemDto.Quantity,
+                        UnitPrice = unitPrice // ✅ Gán giá từ Product.BasePrice
+                    };
+
+                    order.OrderItems.Add(orderItem); // ✅ Thêm vào OrderItems của Order
+                    totalAmount += orderItem.Quantity * orderItem.UnitPrice;
+                }
+
+                // 🔹 Gán tổng tiền đơn hàng
+                order.TotalAmount = totalAmount;
 
                 await _orderRepository.AddOrderAsync(order);
                 await _orderRepository.SaveChangesAsync();
@@ -50,18 +111,32 @@ namespace Warehouse_Management.Services.Service
             }
         }
 
+
         public async Task<ApiResponse> DeleteOrderAsync(int id)
         {
             try
             {
                 var order = await _orderRepository.GetOrderByIdAsync(id);
                 if (order == null)
-                    throw new KeyNotFoundException($"Order with ID {id} not found");
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"Order with ID {id} not found" }
+                    };
+                }
 
+                // ✅ Đánh dấu OrderStatus là false thay vì xóa
                 await _orderRepository.DeleteOrderAsync(order);
                 await _orderRepository.SaveChangesAsync();
 
-                return new ApiResponse { IsSuccess = true, StatusCode = HttpStatusCode.NoContent };
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK, // ✅ Trả về 200 OK thay vì 204 NoContent
+                    Result = new { Message = "Order successfully deleted (soft delete)." }
+                };
             }
             catch (Exception ex)
             {
@@ -73,12 +148,22 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var orders = await _orderRepository.GetAllOrdersAsync(pageNumber, pageSize);
+                var pagedOrders = await _orderRepository.GetAllOrdersAsync(pageNumber, pageSize);
+
+                var response = new
+                {
+                    TotalCount = pagedOrders.TotalCount,
+                    PageSize = pagedOrders.PageSize,
+                    CurrentPage = pagedOrders.CurrentPage,
+                    TotalPages = pagedOrders.TotalPages,
+                    Orders = _mapper.Map<IEnumerable<OrderDTO>>(pagedOrders)
+                };
+
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
-                    Result = _mapper.Map<IEnumerable<OrderDTO>>(orders)
+                    Result = response
                 };
             }
             catch (Exception ex)
@@ -148,27 +233,44 @@ namespace Warehouse_Management.Services.Service
                         ErrorMessages = { "Order not found" }
                     };
                 }
-                _mapper.Map(orderDto, order);
 
+                // ✅ Cập nhật trạng thái đơn hàng
+                order.OrderStatus = orderDto.OrderStatus;
+
+                // ✅ Cập nhật số lượng OrderItem
                 foreach (var orderItemDto in orderDto.OrderItems)
                 {
-                    var orderItem = order.OrderItems.FirstOrDefault(x => x.OrderItemId == orderItemDto.OrderItemId);
-                    if (orderItem != null)
+                    var existingItem = order.OrderItems.FirstOrDefault(oi => oi.OrderItemId == orderItemDto.OrderItemId);
+
+                    if (existingItem != null)
                     {
-                        _mapper.Map(orderItemDto, orderItem); // Ánh xạ cập nhật OrderItem
-                    }
-                    else
-                    {
-                        // Nếu không tìm thấy OrderItem trong đơn hàng hiện tại, có thể thêm mới hoặc xử lý tùy theo logic của bạn.
-                        var newOrderItem = _mapper.Map<OrderItem>(orderItemDto);
-                        order.OrderItems.Add(newOrderItem);
+                        // 🔥 Kiểm tra tồn kho Lot
+                        var lot = await _lotRepository.GetByProductIdAsync(existingItem.ProductId);
+                        if (lot == null || lot.Quantity + existingItem.Quantity < orderItemDto.Quantity)
+                        {
+                            return new ApiResponse
+                            {
+                                IsSuccess = false,
+                                StatusCode = HttpStatusCode.BadRequest,
+                                ErrorMessages = { $"Not enough stock for Product ID {existingItem.ProductId}" }
+                            };
+                        }
+
+                        // 🔥 Cập nhật số lượng trong OrderItem
+                        int quantityDiff = orderItemDto.Quantity - existingItem.Quantity;
+                        existingItem.Quantity = orderItemDto.Quantity;
+
+                        // 🔥 Cập nhật tồn kho Lot
+                        lot.Quantity -= quantityDiff;
+                        await _lotRepository.UpdateAsync(lot);
                     }
                 }
 
-                // Lưu các thay đổi vào cơ sở dữ liệu
+                // ✅ Cập nhật tổng tiền đơn hàng
+                order.TotalAmount = order.OrderItems.Sum(item => item.Quantity * item.UnitPrice);
+
                 await _orderRepository.SaveChangesAsync();
 
-                // Trả về dữ liệu đơn hàng đã cập nhật
                 var orderResponse = _mapper.Map<OrderDTO>(order);
                 return new ApiResponse
                 {
