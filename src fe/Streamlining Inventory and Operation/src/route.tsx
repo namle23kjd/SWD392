@@ -56,7 +56,113 @@ export const router = createBrowserRouter([
                             </>
                         )
                     }
-
+                    ,
+                    {
+                        path: 'products',
+                        element: (
+                            <>
+                                <PageTitle title="Product Manage" />
+                                <Products />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'import-product',
+                        element: (
+                            <>
+                                <PageTitle title="Import Product" />
+                                <ImportProduct />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'export-product',
+                        element: (
+                            <>
+                                <PageTitle title="Export Product" />
+                                <ExportProduct />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'confirm-stock-daily',
+                        element: (
+                            <>
+                                <PageTitle title="Confirm Stock Daily" />
+                                <InventoryTracking />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'order-history',
+                        element: (
+                            <>
+                                <PageTitle title="Order History" />
+                                <OrderHistory />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'create-order',
+                        element: (
+                            <>
+                                <PageTitle title="Order History" />
+                                <CreateOrder />
+                            </>
+                        )
+                    }
+                ]
+            }, {
+                path: 'admin',
+                children: [
+                    {
+                        path: 'accounts',
+                        element: (
+                            <>
+                                <PageTitle title="Account List" />
+                                <ListAccount />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'add-account',
+                        element: (
+                            <>
+                                <PageTitle title="Add new Account" />
+                                <AddAccount />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'edit-account/:id',
+                        element: (
+                            <>
+                                <PageTitle title="Edit Account" />
+                                <EditAccount />
+                            </>
+                        )
+                    },
+                ]
+            }, {
+                path: 'manager',
+                children: [
+                    {
+                        path: "shelfs",
+                        element: (
+                            <>
+                                <PageTitle title="Shelfs Manage" />
+                                <Shelfs />
+                            </>
+                        )
+                    }, {
+                        path: "lots",
+                        element: (
+                            <>
+                                <PageTitle title="Lots Manage" />
+                                <Lots />
+                            </>
+                        )
+                    }
                     , {
                         path: 'products',
                         element: (
@@ -129,42 +235,6 @@ export const router = createBrowserRouter([
                             </>
                         )
                     }
-                ]
-            }, {
-                path: 'admin',
-                children: [
-                    {
-                        path: 'accounts',
-                        element: (
-                            <>
-                                <PageTitle title="Account List" />
-                                <ListAccount />
-                            </>
-                        )
-                    },
-                    {
-                        path: 'add-account',
-                        element: (
-                            <>
-                                <PageTitle title="Add new Account" />
-                                <AddAccount />
-                            </>
-                        )
-                    },
-                    {
-                        path: 'edit-account/:id',
-                        element: (
-                            <>
-                                <PageTitle title="Edit Account" />
-                                <EditAccount />
-                            </>
-                        )
-                    },
-                ]
-            }, {
-                path: 'manager',
-                children: [
-
                 ]
             }
             // other roles here...

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { setUserInfoToStorage } from '../../util/auth';
@@ -7,27 +7,25 @@ const SignIn: React.FC = () => {
   const [userInfo, setUserInfo] = useState({
     email: '123',
     password: '123',
-    role: 'admin',
+    roles: ['Staff', 'Admin', 'Manager'],
   })
-  const handleLogin = async (event: React.FormEvent) => {
-    event.preventDefault();
 
+  const handleLogin = async (prevState: any, formData: any) => {
     try {
       if (userInfo) {
         // Kiểm tra thông tin đăng nhập
         if (!userInfo.email || !userInfo.password) {
-          console.log(123)
           toast.error("Please enter both email and password.");
           return;
         }
 
         setUserInfoToStorage(userInfo);
-        if (userInfo.role === 'admin') {
-          navigate("/");
-        } else if (userInfo.role === 'manager') {
-          navigate("/");
-        } else {
-          navigate("/");
+        if (userInfo.roles.includes('Admin')) {
+          navigate("/admin/accounts");
+        } else if (userInfo.roles.includes('Manager')) {
+          navigate("/manager/reports");
+        } else if (userInfo.roles.includes('Staff')) {
+          navigate("/staff/products")
         }
 
         toast.success("Login successful!");
@@ -38,6 +36,9 @@ const SignIn: React.FC = () => {
       toast.error("Login failed: Incorrect credentials.");
     }
   };
+
+  const [formState, formAction, pending] = useActionState(handleLogin, undefined);
+
   return (
     <div className='flex justify-center items-center h-screen'>
       <div className="w-2/5 m-auto rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -49,7 +50,7 @@ const SignIn: React.FC = () => {
                 Sign In to WareEase
               </h2>
 
-              <form onSubmit={handleLogin}>
+              <form action={formAction}>
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Email
