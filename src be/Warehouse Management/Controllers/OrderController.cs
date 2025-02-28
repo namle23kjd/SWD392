@@ -74,5 +74,20 @@ namespace Warehouse_Management.Controllers
             var response = await _orderService.DeleteOrderAsync(id);
             return StatusCode((int)response.StatusCode, response);
         }
+
+
+        /// <summary>
+        /// Xóa một sản phẩm trong đơn hàng
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <param name="orderItemId"></param>
+        /// <returns></returns>
+        [HttpDelete("{orderId}/items/{orderItemId}")]
+        public async Task<IActionResult> DeleteOrderItem(int orderId, int orderItemId)
+        {
+            var response = await _orderService.DeleteOrderItemAsync(orderId, orderItemId);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
     }
 }

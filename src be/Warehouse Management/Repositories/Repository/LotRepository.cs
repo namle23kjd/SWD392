@@ -47,23 +47,14 @@ namespace Warehouse_Management.Repositories.Repository
                 .Include(l => l.Shelf)// Đảm bảo Load Product
                 .Include(l => l.User) // Load User nếu cần
                 .Where(l => l.ProductId == productId && l.Quantity > 0)
-                .Where(l => l.ProductId == productId && l.Quantity > 0)
                 .OrderBy(l => l.ManufactureDate)
                 .ToListAsync();
 
             if (!lots.Any())
             {
-                _logger.LogWarning($"No lot found for Product ID {productId}");
                 return null;
             }
-
-            var availableLot = lots.FirstOrDefault(l => l.Quantity > 0);
-            if (availableLot == null)
-            {
-                _logger.LogWarning($"No available stock for Product ID {productId}");
-            }
-
-            return availableLot;
+            return lots.FirstOrDefault();
         }
 
         public async Task SaveChangesAsync()

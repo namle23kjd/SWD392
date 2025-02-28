@@ -24,7 +24,7 @@ namespace Warehouse_Management.Services.Service
             _exceptionHandlers = exceptionHandlers;
             _mapper = mapper;
             _orderRepository = orderRepository;
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _lotRepository = lotRepository;
             _productRepository = productRepository;
         }
@@ -58,6 +58,26 @@ namespace Warehouse_Management.Services.Service
                             ErrorMessages = { $"Product ID {itemDto.ProductId} does not exist." }
                         };
                     }
+                    if (itemDto.Quantity <= 0)
+                    {
+                        return new ApiResponse
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.BadRequest,
+                            ErrorMessages = { $"Quantity must be greater than 0 for Product ID {itemDto.ProductId}." }
+                        };
+                    }
+                    var lotProduct = await _lotRepository.GetByProductIdAsync(itemDto.ProductId);
+                    if (lotProduct == null)
+                    {
+                        return new ApiResponse
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.BadRequest,
+                            ErrorMessages = { $"⚠️ Product ID {itemDto.ProductId} is not available in any stock. Please check inventory!" }
+                        };
+                    }
+
 
                     // 🔹 Lấy giá UnitPrice từ Product
                     decimal unitPrice = product.BasePrice ?? 0;
@@ -127,15 +147,91 @@ namespace Warehouse_Management.Services.Service
                     };
                 }
 
-                // ✅ Đánh dấu OrderStatus là false thay vì xóa
-                await _orderRepository.DeleteOrderAsync(order);
+                // ✅ Đánh dấu OrderStatus là false thay vì xóa cứng
+                order.OrderStatus = false;
+
+                // ✅ Hoàn trả số lượng sản phẩm về Lot
+                foreach (var orderItem in order.OrderItems)
+                {
+                    var lot = await _lotRepository.GetByProductIdAsync(orderItem.ProductId);
+                    if (lot != null)
+                    {
+                        // 🔥 Cộng lại số lượng vào Lot
+                        lot.Quantity += orderItem.Quantity;
+                        await _lotRepository.UpdateAsync(lot);
+                    }
+                }
+
                 await _orderRepository.SaveChangesAsync();
 
                 return new ApiResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK, // ✅ Trả về 200 OK thay vì 204 NoContent
-                    Result = new { Message = "Order successfully deleted (soft delete)." }
+                    Result = new { Message = "Order successfully deleted (soft delete). Inventory restored." }
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandlerExceptionAsync(ex);
+            }
+        }
+
+        public async Task<ApiResponse> DeleteOrderItemAsync(int orderId, int orderItemId)
+        {
+            try
+            {
+                var order = await _orderRepository.GetOrderByIdAsync(orderId);
+                if (order == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"Order with ID {orderId} not found" }
+                    };
+                }
+
+                var orderItem = order.OrderItems.FirstOrDefault(oi => oi.OrderItemId == orderItemId);
+                if (orderItem == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        ErrorMessages = { $"OrderItem with ID {orderItemId} not found in Order {orderId}" }
+                    };
+                }
+
+                // ✅ Hoàn trả số lượng về Lot
+                var lot = await _lotRepository.GetByProductIdAsync(orderItem.ProductId);
+                if (lot != null)
+                {
+                    lot.Quantity += orderItem.Quantity;
+                    await _lotRepository.UpdateAsync(lot);
+                }
+
+                // ✅ Xóa OrderItem khỏi Order
+                order.OrderItems.Remove(orderItem);
+
+                // ✅ Nếu Order không còn OrderItem nào, tự động xóa luôn Order
+                if (!order.OrderItems.Any())
+                {
+                    order.OrderStatus = false; // Chuyển trạng thái Order về False
+                }
+                else
+                {
+                    // ✅ Cập nhật lại tổng giá trị đơn hàng
+                    order.TotalAmount = order.OrderItems.Sum(oi => oi.Quantity * oi.UnitPrice);
+                }
+
+                await _orderRepository.SaveChangesAsync();
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.OK,
+                    Result = new { Message = $"OrderItem {orderItemId} deleted from Order {orderId}. Inventory restored." }
                 };
             }
             catch (Exception ex)
@@ -241,6 +337,16 @@ namespace Warehouse_Management.Services.Service
                 foreach (var orderItemDto in orderDto.OrderItems)
                 {
                     var existingItem = order.OrderItems.FirstOrDefault(oi => oi.OrderItemId == orderItemDto.OrderItemId);
+
+                    if(existingItem == null)
+                    {
+                        return new ApiResponse
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.NotFound,
+                            ErrorMessages = { $"OrderItem with ID {orderItemDto.OrderItemId} not found in Order" }
+                        };
+                    }
 
                     if (existingItem != null)
                     {
