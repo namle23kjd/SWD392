@@ -1,24 +1,54 @@
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { setUserInfoToStorage } from '../../util/auth';
+import { loginAction } from '../../fetch/authentication';
+import { validateNonEmptyString, validatePassword } from '../../util/validation';
+import { setAuthToken, setUserInfoToStorage } from '../../util/auth';
+import { DecodedToken, decodeToken } from '../../fetch/axios-instance';
+
+
+
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState({
-    email: '123',
-    password: '123',
-    roles: ['Staff', 'Admin', 'Manager'],
-  })
-
-  const handleLogin = async (prevState: any, formData: any) => {
+  const handleLogin = async (_prevState: any, formData: any): Promise<any> => {
     try {
-      if (userInfo) {
-        // Kiểm tra thông tin đăng nhập
-        if (!userInfo.email || !userInfo.password) {
-          toast.error("Please enter both email and password.");
-          return;
-        }
+      const email = formData.get('email');
+      const password = formData.get('password');
 
+      if (!validateNonEmptyString(email)) {
+        toast.error("Email is required.");
+        return {
+          email, password
+        };
+      }
+
+      if (!validateNonEmptyString(password)) {
+        toast.error("Password is required.");
+        return {
+          email, password
+        };
+      }
+
+      if (!validatePassword(password)) {
+        toast.error("Password must contain at least 6 characters, 1 capital letter, 1 number, and 1 special character.");
+        return {
+          email, password
+        };
+      }
+
+      const response = await loginAction(email, password);
+      if (response?.statusCode === 200) {
+        const decodedToken: DecodedToken | null = decodeToken(response.result.token);
+        console.log(decodedToken);
+        if (!decodedToken) {
+          throw new Error("Failed to decode token.");
+        }
+        const userInfo = {
+          email, password, 
+          roles: decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+          token: response.result.token 
+        }
+        
         setUserInfoToStorage(userInfo);
         if (userInfo.roles.includes('Admin')) {
           navigate("/admin/accounts");
@@ -30,14 +60,24 @@ const SignIn: React.FC = () => {
 
         toast.success("Login successful!");
       } else {
-        toast.error("Login failed: User not found.");
+        toast.error(response[0].toString());
       }
+
+
     } catch (error) {
+      console.log(error);
       toast.error("Login failed: Incorrect credentials.");
+    }
+    return {
+      email: '',
+      password: '',
     }
   };
 
-  const [formState, formAction, pending] = useActionState(handleLogin, undefined);
+  const [formState, formAction, pending] = useActionState(handleLogin, {
+    email: String,
+    password: String,
+  });
 
   return (
     <div className='flex justify-center items-center h-screen'>
@@ -57,6 +97,8 @@ const SignIn: React.FC = () => {
                   </label>
                   <div className="relative">
                     <input
+                      defaultValue={formState?.email}
+                      name='email'
                       type="email"
                       placeholder="Enter your email"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -88,8 +130,10 @@ const SignIn: React.FC = () => {
                   </label>
                   <div className="relative">
                     <input
+                      defaultValue={formState?.password}
+                      name='password'
                       type="password"
-                      placeholder="6+ Characters, 1 Capital letter"
+                      placeholder="Enter your password"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 

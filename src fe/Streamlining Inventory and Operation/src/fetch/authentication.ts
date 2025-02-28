@@ -1,13 +1,15 @@
 import { axiosInstanceJson } from "./axios-instance"
-
-export const loginAction = (username: string, password: string) => {
-    axiosInstanceJson.post('/api/Auth/login', {
+export const loginAction = async (username: string, password: string): Promise<any> => {
+    const data = await axiosInstanceJson.post('/api/Auth/login', {
         username,
         password
     }).then((response) => {
-        console.log(response.data);
+        return response.data
     }
     ).catch((error) => {
-        console.log(error);
+        const errors = error.response.data.errorMessages || error.response.data.errors || []
+        return errors
     })
+
+    return data
 }

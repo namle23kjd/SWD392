@@ -43,14 +43,19 @@ export const setUserInfoToStorage = (userInfo: object) => {
 }
 
 export const getAuthTokenDuration = () => {
-  const storeExpirationDate = Cookies.get('expiration') ?? ''
-  const expirationDate = new Date(storeExpirationDate)
+  const userInfo = getUserInfo()
+  if (!userInfo || !userInfo.expiration) {
+    return 0  // Nếu không có expiration, trả về 0 (hết hạn ngay lập tức)
+  }
 
+  const expirationDate = new Date(userInfo.expiration)  // Giả sử 'expiration' lưu trong userInfo
   const now = new Date()
+
   const duration = expirationDate.getTime() - now.getTime()
 
   return duration
 }
+
 
 export const tokenLoader = () => {
   return getAuthToken()
