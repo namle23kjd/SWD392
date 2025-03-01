@@ -316,8 +316,8 @@ namespace Warehouse_Management.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("OrderStatus")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("OrderStatus")
+                        .HasColumnType("bit");
 
                     b.Property<int>("PlatformId")
                         .HasColumnType("int");

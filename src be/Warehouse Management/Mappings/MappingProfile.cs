@@ -44,7 +44,9 @@ namespace Warehouse_Management.Mappings
 
             CreateMap<CreateOrderItemDTO, OrderItem>();
 
-            CreateMap<OrderItem, OrderItemDTO>();
+            CreateMap<OrderItem, OrderItemDTO>()
+                .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.UnitPrice)); // ✅ Map UnitPrice từ OrderItem
+
 
             CreateMap<UpdateOrderDTO, Order>()
            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
