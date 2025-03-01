@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigation } from 'react-router-dom';
 import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
-import { useAutoLogout } from '../hooks/useAutoLogout';
 import { useCheckRole } from '../hooks/useCheckRole';
+import { Spin } from 'antd';
 
 const DefaultLayout: React.FC = () => {
   useCheckRole()
-  useAutoLogout()
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigation = useNavigation()
 
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">
@@ -27,6 +27,7 @@ const DefaultLayout: React.FC = () => {
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+              {navigation.state === 'loading' && <Spin>Loading...</Spin>}
               <Outlet />
             </div>
           </main>

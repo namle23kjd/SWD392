@@ -3,9 +3,20 @@ import { Form, Link } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import UserOne from '../../images/user/user-01.png';
 import { toast } from 'react-toastify';
+import { getUserInfo } from '../../util/auth';
+import logo from '/src/images/user/user-avatar.png';
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { email } = getUserInfo()
+  function getUsernameFromEmail(email: string) {
+    // Tìm vị trí dấu '@' và lấy phần trước nó
+    const atIndex = email.indexOf('@');
+    if (atIndex === -1) {
+      return null; // Nếu không tìm thấy dấu '@', trả về null
+    }
+    return email.slice(0, atIndex);
+  }
 
   const handleLogout = () => {
     toast.success("Logout successful!");
@@ -20,13 +31,12 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            Welcome, {getUsernameFromEmail(email)}
           </span>
-          <span className="block text-xs">UX Designer</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
-          <img src={UserOne} alt="User" />
+          <img src={logo} alt="User" />
         </span>
 
         <svg

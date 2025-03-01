@@ -22,6 +22,7 @@ import OrderHistory from './pages/OrderHistory';
 import Products from './pages/Products';
 import Profile from './pages/Profile';
 import Shelfs from './pages/Shelfs';
+import { accountListLoader } from './fetch/account';
 
 export const router = createBrowserRouter([
     {
@@ -117,6 +118,7 @@ export const router = createBrowserRouter([
                 children: [
                     {
                         path: 'accounts',
+                        loader: accountListLoader,
                         element: (
                             <>
                                 <PageTitle title="Account List" />
@@ -135,6 +137,7 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: 'edit-account/:id',
+                        loader: accountListLoader,
                         element: (
                             <>
                                 <PageTitle title="Edit Account" />

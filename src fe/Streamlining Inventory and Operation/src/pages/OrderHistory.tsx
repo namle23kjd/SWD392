@@ -156,7 +156,7 @@ const OrderHistory: React.FC = () => {
             {/* Modal for editing order status */}
             <Modal
                 title="Edit Order"
-                visible={isModalVisible}
+                open={isModalVisible}
                 onOk={handleModalSave}
                 onCancel={handleModalCancel}
                 okText="Save"
@@ -232,13 +232,6 @@ const OrderHistory: React.FC = () => {
                 <div className="mt-4 flex justify-end">
                     <button
                         type="button"
-                        onClick={handleModalCancel}
-                        className="ant-btn ant-btn-default px-6 py-2 rounded-md"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
                         onClick={handleModalSave}
                         className="ant-btn ant-btn-primary px-6 py-2 rounded-md"
                         style={{
@@ -248,6 +241,13 @@ const OrderHistory: React.FC = () => {
                         }}
                     >
                         Save
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleModalCancel}
+                        className="ant-btn ant-btn-default px-6 py-2 rounded-md"
+                    >
+                        Cancel
                     </button>
                 </div>
             </Modal>

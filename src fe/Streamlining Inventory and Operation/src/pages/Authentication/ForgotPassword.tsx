@@ -51,9 +51,9 @@ export default function ForgotPassword() {
 
                 <div className="mt-6 text-center">
                   <p>
-                    Don’t have any account?{' '}
-                    <Link to="/auth/signup" className="text-primary">
-                      Sign Up
+                    Back To {' '}
+                    <Link to="/auth/signin" className="text-primary">
+                      Login
                     </Link>
                   </p>
                 </div>

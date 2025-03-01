@@ -1,15 +1,34 @@
 import { useActionState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSubmit } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { loginAction } from '../../fetch/authentication';
+import { DecodedToken, decodeToken, loginAction } from '../../fetch/authentication';
+import { getAuthToken, getAuthTokenDuration, setUserInfoToStorage } from '../../util/auth';
 import { validateNonEmptyString, validatePassword } from '../../util/validation';
-import { setAuthToken, setUserInfoToStorage } from '../../util/auth';
-import { DecodedToken, decodeToken } from '../../fetch/axios-instance';
-
-
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
+  const submit = useSubmit()
+
+  const handleAutoLogout = () => {
+    const token = getAuthToken()
+
+    if (!token) {
+      return
+    }
+
+    if (token === 'EXPIRED') {
+      submit(null, { action: '/auth/logout', method: 'POST' })
+      return
+    }
+
+    const tokenDuration = getAuthTokenDuration()
+    const timer = setTimeout(() => {
+      submit(null, { action: '/auth/logout', method: 'POST' })
+    }, tokenDuration)
+
+    return () => clearTimeout(timer)
+  }
+
   const handleLogin = async (_prevState: any, formData: any): Promise<any> => {
     try {
       const email = formData.get('email');
@@ -44,11 +63,12 @@ const SignIn: React.FC = () => {
           throw new Error("Failed to decode token.");
         }
         const userInfo = {
-          email, password, 
+          email, password,
           roles: decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
-          token: response.result.token 
+          token: response.result.token,
+          expiration: response.result.expiration
         }
-        
+
         setUserInfoToStorage(userInfo);
         if (userInfo.roles.includes('Admin')) {
           navigate("/admin/accounts");
@@ -58,12 +78,14 @@ const SignIn: React.FC = () => {
           navigate("/staff/products")
         }
 
+        handleAutoLogout()
         toast.success("Login successful!");
       } else {
         toast.error(response[0].toString());
+        return {
+          email, password
+        }
       }
-
-
     } catch (error) {
       console.log(error);
       toast.error("Login failed: Incorrect credentials.");
@@ -163,19 +185,11 @@ const SignIn: React.FC = () => {
 
                 <div className="mb-5">
                   <input
+                    disabled={pending}
                     type="submit"
-                    value="Sign In"
+                    value={pending ? 'Submitting...' : "Sign In"}
                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                   />
-                </div>
-
-                <div className="mt-6 text-center">
-                  <p>
-                    Don’t have any account?{' '}
-                    <Link to="/auth/signup" className="text-primary">
-                      Sign Up
-                    </Link>
-                  </p>
                 </div>
 
                 <div className="mt-6 text-center">

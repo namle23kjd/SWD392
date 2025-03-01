@@ -4,7 +4,8 @@ import Cookies from 'js-cookie'
 const COOKIE_EXPIRATION_DAYS = 1 / 24;
 
 export const getAuthToken = () => {
-  const token = Cookies.get('token')
+  const userInfo = getUserInfo()
+  const token = userInfo?.token
   if (!token) {
     return null
   }
@@ -48,7 +49,7 @@ export const getAuthTokenDuration = () => {
     return 0  // Nếu không có expiration, trả về 0 (hết hạn ngay lập tức)
   }
 
-  const expirationDate = new Date(userInfo.expiration)  // Giả sử 'expiration' lưu trong userInfo
+  const expirationDate = new Date(userInfo.expiration)
   const now = new Date()
 
   const duration = expirationDate.getTime() - now.getTime()

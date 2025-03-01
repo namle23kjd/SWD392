@@ -40,19 +40,60 @@ export const useCheckRole = () => {
         }
 
         // Nếu role là admin và chưa vào /admin
-        if (currentRoles.includes('Admin') && !currentPath.includes('/admin')) {
+        if (currentRoles.includes('Admin') && !currentPath.includes('/admin') && currentRoles.length < 2) {
             navigate('/admin/accounts')
             return
         }
 
         // Nếu role là manager và chưa vào /manager
-        if (currentRoles.includes('Manager') && !currentPath.includes('/manager')) {
+        if (currentRoles.includes('Manager') && !currentPath.includes('/manager') && currentRoles.length < 2) {
             navigate('/manager/reports')
         }
 
         // Nếu role là staff và chưa vào /staff
-        if (currentRoles.includes('Staff') && !currentPath.includes('/staff')) {
+        if (currentRoles.includes('Staff') && !currentPath.includes('/staff') && currentRoles.length < 2) {
             navigate('/staff/products')
+        }
+
+        // Nếu người dùng có nhiều hơn 2 role
+        if (currentRoles.length > 2) {
+            // Kiểm tra quyền của người dùng đối với trang hiện tại
+            // Nếu họ không có quyền truy cập trang hiện tại, chuyển hướng về trang chủ của role hợp lệ
+            if (currentPath.includes('/admin') && !currentRoles.includes('Admin')) {
+                // Điều hướng về trang chủ của role Admin nếu họ có role này
+                if (currentRoles.includes('Admin')) {
+                    navigate('/admin/accounts')
+                } else if (currentRoles.includes('Manager')) {
+                    navigate('/manager/reports')
+                } else if (currentRoles.includes('Staff')) {
+                    navigate('/staff/products')
+                }
+                return
+            }
+
+            if (currentPath.includes('/manager') && !currentRoles.includes('Manager')) {
+                // Điều hướng về trang chủ của role Manager nếu họ có role này
+                if (currentRoles.includes('Manager')) {
+                    navigate('/manager/reports')
+                } else if (currentRoles.includes('Admin')) {
+                    navigate('/admin/accounts')
+                } else if (currentRoles.includes('Staff')) {
+                    navigate('/staff/products')
+                }
+                return
+            }
+
+            if (currentPath.includes('/staff') && !currentRoles.includes('Staff')) {
+                // Điều hướng về trang chủ của role Staff nếu họ có role này
+                if (currentRoles.includes('Staff')) {
+                    navigate('/staff/products')
+                } else if (currentRoles.includes('Admin')) {
+                    navigate('/admin/accounts')
+                } else if (currentRoles.includes('Manager')) {
+                    navigate('/manager/reports')
+                }
+                return
+            }
         }
 
         // Kiểm tra nếu đường dẫn không chứa /auth mà không có role thì điều hướng về /auth/signin

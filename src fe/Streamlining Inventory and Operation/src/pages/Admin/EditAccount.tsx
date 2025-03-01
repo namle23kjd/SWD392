@@ -1,24 +1,27 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useActionState } from "react";
+import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify"; // For displaying error messages
+import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import { updateAccountAction } from "../../fetch/account";
+import { validateNonEmptyString, validatePhoneNumber } from "../../util/validation";
 
 // Account creation form validation rules
 const validateAccountData = (accountData: any) => {
-    const { username, email, phone, role, status } = accountData;
-
-    if (!username || !email || !phone || !role || !status) {
-        return "All fields are required.";
+    const { phoneNumber, roles, status } = accountData;
+    if ((phoneNumber && !validateNonEmptyString(phoneNumber) || !phoneNumber)) {
+        return "Phone is required.";
     }
 
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!emailRegex.test(email)) {
-        return "Please enter a valid email address.";
+    if (!validateNonEmptyString(status)) {
+        return "Status is required.";
     }
 
-    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
-    if (!phoneRegex.test(phone)) {
-        return "Please enter a valid phone number (format: XXX-XXX-XXXX).";
+    if (roles.length === 0) {
+        return "Please select at least one role.";
+    }
+
+    if (!validatePhoneNumber(phoneNumber)) {
+        return "Please enter a valid phone number.";
     }
 
     return null; // No errors
@@ -27,66 +30,70 @@ const validateAccountData = (accountData: any) => {
 const EditAccount: React.FC = () => {
     const { id } = useParams(); // Extract account ID from the URL
     const navigate = useNavigate();
-    const [accountDetails, setAccountDetails] = useState({
-        username: "",
+    let accountDetails = {
         email: "",
-        phone: "",
-        role: "",
+        phoneNumber: "",
+        roles: [""],
         status: "",
-    });
+    }
 
-    useEffect(() => {
-        // Fetch the account data based on the account ID (for now, simulating with a sample account)
-        const fetchAccountData = async () => {
-            // Simulate fetching account data (in a real app, you'd fetch this from an API)
-            // Example:
-            // const response = await axios.get(`/api/accounts/${id}`);
-            const sampleAccount = { // Simulating a response from the server
-                username: "JohnDoe",
-                email: "johndoe@gmail.com",
-                phone: "123-456-7890",
-                role: "Admin",
-                status: "Active",
-            };
-            setAccountDetails(sampleAccount);
-        };
+    const responseAccount = useLoaderData()
+    if (responseAccount.statusCode === 200) {
+        const currentAccount = responseAccount.result.find
+            ((account: {
+                id: string; email: string;
+                phoneNumber: string; roles: string[]; status: string;
+            }) =>
+                account.id === id)
 
-        fetchAccountData();
-    }, [id]); // Re-fetch account data when the account ID changes
-
-    // Handle input changes
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setAccountDetails((prev) => ({ ...prev, [name]: value }));
-    };
+        if (currentAccount) {
+            accountDetails = {
+                ...currentAccount,
+                status: currentAccount.status ? "Active" : "Inactive"
+            }
+        }
+    }
 
     // Handle form submission
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (_prevState: any, formData: any): Promise<any> => {
+        const data = {
+            email: formData.get("email") || accountDetails.email || "",
+            phoneNumber: formData.get("phoneNumber"),
+            roles: formData.getAll("roles"),
+            status: formData.get("status"),
+        }
 
         // Validate the account data
-        const validationError = validateAccountData(accountDetails);
+        const validationError = validateAccountData(data);
         if (validationError) {
-            toast.error(validationError); // Show error toast if validation fails
-            return;
+            toast.error(validationError);
+            return { ...data };
         }
 
         try {
-            // Simulate API call to update the account details
-            // await axios.put(`/api/accounts/${id}`, accountDetails);
-
-            // Show success toast and navigate to account management page
-            toast.success("Account updated successfully!");
-            navigate("/admin/accounts"); // Redirect to the manage accounts page
+            const submitData = {
+                ...data,
+                status: data.status === 'Active' ? true : false
+            }
+            const responseUpdate = await updateAccountAction(id, submitData);
+            if (responseUpdate.statusCode === 200) {
+                navigate("/admin/accounts");
+                toast.success("Account updated successfully!");
+            } else {
+                toast.error(responseUpdate[0].toString());
+                return { ...data };
+            }
         } catch (error) {
             toast.error("Failed to update account.");
+            return { ...data };
         }
     };
+
+    const [formState, formAction, pending] = useActionState(handleSubmit, { ...accountDetails });
 
     return (
         <>
             <Breadcrumb pageName="Edit Account" />
-
             <div className="grid-cols-1 gap-9 sm:grid-cols-2">
                 <div className="flex flex-col gap-9">
                     {/* Edit Account Form */}
@@ -94,86 +101,102 @@ const EditAccount: React.FC = () => {
                         <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
                             <h3 className="font-medium text-black dark:text-white">Edit Account</h3>
                         </div>
-                        <div className="flex flex-col gap-5.5 p-6.5">
-                            {/* Username */}
-                            <div>
-                                <label className="mb-3 block text-black dark:text-white">Username</label>
-                                <input
-                                    type="text"
-                                    name="username"
-                                    value={accountDetails.username}
-                                    onChange={handleInputChange}
-                                    placeholder="Enter username"
-                                    className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
-                                />
-                            </div>
+                        <form action={formAction}>
+                            <div className="flex flex-col gap-5.5 p-6.5">
+                                {/* Email */}
+                                <div>
+                                    <label className="mb-3 block text-black dark:text-white">Email</label>
+                                    <input
+                                        disabled
+                                        defaultValue={formState?.email}
+                                        type="email"
+                                        name="email"
+                                        placeholder="Enter email"
+                                        className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
+                                    />
+                                </div>
 
-                            {/* Email */}
-                            <div>
-                                <label className="mb-3 block text-black dark:text-white">Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={accountDetails.email}
-                                    onChange={handleInputChange}
-                                    placeholder="Enter email"
-                                    className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
-                                />
-                            </div>
+                                {/* Phone Number */}
+                                <div>
+                                    <label className="mb-3 block text-black dark:text-white">Phone Number</label>
+                                    <input
+                                        defaultValue={formState?.phoneNumber}
+                                        type="text"
+                                        name="phoneNumber"
+                                        placeholder="Enter phone number"
+                                        className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
+                                    />
+                                </div>
 
-                            {/* Phone Number */}
-                            <div>
-                                <label className="mb-3 block text-black dark:text-white">Phone Number</label>
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    value={accountDetails.phone}
-                                    onChange={handleInputChange}
-                                    placeholder="Enter phone number (XXX-XXX-XXXX)"
-                                    className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
-                                />
-                            </div>
+                                {/* Role */}
+                                <div>
+                                    <label className="mb-3 block text-black dark:text-white">Role</label>
+                                    <div className="flex flex-col space-y-2">
+                                        <label className="flex items-center ml-6">
+                                            <input
+                                                defaultChecked={formState?.roles.includes("Admin")}
+                                                name="roles"
+                                                type="checkbox"
+                                                value="Admin"
+                                                className="mr-2 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                                            />
+                                            Admin
+                                        </label>
+                                        <label className="flex items-center ml-6">
+                                            <input
+                                                defaultChecked={formState?.roles.includes("Staff")}
+                                                name="roles"
+                                                type="checkbox"
+                                                value="Staff"
+                                                className="mr-2 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                                            />
+                                            Staff
+                                        </label>
+                                        <label className="flex items-center ml-6">
+                                            <input
+                                                defaultChecked={formState?.roles.includes("Manager")}
+                                                name="roles"
+                                                type="checkbox"
+                                                value="Manager"
+                                                className="mr-2 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                                            />
+                                            Manager
+                                        </label>
+                                    </div>
+                                </div>
 
-                            {/* Role */}
-                            <div>
-                                <label className="mb-3 block text-black dark:text-white">Role</label>
-                                <select
-                                    name="role"
-                                    value={accountDetails.role}
-                                    onChange={handleInputChange}
-                                    className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
-                                >
-                                    <option value="">Select Role</option>
-                                    <option value="Admin">Admin</option>
-                                    <option value="User">User</option>
-                                </select>
-                            </div>
+                                {/* Status */}
+                                <div>
+                                    <label className="mb-3 block text-black dark:text-white">Status</label>
+                                    <select
+                                        defaultValue={formState?.status}
+                                        name="status"
+                                        className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
+                                    >
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                </div>
 
-                            {/* Status */}
-                            <div>
-                                <label className="mb-3 block text-black dark:text-white">Status</label>
-                                <select
-                                    name="status"
-                                    value={accountDetails.status}
-                                    onChange={handleInputChange}
-                                    className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
-                                >
-                                    <option value="">Select Status</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
-                            </div>
+                                {/* Submit Button */}
+                                <div className="flex justify-center p-6.5">
+                                    <button
+                                        disabled={pending}
+                                        type="submit"
+                                        className="rounded-md bg-blue-600 text-white px-6 py-3"
+                                    >
+                                        {pending ? 'Updating account...' : 'Update Account'}
+                                    </button>
 
-                            {/* Submit Button */}
-                            <div className="flex justify-center p-6.5">
-                                <button
-                                    onClick={handleSubmit}
-                                    className="rounded-md bg-blue-600 text-white px-6 py-3"
-                                >
-                                    Update Account
-                                </button>
+                                    <Link
+                                        to="/admin/accounts"
+                                        className="rounded-md bg-white text-black-0 px-6 py-3 ml-5 border border-black hover:border-gray-600"
+                                    >
+                                        Back to account list
+                                    </Link>
+                                </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
