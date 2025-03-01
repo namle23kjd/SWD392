@@ -10,7 +10,10 @@ namespace Warehouse_Management.Seeder
         {
             try
             {
-                context.Database.Migrate();
+                if (context.Database.GetPendingMigrations().Any())
+                {
+                    context.Database.Migrate();  // Apply migration mới
+                }
 
                 if (!context.Products.Any())
                 {
@@ -25,43 +28,13 @@ namespace Warehouse_Management.Seeder
                             BasePrice = 100,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow
-                        },
-                        new Product
-                        {
-                            SKU = "P002",
-                            Barcode = "1234567891",
-                            ProductName = "Product 2",
-                            Description = "Description of Product 2",
-                            BasePrice = 150,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
-                        },
-                        new Product
-                        {
-                            SKU = "P003",
-                            Barcode = "1234567892",
-                            ProductName = "Product 3",
-                            Description = "Description of Product 3",
-                            BasePrice = 200,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
-                        },
-                        new Product
-                        {
-                            SKU = "P004",
-                            Barcode = "1234567893",
-                            ProductName = "Product 4",
-                            Description = "Description of Product 4",
-                            BasePrice = 250,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow
                         }
                     };
 
                     // Thêm các sản phẩm vào cơ sở dữ liệu
                     context.Products.AddRange(products);
                     context.SaveChanges();
-                    logger.LogInformation("4 products have been seeded into the database.");
+                    logger.LogInformation("1 products have been seeded into the database.");
                 }
                 else
                 {
