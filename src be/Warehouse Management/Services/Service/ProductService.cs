@@ -274,26 +274,68 @@ namespace Warehouse_Management.Services.Service
                     };
                 }
 
-                // ✅ Kiểm tra nếu Product đã tồn tại theo SKU
-                var product = await _productRepository.GetProductBySKUAsync(importDto.SKU);
-                if (product == null)
-                {
-                    product = new Product
-                    {
-                        SKU = importDto.SKU,
-                        Barcode = importDto.Barcode,
-                        ProductName = importDto.ProductName,
-                        Description = importDto.Description,
-                        BasePrice = importDto.BasePrice,
-                        CreatedAt = DateTime.UtcNow,
-                        UserId = importDto.UserId
-                    };
 
-                    await _productRepository.AddProductAsync(product);
-                    await _productRepository.SaveChangesAsync();
+
+
+                // Kiểm tra trùng SKU - Nếu sản phẩm đã tồn tại thì trả lỗi ngay mà không cộng thêm số lượng
+                var existingProduct = await _productRepository.GetProductBySKUAsync(importDto.SKU);
+                if (existingProduct != null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "Product with the same SKU already exists." }
+                    };
                 }
 
-                // ✅ Kiểm tra nếu Shelf tồn tại (Vì Lot cần có ShelfId)
+                // Nếu SKU chưa tồn tại, tạo sản phẩm mới
+                var product = new Product
+                {
+                    SKU = importDto.SKU,
+                    Barcode = importDto.Barcode,
+                    ProductName = importDto.ProductName,
+                    Description = importDto.Description,
+                    BasePrice = importDto.BasePrice,
+                    CreatedAt = DateTime.UtcNow,
+                    UserId = importDto.UserId
+                };
+                // Kiểm tra nếu SupplierId là null
+                if (importDto.SupplierId == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "SupplierId is required." }
+                    };
+                }
+
+                // Kiểm tra nếu ShelfId là null
+                if (importDto.ShelfId == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "ShelfId is required." }
+                    };
+                }
+
+                // Kiểm tra nếu Quantity không hợp lệ
+                if (importDto.Quantity <= 0)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "Quantity is required and must be greater than 0." }
+                    };
+                }
+                await _productRepository.AddProductAsync(product);
+                await _productRepository.SaveChangesAsync();
+
+                // Kiểm tra Shelf tồn tại
                 var shelf = await _shelfRepository.GetByIdAsync(importDto.ShelfId);
                 if (shelf == null)
                 {
@@ -305,17 +347,16 @@ namespace Warehouse_Management.Services.Service
                     };
                 }
 
-                // ✅ Kiểm tra nếu Lot đã tồn tại cho Product
+                // Kiểm tra và tạo Lot nếu chưa có
                 var lot = await _lotRepository.GetByProductIdAsync(product.ProductId);
                 if (lot == null)
                 {
-                    // 🔥 Nếu chưa có Lot, tạo mới Lot
                     lot = new Lot
                     {
                         ProductId = product.ProductId,
                         ShelfId = shelf.ShelfId,
                         LotCode = $"LOT-{Guid.NewGuid().ToString().Substring(0, 8)}",
-                        Quantity = 0,  // ✅ Sẽ cập nhật sau
+                        Quantity = 0,  // Sẽ cập nhật số lượng sau
                         ManufactureDate = importDto.ManufactureDate,
                         ExpiryDate = DateTime.UtcNow.AddYears(1),
                         Status = true,
@@ -328,7 +369,40 @@ namespace Warehouse_Management.Services.Service
                     await _lotRepository.SaveChangesAsync();
                 }
 
-                // ✅ Tạo `StockTransaction`
+                // Kiểm tra nếu ManufactureDate không hợp lệ
+                if (importDto.ManufactureDate == default(DateTime))
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "Manufacture Date is required and must be valid." }
+                    };
+                }
+
+                // Kiểm tra nếu ExpiryDate không hợp lệ
+                if (importDto.ExpiryDate == default(DateTime))
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { "Expiry Date is required and must be valid." }
+                    };
+                }
+                // Kiểm tra UserId
+                var user = await _userManager.FindByIdAsync(importDto.UserId);
+                if (user == null)
+                {
+                    _logger.LogError($"User with ID {importDto.UserId} not found.");
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { $"User with ID {importDto.UserId} not found." }
+                    };
+                }
+                // Tạo StockTransaction
                 var stockTransaction = new StockTransaction
                 {
                     ProductId = product.ProductId,
@@ -343,7 +417,7 @@ namespace Warehouse_Management.Services.Service
                 await _stockTransactionRepository.AddTransactionAsync(stockTransaction);
                 await _stockTransactionRepository.SaveChangesAsync();
 
-                // ✅ Cập nhật số lượng trong Lot
+                // Cập nhật số lượng trong Lot
                 lot.Quantity += importDto.Quantity;
                 await _lotRepository.UpdateAsync(lot);
                 await _lotRepository.SaveChangesAsync();
@@ -355,18 +429,18 @@ namespace Warehouse_Management.Services.Service
                     Result = new
                     {
                         Message = "Product created and stock imported successfully!",
-                        ProductId = product.ProductId,
-                        LotId = lot.LotId,
-                        TransactionId = stockTransaction.TransactionId
+                        productId = product.ProductId,
+                        lotId = lot.LotId,
+                        transactionId = stockTransaction.TransactionId
                     }
                 };
             }
             catch (Exception ex)
             {
+                // Log lỗi và trả về ApiResponse lỗi
+                _logger.LogError($"An error occurred while processing the product creation: {ex.Message}");
                 return await HandleExceptionAsync(ex);
             }
         }
-
-
     }
 }
