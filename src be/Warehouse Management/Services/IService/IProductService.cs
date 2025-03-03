@@ -10,6 +10,8 @@ namespace Warehouse_Management.Services.IService
         Task<ApiResponse> SearchProductsAsync(string? sku, string? barcode, string? name);
         Task<ApiResponse> CreateProductAsync(CreateProductDTO productDto, string userId);
         Task<ApiResponse> UpdateProductAsync(int id, UpdateProductDTO productDto);
+
+        Task<ApiResponse> CreateProductFromTransactionAsync(CreateProductFromTransaction importDto);
         Task<ApiResponse> DeleteProductAsync(int id);
 
         Task<ApiResponse> HandleExceptionAsync(Exception ex);

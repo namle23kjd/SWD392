@@ -8,6 +8,7 @@ using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Models.DTO.Order;
 using Warehouse_Management.Models.DTO.Product;
 using Warehouse_Management.Repositories.IRepository;
+using Warehouse_Management.Repositories.Repository;
 using Warehouse_Management.Services.IService;
 
 namespace Warehouse_Management.Services.Service
@@ -18,13 +19,23 @@ namespace Warehouse_Management.Services.Service
         private readonly IMapper _mapper;
         private readonly IEnumerable<IExceptionHandler> _exceptionhandlers;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IStockTransactionRepository _stockTransactionRepository;
+        private readonly ISupplierRepository _supplierRepository;
+        private readonly ILotRepository _lotRepository;
+        private readonly IShelfRepository _shelfRepository;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IMapper mapper, IProductRepository productRepository, IEnumerable<IExceptionHandler> exceptionHandlers, UserManager<IdentityUser> userManager)
+        public ProductService(IMapper mapper, IProductRepository productRepository, IEnumerable<IExceptionHandler> exceptionHandlers, UserManager<IdentityUser> userManager, ILotRepository lotRepository, IStockTransactionRepository stockTransactionRepository, IShelfRepository shelfRepository, ILogger<ProductService> logger, ISupplierRepository supplierRepository)
         {
             _mapper = mapper;
             _productRepository = productRepository;
             _exceptionhandlers = exceptionHandlers;
             _userManager = userManager;
+            _lotRepository = lotRepository;
+            _supplierRepository = supplierRepository;
+            _stockTransactionRepository = stockTransactionRepository;
+            _shelfRepository = shelfRepository;
+            _logger = logger;
         }
 
 
@@ -245,5 +256,117 @@ namespace Warehouse_Management.Services.Service
                 return await HandleExceptionAsync(ex);
             }
         }
+
+        public async Task<ApiResponse> CreateProductFromTransactionAsync(CreateProductFromTransaction importDto)
+        {
+            try
+            {
+                _logger.LogInformation($"Fetching Supplier with ID: {importDto.SupplierId}");
+                var supplier = await _supplierRepository.GetByIdAsync(importDto.SupplierId);
+                if (supplier == null)
+                {
+                    _logger.LogError($"Supplier with ID {importDto.SupplierId} not found.");
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { $"Supplier with ID {importDto.SupplierId} not found." }
+                    };
+                }
+
+                // ✅ Kiểm tra nếu Product đã tồn tại theo SKU
+                var product = await _productRepository.GetProductBySKUAsync(importDto.SKU);
+                if (product == null)
+                {
+                    product = new Product
+                    {
+                        SKU = importDto.SKU,
+                        Barcode = importDto.Barcode,
+                        ProductName = importDto.ProductName,
+                        Description = importDto.Description,
+                        BasePrice = importDto.BasePrice,
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = importDto.UserId
+                    };
+
+                    await _productRepository.AddProductAsync(product);
+                    await _productRepository.SaveChangesAsync();
+                }
+
+                // ✅ Kiểm tra nếu Shelf tồn tại (Vì Lot cần có ShelfId)
+                var shelf = await _shelfRepository.GetByIdAsync(importDto.ShelfId);
+                if (shelf == null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = { $"Shelf with ID {importDto.ShelfId} not found." }
+                    };
+                }
+
+                // ✅ Kiểm tra nếu Lot đã tồn tại cho Product
+                var lot = await _lotRepository.GetByProductIdAsync(product.ProductId);
+                if (lot == null)
+                {
+                    // 🔥 Nếu chưa có Lot, tạo mới Lot
+                    lot = new Lot
+                    {
+                        ProductId = product.ProductId,
+                        ShelfId = shelf.ShelfId,
+                        LotCode = $"LOT-{Guid.NewGuid().ToString().Substring(0, 8)}",
+                        Quantity = 0,  // ✅ Sẽ cập nhật sau
+                        ManufactureDate = importDto.ManufactureDate,
+                        ExpiryDate = DateTime.UtcNow.AddYears(1),
+                        Status = true,
+                        CreateAt = DateTime.UtcNow,
+                        UpdateAt = DateTime.UtcNow,
+                        UserId = importDto.UserId
+                    };
+
+                    await _lotRepository.CreateAsync(lot);
+                    await _lotRepository.SaveChangesAsync();
+                }
+
+                // ✅ Tạo `StockTransaction`
+                var stockTransaction = new StockTransaction
+                {
+                    ProductId = product.ProductId,
+                    SupplierId = supplier.SupplierId,
+                    LotId = lot.LotId,
+                    UserId = importDto.UserId,
+                    Quantity = importDto.Quantity,
+                    Type = "Import",
+                    TransactionDate = DateTime.UtcNow
+                };
+
+                await _stockTransactionRepository.AddTransactionAsync(stockTransaction);
+                await _stockTransactionRepository.SaveChangesAsync();
+
+                // ✅ Cập nhật số lượng trong Lot
+                lot.Quantity += importDto.Quantity;
+                await _lotRepository.UpdateAsync(lot);
+                await _lotRepository.SaveChangesAsync();
+
+                return new ApiResponse
+                {
+                    IsSuccess = true,
+                    StatusCode = HttpStatusCode.Created,
+                    Result = new
+                    {
+                        Message = "Product created and stock imported successfully!",
+                        ProductId = product.ProductId,
+                        LotId = lot.LotId,
+                        TransactionId = stockTransaction.TransactionId
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                return await HandleExceptionAsync(ex);
+            }
+        }
+
+
     }
 }
