@@ -12,8 +12,8 @@ using Warehouse_Management.Data;
 namespace Warehouse_Management.Migrations
 {
     [DbContext(typeof(WareHouseDbContext))]
-    [Migration("20250227045506_hehe")]
-    partial class hehe
+    [Migration("20250304035722_Fix enitity StockTransaction")]
+    partial class FixenitityStockTransaction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -484,7 +484,7 @@ namespace Warehouse_Management.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("SupplierId")
+                    b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("TransactionDate")
@@ -688,8 +688,7 @@ namespace Warehouse_Management.Migrations
                     b.HasOne("Warehouse_Management.Models.Domain.Supplier", "Supplier")
                         .WithMany("StockTransactions")
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", "User")
                         .WithMany()
