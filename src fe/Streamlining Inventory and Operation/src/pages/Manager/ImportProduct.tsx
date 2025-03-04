@@ -8,6 +8,7 @@ import { getAllShelfs } from '../../services/shelfApi';
 import { getAllSuppliers } from '../../services/supplierApi';
 import { createProductBySuppliers } from '../../services/productApi';
 import dayjs from 'dayjs';
+import { getAllUsers } from '../../services/userApi';
 
 interface ImportProductDetails {
   sku: string;
@@ -39,6 +40,7 @@ const ImportProduct: React.FC = () => {
   });
   const [shelfs, setShelfs] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [users,setUsers] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,7 +60,16 @@ const ImportProduct: React.FC = () => {
         toast.error('Failed to fetch supplier IDs');
       }
     };
-
+    const featchUsers = async () => {
+      try {
+        const response = await getAllUsers();
+        setUsers(response.data.result);
+      } catch (error) {
+        toast.error('Failed to fetch users');
+      }
+    };
+    
+    featchUsers();
     featchSuppliers();
     featchShelfs();
   }, []);
@@ -197,16 +208,18 @@ const ImportProduct: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="mb-3 block text-black dark:text-white">
-                  User Id
-                </label>
-                <input
-                  type="text"
+                <SelectGroupTwo
+                  label="User Id"
                   name="userId"
                   value={importDetails.userId}
                   onChange={handleInputChange}
-                  placeholder="Enter user ID"
-                  className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary"
+                  options={[
+                    { value: '', label: 'Select Supplier Id' },
+                    ...users.map((user) => ({
+                      value: user.id,
+                      label: user.id,
+                    })),
+                  ]}
                 />
               </div>
               <div>
