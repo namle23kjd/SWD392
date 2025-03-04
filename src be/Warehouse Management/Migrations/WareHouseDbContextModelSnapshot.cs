@@ -481,7 +481,7 @@ namespace Warehouse_Management.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("SupplierId")
+                    b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("TransactionDate")
@@ -685,8 +685,7 @@ namespace Warehouse_Management.Migrations
                     b.HasOne("Warehouse_Management.Models.Domain.Supplier", "Supplier")
                         .WithMany("StockTransactions")
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Warehouse_Management.Models.Domain.ApplicationUser", "User")
                         .WithMany()
