@@ -50,13 +50,13 @@ export const productColumns = (
     title: 'Create At',
     dataIndex: 'createdAt',
     key: 'createdAt',
-    render: (text) => <div className="text-green-700">{text}</div>,
+    render: (text) => <div className="text-green-700">{new Date(text).toLocaleString()}</div>,
   },
   {
     title: 'Update At',
     dataIndex: 'updatedAt',
     key: 'updatedAt',
-    render: (text) => <div className="text-red">{text}</div>,
+    render: (text) => <div className="text-red">{new Date(text).toLocaleString()}</div>,
   },
   {
     title: 'User Name',

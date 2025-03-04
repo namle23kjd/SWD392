@@ -64,13 +64,13 @@ export const shelfColumns = (
     title: 'Create At',
     dataIndex: 'createdAt',
     key: 'createAt',
-    render: (text) => <div className="text-green-700">{text}</div>,
+    render: (text) => <div className="text-green-700">{new Date(text).toLocaleString()}</div>,
   },
   {
     title: 'Update At',
     dataIndex: 'updatedAt',
     key: 'updateAt',
-    render: (text) => <div className="text-red">{text}</div>,
+    render: (text) => <div className="text-red">{new Date(text).toLocaleString()}</div>,
   },
   {
     title: 'Action',

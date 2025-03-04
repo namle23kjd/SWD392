@@ -17,6 +17,7 @@ import {
   createProducts,
   deleteProducts,
   getProducts,
+  searchProducts,
   updateProducts,
 } from '../services/productApi';
 import { useStyle } from '../css/useStyle';
@@ -78,24 +79,24 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts(pagination.pageNumber, pagination.pageSize);
-    const fetchShelfs = async () => {
-      try {
-        const response = await getAllShelfs();
-        setShelfs(response.data.result.items);
-      } catch (error) {
-        toast.error('Failed to fetch shelf IDs');
-      }
-    };
-    const fetchLots = async () => {
-      try {
-        const response = await getAllLots();
-        setLots(response.data.result.lots);
-      } catch (error) {
-        toast.error('Failed to fetch product IDs');
-      }
-    };
-    fetchShelfs();
-    fetchLots();
+    // const fetchShelfs = async () => {
+    //   try {
+    //     const response = await getAllShelfs();
+    //     setShelfs(response.data.result.items);
+    //   } catch (error) {
+    //     toast.error('Failed to fetch shelf IDs');
+    //   }
+    // };
+    // const fetchLots = async () => {
+    //   try {
+    //     const response = await getAllLots();
+    //     setLots(response.data.result.lots);
+    //   } catch (error) {
+    //     toast.error('Failed to fetch product IDs');
+    //   }
+    // };
+    // fetchShelfs();
+    // fetchLots();
   }, []);
 
   const handleTalbeChange = (pagination: any) => {
@@ -104,10 +105,16 @@ const Products = () => {
     fetchProducts(pagination.current, pagination.pageSize);
   };
 
-  const handleSearch = (record: any) => {
+  const handleSearch = async (record: any) => {
     setSearchLoading(true);
-    console.log('search Product', record);
-    setSearchLoading(false);
+    try {
+      const response = await searchProducts(record);
+      setProducts(response.data.result);
+      setSearchLoading(false);
+    } catch (error) {
+      toast.error('Search Product failed');
+      setSearchLoading(false);
+    }
   };
 
   const handleEdit = (record: Product) => {
@@ -236,7 +243,7 @@ const Products = () => {
               >
                 <InputNumber min={0} step={0.01} />
               </Form.Item>
-              <Form.Item
+              {/* <Form.Item
                 name={['shelfId']}
                 label="Shelf ID"
                 rules={[{ required: true }]}
@@ -261,7 +268,7 @@ const Products = () => {
                     </Select.Option>
                   ))}
                 </Select>
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item label={null}>
                 <Button
@@ -289,7 +296,7 @@ const Products = () => {
         }}
       >
         <Search
-          placeholder="Search by Bar Code"
+          placeholder="Search by SKU"
           enterButton="Search"
           size="large"
           loading={searchLoading}
