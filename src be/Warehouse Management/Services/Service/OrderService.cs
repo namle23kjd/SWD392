@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using System.Net;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Middlewares;
@@ -18,8 +19,10 @@ namespace Warehouse_Management.Services.Service
         private readonly IEnumerable<IExceptionHandler> _exceptionHandlers;
         private readonly IProductRepository _productRepository;
         private readonly ILogger<OrderService> _logger;
+        private readonly IStockTransactionRepository _stockTransactionRepository;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IEnumerable<IExceptionHandler> exceptionHandlers, ILogger<OrderService> logger, ILotRepository lotRepository, IProductRepository productRepository)
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IEnumerable<IExceptionHandler> exceptionHandlers, ILogger<OrderService> logger, ILotRepository lotRepository, IProductRepository productRepository, IStockTransactionRepository stockTransactionRepository, UserManager<IdentityUser> userManager)
         {
             _exceptionHandlers = exceptionHandlers;
             _mapper = mapper;
@@ -27,6 +30,8 @@ namespace Warehouse_Management.Services.Service
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _lotRepository = lotRepository;
             _productRepository = productRepository;
+            _stockTransactionRepository = stockTransactionRepository;
+            _userManager = userManager;
         }
 
         public async Task<ApiResponse> CreateOrderAsync(CreateOrderDTO orderDto)
@@ -48,6 +53,16 @@ namespace Warehouse_Management.Services.Service
 
                 foreach (var itemDto in orderDto.OrderItems)
                 {
+                    var user = await _userManager.FindByIdAsync(orderDto.UserId);
+                    if (user == null)
+                    {
+                        return new ApiResponse
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.BadRequest,
+                            ErrorMessages = { "User not found" }
+                        };
+                    }
                     var product = await _productRepository.GetProductByIdAsync(itemDto.ProductId);
                     if (product == null)
                     {
@@ -108,6 +123,22 @@ namespace Warehouse_Management.Services.Service
 
                     order.OrderItems.Add(orderItem); // ✅ Thêm vào OrderItems của Order
                     totalAmount += orderItem.Quantity * orderItem.UnitPrice;
+
+                    var stockTransaction = new StockTransaction
+                    {
+                        ProductId = itemDto.ProductId,
+                        SupplierId = null, // Có thể để SupplierId là null nếu không cần
+                        LotId = lot.LotId,
+                        UserId = orderDto.UserId, // Gán UserId từ Order DTO
+                        Quantity = itemDto.Quantity,
+                        Type = "Export", // Đặt type là "Export" vì đây là xuất kho
+                        TransactionDate = DateTime.UtcNow // Gán thời gian giao dịch là thời gian hiện tại
+                    };
+
+
+                    // Lưu StockTransaction
+                    await _stockTransactionRepository.AddTransactionAsync(stockTransaction);
+                    await _stockTransactionRepository.SaveChangesAsync();
                 }
 
                 // 🔹 Gán tổng tiền đơn hàng
@@ -122,7 +153,7 @@ namespace Warehouse_Management.Services.Service
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.Created,
-                    Result = orderResponse
+                    Result = orderResponse  
                 };
             }
             catch (Exception ex)
