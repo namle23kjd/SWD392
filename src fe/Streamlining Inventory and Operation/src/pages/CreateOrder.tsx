@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify"; // For displaying error messages
 import { DeleteOutlined } from '@ant-design/icons'; // Import delete icon from Ant Design
+import { getListPlatforms, getListProducts, getListSuppliers } from "../fetch/order";
+import { createOrder } from "../fetch/order"; // Import the createOrder API function
+import { accountListLoader } from "../fetch/account";
+import { getUserInfo } from "../util/auth";
+import { useNavigate } from "react-router-dom";
 
 const CreateOrder: React.FC = () => {
     // State for the order fields
+    const navigate = useNavigate()
     const [orderDetails, setOrderDetails] = useState({
         platformId: "",
         orderDate: "",
-        status: "In Progress",
         supplierId: "",
         totalPrice: 0,
+        status: "In Progress",
     });
 
     // State for the products in the order
@@ -19,25 +25,44 @@ const CreateOrder: React.FC = () => {
     const [products, setProducts] = useState<any[]>([]);
     const [platforms, setPlatforms] = useState<any[]>([]);
     const [suppliers, setSuppliers] = useState<any[]>([]);
+    const [userId, setUserId] = useState(null);
+
+    async function fetchUserId() {
+        const response = await accountListLoader();
+        if (response.statusCode === 200) {
+            const listAccount = response.result;
+            const userIdFetch = listAccount.find((account: { email: string }) =>
+                account.email === getUserInfo()?.email).id;
+            setUserId(userIdFetch);
+        }
+    }
+
+    useEffect(() => {
+        fetchUserId();
+    }, []);
 
     useEffect(() => {
         // Simulate fetching product, platform, and supplier data
         const fetchData = async () => {
-            const fetchedProducts = [
-                { id: "P001", name: "Product A", price: 100 },
-                { id: "P002", name: "Product B", price: 200 },
-            ];
-            const fetchedPlatforms = [
-                { id: "PL01", name: "Platform A" },
-                { id: "PL02", name: "Platform B" },
-            ];
-            const fetchedSuppliers = [
-                { id: "S001", name: "Supplier A" },
-                { id: "S002", name: "Supplier B" },
-            ];
-            setProducts(fetchedProducts);
-            setPlatforms(fetchedPlatforms);
-            setSuppliers(fetchedSuppliers);
+            const platformData = await getListPlatforms();
+            setPlatforms(platformData.result.map((platformItem: { platformId: number, name: string }) => ({
+                id: platformItem.platformId,
+                name: platformItem.name
+            })));
+
+            const productData = await getListProducts();
+            setProducts(productData.result.products.map((productData: { sku: string, productName: string, basePrice: number, productId: string }) => ({
+                id: productData.sku,
+                name: productData.productName,
+                price: productData.basePrice,
+                productId: productData.productId
+            })));
+
+            const supplierData = await getListSuppliers();
+            setSuppliers(supplierData.result.suppliers.map((supplierItem: { supplierId: number, name: string }) => ({
+                id: supplierItem.supplierId,
+                name: supplierItem.name
+            })));
         };
 
         fetchData();
@@ -49,34 +74,46 @@ const CreateOrder: React.FC = () => {
         setOrderDetails((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle input changes for each product in the order items
     const handleProductChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
         const { name, value } = e.target;
         const updatedItems = [...orderItems];
-        updatedItems[index] = { ...updatedItems[index], [name]: value };
 
-        // Recalculate the total price for the product
-        if (name === "quantity") {
+        if (name === "productId") {
+            // Tìm thông tin sản phẩm từ danh sách sản phẩm theo productId
+            const selectedProduct = products.find(product => product.id === value);
+
+            // Cập nhật lại giá cho sản phẩm trong orderItems
+            if (selectedProduct) {
+                updatedItems[index] = {
+                    ...updatedItems[index],
+                    [name]: value,
+                    price: selectedProduct.price,  // Gắn giá sản phẩm vào orderItems
+                    totalPrice: updatedItems[index].quantity * selectedProduct.price,  // Tính lại tổng giá
+                    id: selectedProduct.productId
+                };
+            }
+        } else if (name === "quantity") {
+            // Cập nhật lại tổng giá khi thay đổi số lượng
             updatedItems[index].totalPrice = updatedItems[index].quantity * updatedItems[index].price;
+        } else {
+            updatedItems[index] = { ...updatedItems[index], [name]: value };
         }
 
-        // Update the order items state
+        // Cập nhật lại orderItems
         setOrderItems(updatedItems);
 
-        // Recalculate overall total price
-        const newTotalPrice = updatedItems.reduce((acc, item) => acc + item.totalPrice, 0);
-        setOrderDetails((prev) => ({ ...prev, totalPrice: newTotalPrice }));
+        // Cập nhật tổng giá trị đơn hàng
+        calculateTotalPrice(updatedItems);
     };
 
-    // Add a product with default total price (quantity * price)
     const addProduct = () => {
         setOrderItems([
             ...orderItems,
             {
                 productId: "",
                 quantity: 1,
-                price: 0,
-                totalPrice: 0, // Default total price is 0, updated when quantity changes
+                price: 0,  // Mặc định giá là 0, nhưng sẽ được cập nhật khi chọn sản phẩm
+                totalPrice: 0,
                 notes: "",
             },
         ]);
@@ -88,6 +125,11 @@ const CreateOrder: React.FC = () => {
         setOrderItems(updatedItems);
 
         // Recalculate overall total price
+        calculateTotalPrice(updatedItems);
+    };
+
+    // Function to calculate the total price of the order
+    const calculateTotalPrice = (updatedItems: any[]) => {
         const newTotalPrice = updatedItems.reduce((acc, item) => acc + item.totalPrice, 0);
         setOrderDetails((prev) => ({ ...prev, totalPrice: newTotalPrice }));
     };
@@ -108,24 +150,37 @@ const CreateOrder: React.FC = () => {
         }
 
         try {
-            // Simulate order creation API request
-            // await axios.post('/api/orders', { orderDetails, orderItems });
+            // Prepare the order data for submission
+            console.log(orderItems)
+            const submitData = {
+                userId: userId,
+                platformId: parseInt(orderDetails.platformId),
+                platformOrderId: "string",
+                orderDate: new Date(orderDetails.orderDate).toISOString(),
+                orderItems: orderItems.map(item => ({
+                    productId: parseInt(item.id),
+                    quantity: item.quantity,
+                })),
+            };
 
-            // Simulate saving the order data
-            console.log("Order Created:", { orderDetails, orderItems });
+            // Call the createOrder API
+            const response = await createOrder(submitData);
 
-            toast.success("Order created successfully!");
+            if (response.statusCode === 201) {
+                navigate("/manager/order-history")
+                toast.success("Order created successfully!");
+            } else {
+                toast.error("Failed to create order.");
+            }
         } catch (error) {
-            toast.error("Failed to create order.");
+            toast.error("An error occurred while creating the order.");
         }
     };
 
-    // Get the list of available products (excluding already selected ones)
     const getAvailableProducts = (index: number) => {
         const selectedProductIds = orderItems.map((item, idx) => (idx !== index ? item.productId : null));
         return products.filter((product) => !selectedProductIds.includes(product.id));
     };
-
 
     return (
         <div className="p-6 bg-gray-50">
@@ -172,8 +227,6 @@ const CreateOrder: React.FC = () => {
                     >
                         <option value="In Progress">In Progress</option>
                         <option value="Completed">Completed</option>
-                        <option value="In Transit">In Transit</option>
-                        <option value="Canceled">Canceled</option>
                     </select>
                 </div>
 
@@ -256,6 +309,7 @@ const CreateOrder: React.FC = () => {
                         </div>
                     ))}
                 </div>
+
                 {/* Display Total Price */}
                 <div className="mt-4">
                     <label className="block text-gray-600 font-semibold">Total Price</label>
@@ -266,6 +320,7 @@ const CreateOrder: React.FC = () => {
                         className="w-full border rounded-lg px-4 py-2 mt-1 bg-gray-100 text-gray-600"
                     />
                 </div>
+
                 {/* Submit Button */}
                 <div className="mt-6">
                     <button

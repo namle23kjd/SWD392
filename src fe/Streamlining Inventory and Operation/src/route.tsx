@@ -117,6 +117,7 @@ export const router = createBrowserRouter([
                 path: 'admin',
                 children: [
                     {
+                        id: 'accountList',
                         path: 'accounts',
                         loader: accountListLoader,
                         element: (
