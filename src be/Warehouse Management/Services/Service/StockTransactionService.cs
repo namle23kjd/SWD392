@@ -126,7 +126,7 @@ namespace Warehouse_Management.Services.Service
                     StatusCode = HttpStatusCode.OK,
                     Result = new
                     {
-                        Items = _mapper.Map<IEnumerable<StockTransactionDTO>>(transactions),
+                        Items = _mapper.Map<IEnumerable<StockTransactionDTO>>(transactions.ToList()), // 🛠 Dùng ToList() // ✅ Chỉ ánh xạ danh sách Items
                         TotalCount = transactions.TotalCount,
                         PageSize = transactions.PageSize,
                         CurrentPage = transactions.CurrentPage,
