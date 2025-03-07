@@ -32,6 +32,11 @@ namespace Warehouse_Management.Repositories.Repository
         public async Task<Product?> GetProductByIdAsync(int id)
         => await _db.Products.FirstOrDefaultAsync(p => p.ProductId == id);
 
+        public async Task<Product?> GetProductBySKUAsync(string sku)
+        {
+            return await _db.Products.FirstOrDefaultAsync(p => p.SKU == sku);
+        }
+
         public async Task SaveChangesAsync()
         => await _db.SaveChangesAsync();
 

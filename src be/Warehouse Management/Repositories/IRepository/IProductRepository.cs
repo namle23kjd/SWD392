@@ -13,6 +13,7 @@ namespace Warehouse_Management.Repositories.IRepository
         Task AddProductAsync(Product product);
         void UpdateProductAsync(Product product);
         Task DeleteProductAsync(Product product);
+        Task<Product?> GetProductBySKUAsync(string sku);
         Task SaveChangesAsync();
     }
 }

@@ -2,9 +2,7 @@
 {
     public class UpdateOrderItemDTO
     {
-        public int OrderItemId { get; set; }  // Để cập nhật các item trong đơn hàng
-        public int ProductId { get; set; }
+        public int OrderItemId { get; set; }  // Nếu = 0 => tạo mới, nếu có ID => cập nhật
         public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
     }
 }

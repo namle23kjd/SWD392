@@ -108,7 +108,7 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                var (lots, totalCount) = await _lotRepository.GetAllAsync(page, pageSize);
+                var pagedLots = await _lotRepository.GetAllAsync(page, pageSize);
 
                 return new ApiResponse
                 {
@@ -116,8 +116,11 @@ namespace Warehouse_Management.Services.Service
                     StatusCode = HttpStatusCode.OK,
                     Result = new
                     {
-                        TotalCount = totalCount,
-                        Lots = _mapper.Map<IEnumerable<LotDTO>>(lots)
+                        TotalCount = pagedLots.TotalCount,
+                        PageSize = pagedLots.PageSize,
+                        CurrentPage = pagedLots.CurrentPage,
+                        TotalPages = pagedLots.TotalPages,
+                        Lots = _mapper.Map<IEnumerable<LotDTO>>(pagedLots)
                     }
                 };
             }

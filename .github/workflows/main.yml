@@ -28,3 +28,18 @@ jobs:
         run: |
           cd "src be"
           dotnet build "Warehouse Management.sln" --no-restore
+          
+      - name: 🚀 Publish Project
+        run: |
+          cd "src be"
+          dotnet publish "Warehouse Management.sln" --configuration Release --output ./publish
+
+      - name: 🛠 Set Environment Variables
+        run: echo "AZURE_SQL_CONNECTION_STRING=${{ secrets.AZURE_SQL_CONNECTION_STRING }}" >> $GITHUB_ENV
+
+      - name: 🌐 Deploy to Azure App Service
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "warehousemanagement-api-dev"  # 💡 Đổi thành đúng tên App Service của bạn
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: "src be/publish"

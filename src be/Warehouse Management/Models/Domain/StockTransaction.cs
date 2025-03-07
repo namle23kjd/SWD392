@@ -11,7 +11,7 @@ namespace Warehouse_Management.Models.Domain
         public int ProductId { get; set; }
 
         [ForeignKey("Supplier")]
-        public int SupplierId { get; set; }
+        public int? SupplierId { get; set; }
 
         [ForeignKey("Lot")]
         public int LotId { get; set; }

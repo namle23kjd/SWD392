@@ -44,7 +44,9 @@ namespace Warehouse_Management.Mappings
 
             CreateMap<CreateOrderItemDTO, OrderItem>();
 
-            CreateMap<OrderItem, OrderItemDTO>();
+            CreateMap<OrderItem, OrderItemDTO>()
+                .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.UnitPrice)); // ✅ Map UnitPrice từ OrderItem
+
 
             CreateMap<UpdateOrderDTO, Order>()
            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
@@ -97,6 +99,26 @@ namespace Warehouse_Management.Mappings
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.ApiKey, opt => opt.MapFrom(src => src.ApiKey))
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
+
+            CreateMap<StockTransaction, StockTransactionDTO>()
+               .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
+               .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier!.Name))
+               .ForMember(dest => dest.LotCode, opt => opt.MapFrom(src => src.Lot!.LotCode))
+               .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
+
+            // ✅ Lot Mapping
+            CreateMap<Lot, LotDTO>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
+                .ForMember(dest => dest.ShelfName, opt => opt.MapFrom(src => src.Shelf!.Name))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown"));
+
+            // ✅ Supplier Mapping
+            CreateMap<Supplier, SupplierDTO>();
+
+            // ✅ CreateProductFromTransaction Mapping
+            CreateMap<CreateProductFromTransaction, Product>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
         }
 
     }

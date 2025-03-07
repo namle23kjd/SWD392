@@ -11,5 +11,7 @@ namespace Warehouse_Management.Services.IService
         Task<ApiResponse> DeleteOrderAsync(int id);
         Task<ApiResponse> UpdateOrderAsync(int id, UpdateOrderDTO orderDto);
         Task<ApiResponse> HandlerExceptionAsync(Exception ex);
+        Task<ApiResponse> DeleteOrderItemAsync(int orderId, int orderItemId);
+
     }
 }

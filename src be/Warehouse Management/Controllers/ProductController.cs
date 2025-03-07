@@ -73,5 +73,13 @@ namespace Warehouse_Management.Controllers
 
             return StatusCode((int)response.StatusCode, response);
         }
+
+        [HttpPost("createProductBySUppliers")]
+        public async Task<IActionResult> CreateProductBySupplier([FromBody] CreateProductFromTransaction productFromTrancsion)
+        {
+            var respone = await _productService.CreateProductFromTransactionAsync(productFromTrancsion);
+            return StatusCode((int)respone.StatusCode, respone);
+        }
+       
     }
 }
