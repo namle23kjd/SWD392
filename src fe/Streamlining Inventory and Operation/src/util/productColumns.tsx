@@ -6,6 +6,7 @@ import {
   ZoomInOutlined,
 } from '@ant-design/icons';
 import { Product } from '../pages/Products';
+import { adjustTimezone } from './convertUtils';
 
 export const productColumns = (
   handleEdit: (record: Product) => void,
@@ -56,7 +57,7 @@ export const productColumns = (
     title: 'Create At',
     dataIndex: 'createdAt',
     key: 'createdAt',
-    render: (text) => <div className="text-green-700">{new Date(text).toLocaleString()}</div>,
+    render: (text) => <div className="text-green-700">{adjustTimezone(text, 7)}</div>,
     sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     sortDirections: ['descend', 'ascend'],
   },
@@ -64,7 +65,7 @@ export const productColumns = (
     title: 'Update At',
     dataIndex: 'updatedAt',
     key: 'updatedAt',
-    render: (text) => <div className="text-red">{new Date(text).toLocaleString()}</div>,
+    render: (text) => <div className="text-red">{adjustTimezone(text, 7)}</div>,
     sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
     sortDirections: ['descend', 'ascend'],
   },
