@@ -6,7 +6,8 @@ import { createOrder } from "../fetch/order"; // Import the createOrder API func
 import { accountListLoader } from "../fetch/account";
 import { getUserInfo } from "../util/auth";
 import { useNavigate } from "react-router-dom";
-
+import { formatDate, formatNumber } from "../util/convertUtils";
+import Select from 'react-select';
 const CreateOrder: React.FC = () => {
     // State for the order fields
     const navigate = useNavigate()
@@ -51,11 +52,16 @@ const CreateOrder: React.FC = () => {
             })));
 
             const productData = await getListProducts();
-            setProducts(productData.result.products.map((productData: { sku: string, productName: string, basePrice: number, productId: string }) => ({
+            setProducts(productData.result.products.map((productData: {
+                sku: string,
+                productName: string, basePrice: number,
+                productId: string, createdAt: string
+            }) => ({
                 id: productData.sku,
                 name: productData.productName,
                 price: productData.basePrice,
-                productId: productData.productId
+                productId: productData.productId,
+                createdAt: productData.createdAt,
             })));
 
             const supplierData = await getListSuppliers();
@@ -74,35 +80,53 @@ const CreateOrder: React.FC = () => {
         setOrderDetails((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleProductChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
+    const handleProductChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+        index: number) => {
         const { name, value } = e.target;
         const updatedItems = [...orderItems];
 
         if (name === "productId") {
-            // Tìm thông tin sản phẩm từ danh sách sản phẩm theo productId
             const selectedProduct = products.find(product => product.id === value);
 
-            // Cập nhật lại giá cho sản phẩm trong orderItems
+            // Kiểm tra trùng tên sản phẩm
+            const sameNameProducts = products.filter(product => {
+                return product.productId !== value && product.name === selectedProduct?.name;
+            })
+
+            if (sameNameProducts.length > 0) {
+                const latestProduct = sameNameProducts.reduce((prev, current) => {
+                    return new Date(prev.createdAt) < new Date(current.createdAt) ? prev : current;
+                });
+
+                // Nếu sản phẩm được chọn không phải là sản phẩm có ngày tạo sớm nhất
+                if (latestProduct && latestProduct.productId !== selectedProduct.productId) {
+                    toast.error(`The product ${selectedProduct?.name} should be the earliest created one.`);
+                    return;
+                }
+            }
+
             if (selectedProduct) {
                 updatedItems[index] = {
                     ...updatedItems[index],
                     [name]: value,
-                    price: selectedProduct.price,  // Gắn giá sản phẩm vào orderItems
-                    totalPrice: updatedItems[index].quantity * selectedProduct.price,  // Tính lại tổng giá
+                    price: selectedProduct.price,
+                    totalPrice: updatedItems[index].quantity * selectedProduct.price,
                     id: selectedProduct.productId
                 };
             }
         } else if (name === "quantity") {
-            // Cập nhật lại tổng giá khi thay đổi số lượng
+            const newQuantity = Number(value);
+            if (newQuantity > 100000) {
+                toast.error("Quantity must be less than or equal to 100000.");
+                return;
+            }
+            updatedItems[index].quantity = newQuantity;
             updatedItems[index].totalPrice = updatedItems[index].quantity * updatedItems[index].price;
         } else {
             updatedItems[index] = { ...updatedItems[index], [name]: value };
         }
 
-        // Cập nhật lại orderItems
         setOrderItems(updatedItems);
-
-        // Cập nhật tổng giá trị đơn hàng
         calculateTotalPrice(updatedItems);
     };
 
@@ -139,7 +163,7 @@ const CreateOrder: React.FC = () => {
         e.preventDefault();
 
         // Validation
-        if (!orderDetails.platformId || !orderDetails.supplierId || !orderDetails.orderDate) {
+        if (!orderDetails.platformId || !orderDetails.supplierId) {
             toast.error("Please fill in all required fields.");
             return;
         }
@@ -150,30 +174,27 @@ const CreateOrder: React.FC = () => {
         }
 
         try {
-            // Prepare the order data for submission
-            console.log(orderItems)
             const submitData = {
                 userId: userId,
                 platformId: parseInt(orderDetails.platformId),
                 platformOrderId: "string",
-                orderDate: new Date(orderDetails.orderDate).toISOString(),
+                orderDate: new Date().toISOString(),
                 orderItems: orderItems.map(item => ({
                     productId: parseInt(item.id),
                     quantity: item.quantity,
                 })),
             };
 
-            // Call the createOrder API
             const response = await createOrder(submitData);
 
             if (response.statusCode === 201) {
                 navigate("/manager/order-history")
                 toast.success("Order created successfully!");
             } else {
-                toast.error("Failed to create order.");
+                toast.error(response[0]);
             }
-        } catch (error) {
-            toast.error("An error occurred while creating the order.");
+        } catch (error: any) {
+            toast.error("An error ocurred! Please try again");
         }
     };
 
@@ -202,18 +223,6 @@ const CreateOrder: React.FC = () => {
                             </option>
                         ))}
                     </select>
-                </div>
-
-                {/* Order Date */}
-                <div>
-                    <label className="block text-gray-600">Order Date</label>
-                    <input
-                        type="date"
-                        name="orderDate"
-                        value={orderDetails.orderDate}
-                        onChange={handleOrderDetailsChange}
-                        className="w-full border rounded-lg px-4 py-2 mt-1"
-                    />
                 </div>
 
                 {/* Status */}
@@ -262,49 +271,72 @@ const CreateOrder: React.FC = () => {
                     {orderItems.map((item, index) => (
                         <div key={index} className="mt-4 space-y-4">
                             <div className="flex items-center gap-4">
-                                <select
-                                    name="productId"
-                                    value={item.productId}
-                                    onChange={(e) => handleProductChange(e, index)}
-                                    className="w-1/3 border rounded-lg px-4 py-2"
-                                >
-                                    <option value="">Select Product</option>
-                                    {getAvailableProducts(index).map((product) => (
-                                        <option key={product.id} value={product.id}>
-                                            {product.name} - ${product.price}
-                                        </option>
-                                    ))}
-                                </select>
+                                {/* Product Select */}
+                                <div className="w-1/3">
+                                    <label className="block text-gray-600">Product</label>
+                                    <Select
+                                        name="productId"
+                                        value={getAvailableProducts(index).find(product => product.id === item.productId) ? {
+                                            label: `${getAvailableProducts(index).find(product => product.id === item.productId)?.name} - ${formatDate(getAvailableProducts(index).find(product => product.id === item.productId)?.createdAt)}`,
+                                            value: item.productId
+                                        } : null}
+                                        onChange={(selectedOption) => {
+                                            handleProductChange({ target: { name: "productId", value: selectedOption?.value } } as React.ChangeEvent<HTMLInputElement>, index);
+                                        }}
+                                        options={getAvailableProducts(index).map((product) => ({
+                                            label: `${product.name} - ${formatDate(product.createdAt)}`, // Hiển thị tên sản phẩm và ngày tạo
+                                            value: product.id
+                                        }))}
+                                        className="w-full border rounded-lg"
+                                        placeholder="Select Product"
+                                    />
+                                </div>
 
-                                <input
-                                    type="number"
-                                    name="quantity"
-                                    value={item.quantity}
-                                    onChange={(e) => handleProductChange(e, index)}
-                                    className="w-1/6 border rounded-lg px-4 py-2"
-                                    min="1"
-                                />
+                                {/* Quantity Input */}
+                                <div className="w-1/6">
+                                    <label className="block text-gray-600">Quantity</label>
+                                    <input
+                                        type="number"
+                                        name="quantity"
+                                        value={item.quantity}
+                                        onChange={(e) => handleProductChange(e, index)} // Đảm bảo gọi handleProductChange khi giá trị thay đổi
+                                        className="w-full border rounded-lg px-4 py-2"
+                                        min="1"
+                                    />
+                                </div>
 
-                                <input
-                                    type="text"
-                                    name="notes"
-                                    value={item.notes}
-                                    onChange={(e) => handleProductChange(e, index)}
-                                    placeholder="Notes"
-                                    className="w-1/3 border rounded-lg px-4 py-2"
-                                />
+                                {/* Price Input */}
+                                <div className="w-1/6">
+                                    <label className="block text-gray-600">Price ($)</label>
+                                    <input
+                                        type="text"
+                                        name="price"
+                                        value={formatNumber(item.price)}
+                                        onChange={(e) => handleProductChange(e, index)}
+                                        className="w-full border rounded-lg px-4 py-2"
+                                        min="0"
+                                        disabled
+                                    />
+                                </div>
 
-                                <input
-                                    type="text"
-                                    value={item.totalPrice}
-                                    readOnly
-                                    className="w-1/6 border rounded-lg px-4 py-2"
-                                />
+                                {/* Total Price Display */}
+                                <div className="w-1/6">
+                                    <label className="block text-gray-600">Total Price ($)</label>
+                                    <input
+                                        type="text"
+                                        value={formatNumber(item.totalPrice)}
+                                        disabled
+                                        className="w-full border rounded-lg px-4 py-2"
+                                    />
+                                </div>
 
-                                <DeleteOutlined
-                                    onClick={() => deleteProduct(index)} // Call deleteProduct when clicked
-                                    className="text-red-600 cursor-pointer"
-                                />
+                                {/* Delete Button */}
+                                <div>
+                                    <DeleteOutlined
+                                        onClick={() => deleteProduct(index)}
+                                        className="text-red-600 cursor-pointer"
+                                    />
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -315,7 +347,7 @@ const CreateOrder: React.FC = () => {
                     <label className="block text-gray-600 font-semibold">Total Price</label>
                     <input
                         type="text"
-                        value={`$${orderDetails.totalPrice.toFixed(2)}`} // Format the price with two decimal places
+                        value={`$${formatNumber(Number(orderDetails.totalPrice.toFixed(2)))}`} // Format the price with two decimal places
                         readOnly
                         className="w-full border rounded-lg px-4 py-2 mt-1 bg-gray-100 text-gray-600"
                     />

@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Select, Table, Row, Col, Button, Input, notification, Pagination } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Col, Input, Modal, notification, Pagination, Row, Select, Table } from "antd";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { accountListLoader } from '../fetch/account';
 import { getListOrders, getListProducts, getPlatformById, getProductById, updateOrderById } from '../fetch/order';
 import { getUserInfo } from '../util/auth';
-import { accountListLoader } from '../fetch/account';
+import { formatDate } from '../util/convertUtils';
 
 const { Option } = Select;
 const pageSize = 10
-const formatOrderDate = (dateString: string) => {
-    const options = { year: 'numeric' as const, month: 'long' as const, day: 'numeric' as const };
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', options);
-};
+
 
 const OrderHistory: React.FC = () => {
     const [orders, setOrders] = useState<any[]>([]);
@@ -58,11 +55,17 @@ const OrderHistory: React.FC = () => {
                         products: productsWithDetails,
                     };
                 }));
-                setOrders(ordersWithDetails);
-                setEditedOrders(ordersWithDetails);
-                setAllOrders(ordersWithDetails);
+
+                const sortedOrders = ordersWithDetails.sort((a, b) => {
+                    const dateA = new Date(a.orderDate);
+                    const dateB = new Date(b.orderDate);
+                    return dateB.getTime() - dateA.getTime();  // descending order
+                });
+                setOrders(sortedOrders);
+                setEditedOrders(sortedOrders);
+                setAllOrders(sortedOrders);
             } else {
-                toast.error("Failed to fetch orders.");
+                toast.error(response[0]);
             }
         } catch (error) {
             toast.error("Failed to fetch orders.");
@@ -110,18 +113,11 @@ const OrderHistory: React.FC = () => {
 
     console.log(selectedOrder)
 
-    const getAvailableProducts = (index: number) => {
-        const selectedProductIds = selectedOrder.orderItems.map(
-            (item: { productId: number }, idx: number) =>
-                (idx !== index ? item.productId : null));
-        return products.filter((product) => !selectedProductIds.includes(product.id));
-    };
-
     const handleModalSave = async () => {
         try {
             const submitData = {
                 orderStatus: selectedOrder.orderStatus,
-                orderItems: selectedOrder.products.map((item: any) => {
+                orderItems: selectedOrder.orderItems.map((item: any) => {
                     if (item.quantity < 1) {
                         throw new Error(`Quantity of ${item.name} cannot be less than 1.`);
                     }
@@ -131,6 +127,7 @@ const OrderHistory: React.FC = () => {
                     };
                 }),
             };
+            console.log(selectedOrder)
             const response = await updateOrderById(selectedOrder.orderId, submitData);
             if (response.statusCode === 200) {
                 // Update orders with the latest changes
@@ -154,20 +151,37 @@ const OrderHistory: React.FC = () => {
     };
 
     const handleProductChange = (value: string, index: number) => {
-        const updatedProducts = [...selectedOrder.products];
-        const selectedProduct = products.find(product => product.id === value);
+        const selectedProduct = products.find(product => product.productId === value);
 
         if (selectedProduct) {
-            updatedProducts[index] = {
-                ...updatedProducts[index],
-                productId: value,
-                name: selectedProduct.name,
-                price: selectedProduct.price,
-                totalPrice: updatedProducts[index].quantity * selectedProduct.price // Recalculate total price based on new selection
-            };
-        }
+            // Cập nhật sản phẩm và tính lại giá trị tổng tiền
+            setSelectedOrder((prevOrder: any) => {
+                const updatedProducts = [...prevOrder.products];
+                updatedProducts[index] = {
+                    ...updatedProducts[index], // Giữ nguyên các giá trị cũ của sản phẩm
+                    productId: selectedProduct.productId,  // Cập nhật productId mới
+                    name: selectedProduct.name,  // Cập nhật tên sản phẩm
+                    price: selectedProduct.price,  // Cập nhật giá sản phẩm
+                    totalPrice: updatedProducts[index].quantity * selectedProduct.price, // Tính lại tổng tiền
+                };
 
-        setSelectedOrder({ ...selectedOrder, products: updatedProducts });
+                console.log(updatedProducts)
+
+                // Trả về updated selectedOrder
+                return { ...prevOrder, orderItems: updatedProducts };
+            });
+        }
+    };
+
+
+
+    const getAvailableProducts = (index: number) => {
+        const selectedProductIds = selectedOrder.products
+            .filter((_: number, idx: number) => idx !== index)  // Loại bỏ sản phẩm đã chọn ở index hiện tại
+            .map((item: { productId: string }) => item.productId); // Lấy ra các productId đã chọn
+
+        // Trả về danh sách sản phẩm chưa được chọn
+        return products.filter((product) => !selectedProductIds.includes(product.productId));
     };
 
     const handleModalCancel = () => {
@@ -206,8 +220,8 @@ const OrderHistory: React.FC = () => {
     // Add new order item
     const addNewOrderItem = () => {
         const newProduct = {
-            productId: Math.random().toString(),
-            name: '1',
+            productId: '',
+            name: '',
             quantity: 1,
             price: 0,
             orderItemId: Date.now().toString(), // Unique ID for the new item
@@ -263,7 +277,7 @@ const OrderHistory: React.FC = () => {
                                             {order.orderStatus ? 'Completed' : 'In progress'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-3 text-sm text-gray-800">{formatOrderDate(order.orderDate)}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800">{formatDate(order.orderDate)}</td>
                                     <td className="px-6 py-3 text-sm">
                                         <EditOutlined
                                             onClick={() => showModal(order)}
@@ -310,7 +324,7 @@ const OrderHistory: React.FC = () => {
                         </Row>
                         <Row gutter={16}>
                             <Col span={12}>
-                                <p><strong>Order Date:</strong> {formatOrderDate(selectedOrder.orderDate)}</p>
+                                <p><strong>Order Date:</strong> {formatDate(selectedOrder.orderDate)}</p>
                             </Col>
                             <Col span={12}>
                                 <p><strong>Notes:</strong> {selectedOrder.notes}</p>
@@ -322,19 +336,21 @@ const OrderHistory: React.FC = () => {
                             dataSource={selectedOrder.products}
                             columns={[{
                                 title: 'Product Name', dataIndex: 'name', key: 'name',
-                                render: (value: string, record: any, index: number) => (
-                                    <Select
-                                        value={record.productId}
-                                        onChange={(value) => handleProductChange(value, index)}
-                                        style={{ width: '100%' }}
-                                    >
-                                        {products.map((product) => (
-                                            <Option key={product.id} value={product.id}>
-                                                {product.name}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                )
+                                render: (_value: string, record: any, index: number) => {
+                                    return (
+                                        <Select
+                                            value={record.productId}
+                                            onChange={(value) => handleProductChange(value, index)}
+                                            style={{ width: '100%' }}
+                                        >
+                                            {getAvailableProducts(index).map((product) => (
+                                                <Option key={product.productId} value={product.productId}>
+                                                    {product.name}  {/* Hiển thị tên sản phẩm */}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    )
+                                }
                             }, {
                                 title: 'Quantity', dataIndex: 'quantity', key: 'quantity',
                                 render: (value: number, record: any) => (
