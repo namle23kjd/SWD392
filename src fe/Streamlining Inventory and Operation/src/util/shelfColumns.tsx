@@ -8,6 +8,7 @@ import {
   SearchOutlined,
   ZoomInOutlined,
 } from '@ant-design/icons';
+import { adjustTimezone } from './convertUtils';
 
 export const shelfColumns = (
   handleEdit: (record: Shelf) => void,
@@ -69,14 +70,14 @@ export const shelfColumns = (
     title: 'Create At',
     dataIndex: 'createdAt',
     key: 'createAt',
-    render: (text) => <div className="text-green-700">{new Date(text).toLocaleString()}</div>,
+    render: (text) => <div className="text-green-700">{adjustTimezone(text, 7)}</div>,
     sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   },
   {
     title: 'Update At',
     dataIndex: 'updatedAt',
     key: 'updateAt',
-    render: (text) => <div className="text-red">{new Date(text).toLocaleString()}</div>,
+    render: (text) => <div className="text-red">{adjustTimezone(text, 7)}</div>,
     sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
   },
   {

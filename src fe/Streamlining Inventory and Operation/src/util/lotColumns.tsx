@@ -7,6 +7,7 @@ import {
   ZoomInOutlined,
 } from '@ant-design/icons';
 import { Lot } from '../pages/Lots';
+import { adjustTimezone } from './convertUtils';
 
 export const lotColumns = (
   handleEdit: (record: Lot) => void,
@@ -53,7 +54,7 @@ export const lotColumns = (
     title: 'Expiry Date',
     dataIndex: 'expiryDate',
     key: 'expiryDate',
-    render: (text) => <div className="text-red">{new Date(text).toLocaleDateString()}</div>,
+    render: (text) => <div className="text-red">{adjustTimezone(text, 7)}</div>,
     sorter: (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime(),
   },
   {
