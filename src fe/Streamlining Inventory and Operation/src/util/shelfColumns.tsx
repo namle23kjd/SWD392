@@ -19,6 +19,9 @@ export const shelfColumns = (
     dataIndex: 'shelfId',
     key: 'shelfId',
     fixed: 'left',
+    sorter: (a, b) => a.shelfId - b.shelfId,
+    defaultSortOrder: 'descend',
+    sortDirections: ['descend', 'ascend'],
   }
   ,
   {
@@ -49,6 +52,8 @@ export const shelfColumns = (
     title: 'Capacity',
     dataIndex: 'capacity',
     key: 'capacity',
+    sorter: (a, b) => a.capacity - b.capacity,
+    sortDirections: ['descend', 'ascend'],
   },
   {
     title: 'Status',
@@ -65,12 +70,14 @@ export const shelfColumns = (
     dataIndex: 'createdAt',
     key: 'createAt',
     render: (text) => <div className="text-green-700">{new Date(text).toLocaleString()}</div>,
+    sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   },
   {
     title: 'Update At',
     dataIndex: 'updatedAt',
     key: 'updateAt',
     render: (text) => <div className="text-red">{new Date(text).toLocaleString()}</div>,
+    sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
   },
   {
     title: 'Action',

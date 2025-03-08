@@ -13,7 +13,11 @@ export const lotColumns = (
   handleSelectedDelete: (record: Lot) => void,
   handleView: (record: Lot) => void,
 ): TableColumnsType<Lot> => [
-  { title: 'Id', dataIndex: 'lotId', key: 'lotId', fixed: 'left' },
+  { title: 'Id', dataIndex: 'lotId', key: 'lotId', fixed: 'left',
+    sorter: (a, b) => a.lotId - b.lotId,
+    defaultSortOrder: 'descend',
+    sortDirections: ['descend', 'ascend'],
+   },
   {
     title: 'Product Id',
     dataIndex: 'productId',
@@ -43,58 +47,22 @@ export const lotColumns = (
     dataIndex: 'manufactureDate',
     key: 'manufactureDate',
     render: (text) => <div className="text-green-800">{new Date(text).toLocaleDateString()}</div>,
+    sorter: (a, b) => new Date(a.manufactureDate).getTime() - new Date(b.manufactureDate).getTime(),
   },
   {
     title: 'Expiry Date',
     dataIndex: 'expiryDate',
     key: 'expiryDate',
     render: (text) => <div className="text-red">{new Date(text).toLocaleDateString()}</div>,
+    sorter: (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime(),
   },
   {
     title: 'Quantity',
     dataIndex: 'quantity',
     key: 'quantity',
+    sorter: (a, b) => a.quantity - b.quantity,
+    sortDirections: ['descend', 'ascend'],
   },
-  // {
-  //   title: 'Status',
-  //   dataIndex: 'status',
-  //   key: 'status',
-  //   render: (status: string) => {
-  //     let color = '';
-  //     let text = '';
-
-  //     switch (status) {
-  //       case 'Active':
-  //         color = 'green';
-  //         text = 'Active';
-  //         break;
-  //       case 'Expired':
-  //         color = 'volcano';
-  //         text = 'Expired';
-  //         break;
-  //       case 'Empty':
-  //         color = 'gray';
-  //         text = 'Empty';
-  //         break;
-  //       default:
-  //         color = 'default';
-  //         text = status;
-  //     }
-  //     return <Tag color={color}>{text}</Tag>;
-  //   },
-  // },
-  // {
-  //   title: 'Create At',
-  //   dataIndex: 'createdAt',
-  //   key: 'createdAt',
-  //   render: (text) => <div className="text-green">{text}</div>,
-  // },
-  // {
-  //   title: 'Update At',
-  //   dataIndex: 'updatedAt',
-  //   key: 'updatedAt',
-  //   render: (text) => <div className="text-yellow-600">{text}</div>,
-  // },
   {
     title: 'Action',
     key: 'action',

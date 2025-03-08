@@ -40,7 +40,7 @@ const ImportProduct: React.FC = () => {
   });
   const [shelfs, setShelfs] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
-  const [users,setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const ImportProduct: React.FC = () => {
         toast.error('Failed to fetch users');
       }
     };
-    
+
     featchUsers();
     featchSuppliers();
     featchShelfs();
@@ -82,7 +82,10 @@ const ImportProduct: React.FC = () => {
   };
 
   const handleDateChange = (date: string, field: string) => {
-    setImportDetails((prev) => ({ ...prev, [field]: dayjs(date).format('YYYY-MM-DD') }));
+    setImportDetails((prev) => ({
+      ...prev,
+      [field]: dayjs(date).format('YYYY-MM-DD'),
+    }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -136,8 +139,16 @@ const ImportProduct: React.FC = () => {
     const today = new Date();
     const manufactureDate = new Date(importDetails.manufactureDate);
     const expiryDate = new Date(importDetails.expiryDate);
-    if (manufactureDate > today || expiryDate < manufactureDate) {
-      toast.error('Manufacture date and expiry date invalid.');
+    if (manufactureDate > today) {
+      toast.error('Manufacture date must not be in the future');
+      return;
+    }
+    if (expiryDate < today) {
+      toast.error('Expiry date must be in the future');
+      return;
+    }
+    if (expiryDate < manufactureDate) {
+      toast.error('Expiry Date must be greater than Manufacture Date');
       return;
     }
 
@@ -157,8 +168,12 @@ const ImportProduct: React.FC = () => {
       console.log('requestBody', requestBody);
       await createProductBySuppliers(requestBody);
       toast.success('Product imported successfully!');
-    } catch (error) {
-      toast.error('Failed to import product');
+    } catch (error: any) {
+      toast.error(
+        error.response.data.errorMessages
+          ? error.response.data.errorMessages[0]
+          : 'Failed to import product',
+      );
     }
   };
 
@@ -187,7 +202,7 @@ const ImportProduct: React.FC = () => {
                     { value: '', label: 'Select Shelf Id' },
                     ...shelfs.map((shelf) => ({
                       value: shelf.shelfId,
-                      label: shelf.shelfId,
+                      label: shelf.shelfId + ' - ' + shelf.name,
                     })),
                   ]}
                 />
@@ -202,7 +217,7 @@ const ImportProduct: React.FC = () => {
                     { value: '', label: 'Select Supplier Id' },
                     ...suppliers.map((supplier) => ({
                       value: supplier.supplierId,
-                      label: supplier.supplierId,
+                      label: supplier.supplierId + ' - ' + supplier.name,
                     })),
                   ]}
                 />
@@ -217,7 +232,7 @@ const ImportProduct: React.FC = () => {
                     { value: '', label: 'Select Supplier Id' },
                     ...users.map((user) => ({
                       value: user.id,
-                      label: user.id,
+                      label: user.id + ' - ' + user.email,
                     })),
                   ]}
                 />

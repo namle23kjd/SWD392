@@ -18,6 +18,10 @@ export const productColumns = (
     key: 'productId',
     render: (text) => <a>{text}</a>,
     fixed: 'left',
+    sorter: (a, b) => a.productId - b.productId,
+    defaultSortOrder: 'descend',
+    sortDirections: ['descend', 'ascend'],
+
   },
   {
     title: 'SKU',
@@ -45,18 +49,24 @@ export const productColumns = (
     title: 'Base Price',
     dataIndex: 'basePrice',
     key: 'basePrice',
+    sorter: (a, b) => a.basePrice - b.basePrice,
+    sortDirections: ['descend', 'ascend'],
   },
   {
     title: 'Create At',
     dataIndex: 'createdAt',
     key: 'createdAt',
     render: (text) => <div className="text-green-700">{new Date(text).toLocaleString()}</div>,
+    sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    sortDirections: ['descend', 'ascend'],
   },
   {
     title: 'Update At',
     dataIndex: 'updatedAt',
     key: 'updatedAt',
     render: (text) => <div className="text-red">{new Date(text).toLocaleString()}</div>,
+    sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
+    sortDirections: ['descend', 'ascend'],
   },
   {
     title: 'User Name',
