@@ -42,59 +42,59 @@ export const lotColumns = (
     title: 'Manafacture Date',
     dataIndex: 'manufactureDate',
     key: 'manufactureDate',
-    render: (text) => <div className="text-green-800">{text}</div>,
+    render: (text) => <div className="text-green-800">{new Date(text).toLocaleDateString()}</div>,
   },
   {
     title: 'Expiry Date',
     dataIndex: 'expiryDate',
     key: 'expiryDate',
-    render: (text) => <div className="text-red">{text}</div>,
+    render: (text) => <div className="text-red">{new Date(text).toLocaleDateString()}</div>,
   },
   {
     title: 'Quantity',
     dataIndex: 'quantity',
     key: 'quantity',
   },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    render: (status: string) => {
-      let color = '';
-      let text = '';
+  // {
+  //   title: 'Status',
+  //   dataIndex: 'status',
+  //   key: 'status',
+  //   render: (status: string) => {
+  //     let color = '';
+  //     let text = '';
 
-      switch (status) {
-        case 'Active':
-          color = 'green';
-          text = 'Active';
-          break;
-        case 'Expired':
-          color = 'volcano';
-          text = 'Expired';
-          break;
-        case 'Empty':
-          color = 'gray';
-          text = 'Empty';
-          break;
-        default:
-          color = 'default';
-          text = status;
-      }
-      return <Tag color={color}>{text}</Tag>;
-    },
-  },
-  {
-    title: 'Create At',
-    dataIndex: 'createdAt',
-    key: 'createdAt',
-    render: (text) => <div className="text-green">{text}</div>,
-  },
-  {
-    title: 'Update At',
-    dataIndex: 'updatedAt',
-    key: 'updatedAt',
-    render: (text) => <div className="text-yellow-600">{text}</div>,
-  },
+  //     switch (status) {
+  //       case 'Active':
+  //         color = 'green';
+  //         text = 'Active';
+  //         break;
+  //       case 'Expired':
+  //         color = 'volcano';
+  //         text = 'Expired';
+  //         break;
+  //       case 'Empty':
+  //         color = 'gray';
+  //         text = 'Empty';
+  //         break;
+  //       default:
+  //         color = 'default';
+  //         text = status;
+  //     }
+  //     return <Tag color={color}>{text}</Tag>;
+  //   },
+  // },
+  // {
+  //   title: 'Create At',
+  //   dataIndex: 'createdAt',
+  //   key: 'createdAt',
+  //   render: (text) => <div className="text-green">{text}</div>,
+  // },
+  // {
+  //   title: 'Update At',
+  //   dataIndex: 'updatedAt',
+  //   key: 'updatedAt',
+  //   render: (text) => <div className="text-yellow-600">{text}</div>,
+  // },
   {
     title: 'Action',
     key: 'action',

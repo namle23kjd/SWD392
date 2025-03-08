@@ -21,3 +21,13 @@ export const updateProducts = async (productId: number, body: any) => {
 export const deleteProducts = async (productId: number) => {
     return axios.delete(`${baseURL}/Product/${productId}`);
 }
+export const searchProducts = async (sku: string) => {
+    return axios.get(`${baseURL}/Product/search`, {
+        params: {
+            sku
+        }
+    });
+}
+export const createProductBySuppliers = async (body: any) => {
+    return axios.post(`${baseURL}/Product/createProductBySUppliers`,body);
+}
