@@ -43,7 +43,7 @@ const Shelfs: React.FC = () => {
   const [openModalDelete, setModalDelete] = useState<boolean>(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 4,
+    pageSize: 10,
     total: 0,
   });
   const [selectedShelf, setSelectedShelf] = useState<Shelf | null>(null);

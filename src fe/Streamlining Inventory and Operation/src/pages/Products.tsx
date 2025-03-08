@@ -45,13 +45,10 @@ const Products = () => {
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
   const [activeKey, setActiveKey] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [shelfIds, setShelfIds] = useState<number[]>([]);
-  const [lotIds, setLotIds] = useState<number[]>([]);
-  const dateFormat = 'DD-MM-YYYY';
   const { styles } = useStyle();
   const [pagination, setPagination] = useState({
     pageNumber: 1,
-    pageSize: 3,
+    pageSize: 10,
     total: 0,
   });
   const [openModalDelete, setModalDelete] = useState<boolean>(false);
@@ -79,24 +76,6 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts(pagination.pageNumber, pagination.pageSize);
-    // const fetchShelfs = async () => {
-    //   try {
-    //     const response = await getAllShelfs();
-    //     setShelfs(response.data.result.items);
-    //   } catch (error) {
-    //     toast.error('Failed to fetch shelf IDs');
-    //   }
-    // };
-    // const fetchLots = async () => {
-    //   try {
-    //     const response = await getAllLots();
-    //     setLots(response.data.result.lots);
-    //   } catch (error) {
-    //     toast.error('Failed to fetch product IDs');
-    //   }
-    // };
-    // fetchShelfs();
-    // fetchLots();
   }, []);
 
   const handleTalbeChange = (pagination: any) => {
@@ -194,100 +173,6 @@ const Products = () => {
   return (
     <>
       <Breadcrumb pageName="Product Manage" />
-      <Collapse
-        activeKey={activeKey}
-        onChange={toggleCollapse}
-        style={{ marginBottom: '20px' }}
-      >
-        <Panel header="Create New Product" key="1">
-          <div className="bg-white p-8 rounded-md w-full">
-            <Form
-              {...LAYOUT_LOT}
-              name="products"
-              onFinish={onFinish}
-              style={{ maxWidth: 600 }}
-              validateMessages={VALIDATE_MESSAGES}
-            >
-              <Form.Item
-                name={['sku']}
-                label="SKU"
-                rules={[{ required: true }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name={['barcode']}
-                label="BarCode"
-                rules={[{ required: true }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name={['productName']}
-                label="Product Name"
-                rules={[{ required: true }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name={['description']}
-                label="Description"
-                rules={[{ required: true }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name={['basePrice']}
-                label="Base Price"
-                rules={[{ required: true }]}
-              >
-                <InputNumber min={0} step={0.01} />
-              </Form.Item>
-              {/* <Form.Item
-                name={['shelfId']}
-                label="Shelf ID"
-                rules={[{ required: true }]}
-              >
-                <Select>
-                  {shelfs.map((item) => (
-                    <Select.Option key={item.shelfId} value={item.shelfId}>
-                      {item.shelfId}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item
-                name={['lotId']}
-                label="Lot ID"
-                rules={[{ required: true }]}
-              >
-                <Select>
-                  {lots.map((item) => (
-                    <Select.Option key={item.lotId} value={item.lotId}>
-                      {item.lotId}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item> */}
-
-              <Form.Item label={null}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  style={{
-                    backgroundColor: '#1890ff',
-                    borderColor: '#1890ff',
-                    color: '#fff',
-                    marginRight: '20px',
-                  }}
-                >
-                  Submit
-                </Button>
-              </Form.Item>
-            </Form>
-          </div>
-        </Panel>
-      </Collapse>
       <div
         style={{
           display: 'flex',

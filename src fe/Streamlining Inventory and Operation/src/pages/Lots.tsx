@@ -53,7 +53,7 @@ const Lots: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const { styles } = useStyle();
   const dateFormat = 'DD-MM-YYYY';
-  const [pagination, setPagination] = useState({ pageNumber: 1, pageSize: 1 ,total: 0, });
+  const [pagination, setPagination] = useState({ pageNumber: 1, pageSize: 10 ,total: 0, });
   const [selectedLotDelete, setSelectedLotDelete] = useState<Lot | null>(null);
   const [openModalDelete, setModalDelete] = useState<boolean>(false);
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
