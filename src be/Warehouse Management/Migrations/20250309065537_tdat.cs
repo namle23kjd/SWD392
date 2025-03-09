@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Warehouse_Management.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateStocjTransaction : Migration
+    public partial class tdat : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
