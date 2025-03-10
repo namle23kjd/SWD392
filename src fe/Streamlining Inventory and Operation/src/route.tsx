@@ -107,7 +107,7 @@ export const router = createBrowserRouter([
                         path: 'create-order',
                         element: (
                             <>
-                                <PageTitle title="Order History" />
+                                <PageTitle title="Create Order" />
                                 <CreateOrder />
                             </>
                         )

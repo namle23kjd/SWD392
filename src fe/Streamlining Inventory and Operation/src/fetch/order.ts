@@ -1,5 +1,17 @@
 import { axiosInstanceJson } from "./axios-instance"
 
+export const getListLots = async () => {
+    const data = await axiosInstanceJson.get('/api/Lot?pageNumber=1&pageSize=1000').then((response) => {
+        return response.data
+    }
+    ).catch((error) => {
+        const errors = error.response.data.errorMessages || error.response.data.errors || []
+        return errors
+    })
+
+    return data
+}
+
 export const getListPlatforms = async () => {
     const data = await axiosInstanceJson.get('/api/Platform').then((response) => {
         return response.data

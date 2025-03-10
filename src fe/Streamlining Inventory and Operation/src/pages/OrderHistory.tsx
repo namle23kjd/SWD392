@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { accountListLoader } from '../fetch/account';
 import { getListOrders, getListProducts, getPlatformById, getProductById, updateOrderById } from '../fetch/order';
 import { getUserInfo } from '../util/auth';
-import { formatDate } from '../util/convertUtils';
+import { formatDate, formatNumber } from '../util/convertUtils';
 
 const { Option } = Select;
 const pageSize = 10
@@ -117,7 +117,7 @@ const OrderHistory: React.FC = () => {
         try {
             const submitData = {
                 orderStatus: selectedOrder.orderStatus,
-                orderItems: selectedOrder.orderItems.map((item: any) => {
+                orderItems: selectedOrder.products.map((item: any) => {
                     if (item.quantity < 1) {
                         throw new Error(`Quantity of ${item.name} cannot be less than 1.`);
                     }
@@ -127,26 +127,21 @@ const OrderHistory: React.FC = () => {
                     };
                 }),
             };
-            console.log(selectedOrder)
+
             const response = await updateOrderById(selectedOrder.orderId, submitData);
             if (response.statusCode === 200) {
-                // Update orders with the latest changes
                 const updatedOrders = editedOrders.map(order =>
                     order.orderId === selectedOrder.orderId ? selectedOrder : order
                 );
                 setEditedOrders(updatedOrders);
                 setIsModalVisible(false);
-                fetchOrders();
-                toast.success("Order status updated successfully!");
+                fetchOrders(); // Ensure the orders are re-fetched after update
+                toast.success("Order updated successfully!");
             } else {
-                toast.error("Failed to update order status.");
+                toast.error("Failed to update order.");
             }
-        } catch (error) {
-            if (error instanceof Error) {
-                toast.error(error.message);
-            } else {
-                toast.error("An unknown error occurred.");
-            }
+        } catch (error: any) {
+            toast.error(error.message || "An error occurred while updating the order.");
         }
     };
 
@@ -154,26 +149,20 @@ const OrderHistory: React.FC = () => {
         const selectedProduct = products.find(product => product.productId === value);
 
         if (selectedProduct) {
-            // Cập nhật sản phẩm và tính lại giá trị tổng tiền
             setSelectedOrder((prevOrder: any) => {
                 const updatedProducts = [...prevOrder.products];
                 updatedProducts[index] = {
-                    ...updatedProducts[index], // Giữ nguyên các giá trị cũ của sản phẩm
-                    productId: selectedProduct.productId,  // Cập nhật productId mới
-                    name: selectedProduct.name,  // Cập nhật tên sản phẩm
-                    price: selectedProduct.price,  // Cập nhật giá sản phẩm
-                    totalPrice: updatedProducts[index].quantity * selectedProduct.price, // Tính lại tổng tiền
+                    ...updatedProducts[index],
+                    productId: selectedProduct.productId,
+                    name: selectedProduct.name,
+                    price: selectedProduct.price,
+                    totalPrice: updatedProducts[index].quantity * selectedProduct.price,
                 };
 
-                console.log(updatedProducts)
-
-                // Trả về updated selectedOrder
-                return { ...prevOrder, orderItems: updatedProducts };
+                return { ...prevOrder, products: updatedProducts };
             });
         }
     };
-
-
 
     const getAvailableProducts = (index: number) => {
         const selectedProductIds = selectedOrder.products
@@ -192,17 +181,17 @@ const OrderHistory: React.FC = () => {
         return products.reduce((total, product) => total + (product.quantity * product.price), 0);
     };
 
-    // Delete order item
     const deleteOrderItem = (productId: string) => {
-        if (selectedOrder.products.length === 1) {
+        if (selectedOrder.products.length <= 1) {
             notification.error({
                 message: "Error",
                 description: "Cannot delete the last item in the order.",
             });
             return;
         }
-
-        const updatedProducts = selectedOrder.products.filter((item: { productId: string }) => item.productId !== productId);
+        const updatedProducts = selectedOrder.products.filter((item: {
+            productId: string
+        }) => item.productId !== productId);
         setSelectedOrder({ ...selectedOrder, products: updatedProducts });
         toast.success("Order item deleted successfully!");
     };
@@ -365,7 +354,9 @@ const OrderHistory: React.FC = () => {
                                 title: 'Price', dataIndex: 'price', key: 'price'
                             }, {
                                 title: 'Total Price', key: 'totalPrice',
-                                render: (_text, record: { quantity: number; price: number }) => record.quantity * record.price
+                                render: (_text, record:
+                                    { quantity: number; price: number }) =>
+                                    formatNumber(record.quantity * record.price)
                             }, {
                                 title: 'Actions', key: 'actions',
                                 render: (_text, record: any) => (
