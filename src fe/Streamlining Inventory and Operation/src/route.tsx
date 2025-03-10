@@ -32,6 +32,8 @@ import AddAccount from './pages/Admin/AddAccount';
 import EditAccount from './pages/Admin/EditAccount';
 import OrderHistory from './pages/OrderHistory';
 import CreateOrder from './pages/CreateOrder';
+import SuppliersPage from './pages/SuppliersPage';
+import Platforms from './pages/Platform';
 
 export const router = createBrowserRouter([
     {
@@ -132,6 +134,24 @@ export const router = createBrowserRouter([
                             <>
                                 <PageTitle title="Order History" />
                                 <CreateOrder />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'suppliers-page',
+                        element: (
+                            <>
+                                <PageTitle title="Suppliers Page" />
+                                <SuppliersPage />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'platforms',
+                        element: (
+                            <>
+                                <PageTitle title="platforms" />
+                                <Platforms />
                             </>
                         )
                     }
