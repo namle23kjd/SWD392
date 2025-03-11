@@ -10,7 +10,6 @@ import { action as logoutAction } from './pages/Authentication/Logout';
 import RecoverPassword from './pages/Authentication/RecoverPassword';
 import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
-import CreateOrder from './pages/CreateOrder';
 import ErrorPage from './pages/Error/ErrorPage';
 import Lots from './pages/Lots';
 import ExportProduct from './pages/Manager/ExportProduct';
@@ -23,6 +22,9 @@ import Products from './pages/Products';
 import Profile from './pages/Profile';
 import Shelfs from './pages/Shelfs';
 import { accountListLoader } from './fetch/account';
+import CreateOrder from './pages/CreateOrder';
+import SuppliersPage from './pages/SuppliersPage';
+import Platforms from './pages/Platform';
 
 export const router = createBrowserRouter([
     {
@@ -109,6 +111,24 @@ export const router = createBrowserRouter([
                             <>
                                 <PageTitle title="Create Order" />
                                 <CreateOrder />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'suppliers-page',
+                        element: (
+                            <>
+                                <PageTitle title="Suppliers Page" />
+                                <SuppliersPage />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'platforms',
+                        element: (
+                            <>
+                                <PageTitle title="platforms" />
+                                <Platforms />
                             </>
                         )
                     }
