@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify"; // Hiển thị thông báo
+import { toast } from "react-toastify"; 
 import { Table, Modal, Input, Button } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 
 const SuppliersPage: React.FC = () => {
-    // State storage Supplier
     const [suppliers, setSuppliers] = useState<any[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
@@ -12,15 +11,14 @@ const SuppliersPage: React.FC = () => {
         name: "",
         email: "",
         phone: "",
-        createAt: new Date().toISOString().split("T")[0], // date
+        createAt: new Date().toISOString().split("T")[0], 
     });
 
-    // Fetch API
     useEffect(() => {
         const fetchSuppliers = async () => {
             const fetchedSuppliers = [
-                { id: "S001", name: "Supplier A", email: "a@example.com", phone: "123 456 7890", createAt: "2024-03-01" },
-                { id: "S002", name: "Supplier B", email: "b@example.com", phone: "098 765 4321", createAt: "2024-03-05" },
+                { id: "S001", name: "Supplier A", email: "a@example.com", phone: "1234567890", createAt: "2024-03-01" },
+                { id: "S002", name: "Supplier B", email: "b@example.com", phone: "0987654321", createAt: "2024-03-05" },
             ];
             setSuppliers(fetchedSuppliers);
         };
@@ -33,34 +31,40 @@ const SuppliersPage: React.FC = () => {
             name: "",
             email: "",
             phone: "",
-            createAt: new Date().toISOString().split("T")[0], // date
+            createAt: new Date().toISOString().split("T")[0],
         });
         setIsModalVisible(true);
     };
 
-    
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setSupplierDetails((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Storage data when Submit (adđ / edit)
+    const validatePhone = (phone: string) => {
+        const phoneRegex = /^[0-9]{10,15}$/;
+        return phoneRegex.test(phone);
+    };
+
     const handleSave = () => {
         if (!supplierDetails.name || !supplierDetails.email || !supplierDetails.phone) {
             toast.error("Please fill in all fields.");
             return;
         }
 
+        if (!validatePhone(supplierDetails.phone)) {
+            toast.error("Phone number must be 10-15 digits long.");
+            return;
+        }
+
         if (selectedSupplier) {
-            // Cập nhật Supplier
             setSuppliers((prev) =>
                 prev.map((s) => (s.id === selectedSupplier.id ? { ...s, ...supplierDetails } : s))
             );
             toast.success("Supplier updated successfully!");
         } else {
-            // Thêm mới Supplier
             const newSupplier = { id: Date.now().toString(), ...supplierDetails };
-            setSuppliers([...suppliers, newSupplier]);
+            setSuppliers([newSupplier, ...suppliers]); // 🔹 Supplier mới lên đầu danh sách
             toast.success("Supplier added successfully!");
         }
 
@@ -68,7 +72,6 @@ const SuppliersPage: React.FC = () => {
         setSupplierDetails({ name: "", email: "", phone: "", createAt: new Date().toISOString().split("T")[0] });
     };
 
-    // Delete Supplier
     const handleDelete = (id: string) => {
         setSuppliers(suppliers.filter((s) => s.id !== id));
         toast.error("Supplier deleted!");
@@ -78,17 +81,17 @@ const SuppliersPage: React.FC = () => {
         <div className="p-6 bg-gray-50">
             <h3 className="text-xl font-semibold text-gray-900">Manage Suppliers</h3>
 
-            {/* add  Supplier */}
+            {/* Add Supplier Button */}
             <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => showModal()}
-                className="mb-4 mt-6 bg-blue-600 text-white"
+                className="mb-6 mt-6 bg-blue-600 text-white" 
             >
                 Add Supplier
             </Button>
 
-            {/* View Supplier */}
+            {/* Supplier Table */}
             <Table dataSource={suppliers} rowKey="id" bordered>
                 <Table.Column 
                     title={<div className="bg-blue-600 text-white p-2 text-center">Name</div>} 
@@ -127,7 +130,7 @@ const SuppliersPage: React.FC = () => {
                 />
             </Table>
 
-            {/* Modal add/edit Supplier */}
+            {/* Modal Add/Edit Supplier */}
             <Modal
                 title={selectedSupplier ? "Edit Supplier" : "Add Supplier"}
                 open={isModalVisible}
