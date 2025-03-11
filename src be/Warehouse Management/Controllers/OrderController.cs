@@ -43,6 +43,10 @@ namespace Warehouse_Management.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO orderDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var response = await _orderService.CreateOrderAsync(orderDto);
             return StatusCode((int)response.StatusCode, response);
         }
@@ -53,6 +57,10 @@ namespace Warehouse_Management.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] UpdateOrderDTO orderDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var response = await _orderService.UpdateOrderAsync(id, orderDto);
             return StatusCode((int)response.StatusCode, response);
         }
@@ -64,11 +72,22 @@ namespace Warehouse_Management.Controllers
         public async Task<IActionResult> DeleteOrder(int id)
         {
             var response = await _orderService.DeleteOrderAsync(id);
-            if (response.StatusCode == HttpStatusCode.NoContent)
-            {
-                return NoContent();
-            }
             return StatusCode((int)response.StatusCode, response);
         }
+
+
+        /// <summary>
+        /// Xóa một sản phẩm trong đơn hàng
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <param name="orderItemId"></param>
+        /// <returns></returns>
+        [HttpDelete("{orderId}/items/{orderItemId}")]
+        public async Task<IActionResult> DeleteOrderItem(int orderId, int orderItemId)
+        {
+            var response = await _orderService.DeleteOrderItemAsync(orderId, orderItemId);
+            return StatusCode((int)response.StatusCode, response);
+        }
+
     }
 }

@@ -29,8 +29,12 @@ namespace Warehouse_Management.Mappings
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username));
 
             CreateMap<Product, ProductDTO>()
-                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown"))
-                 .ReverseMap();
+                             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown"))
+                             .ForMember(dest => dest.LotId, opt => opt.MapFrom(src => src.Lots.Any() ? src.Lots.First().LotId : (int?)null))
+                             .ReverseMap();
+
+
+
             CreateMap<CreateProductDTO, Product>()
                 .ForMember(dest => dest.UserId, opt => opt.Ignore());
             CreateMap<Product, UpdateProductDTO>().ReverseMap();
@@ -44,31 +48,26 @@ namespace Warehouse_Management.Mappings
 
             CreateMap<CreateOrderItemDTO, OrderItem>();
 
-            CreateMap<OrderItem, OrderItemDTO>();
+            CreateMap<OrderItem, OrderItemDTO>()
+                .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.UnitPrice)); // ✅ Map UnitPrice từ OrderItem
+
 
             CreateMap<UpdateOrderDTO, Order>()
-           .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) 
+           .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
            .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
 
-           
+
             CreateMap<UpdateOrderItemDTO, OrderItem>();
-
-
-            CreateMap<StockTransaction, StockTransactionDTO>()
-            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
-            .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier!.Name))
-            .ForMember(dest => dest.LotCode, opt => opt.MapFrom(src => src.Lot!.LotCode))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
 
             CreateMap<CreateStockTransactionDTO, StockTransaction>();
 
             CreateMap<Supplier, SupplierDTO>();
             CreateMap<CreateSupplierDTO, Supplier>();
             CreateMap<UpdateSupplierDTO, Supplier>();
-           
+
 
             CreateMap<Shelf, ShelfDTO>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
+.ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
             CreateMap<CreateShelfDTO, Shelf>()
                 .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
@@ -97,6 +96,31 @@ namespace Warehouse_Management.Mappings
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.ApiKey, opt => opt.MapFrom(src => src.ApiKey))
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
+
+            CreateMap<StockTransaction, StockTransactionDTO>()
+                           .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
+                          .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
+                          .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier!.Name))
+                          .ForMember(dest => dest.LotCode, opt => opt.MapFrom(src => src.Lot!.LotCode))
+                          .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
+
+            CreateMap<TransactionFilterDTO, StockTransaction>()
+             .ForMember(dest => dest.Type, opt =>
+                 opt.MapFrom(src => src.Type));
+
+            // ✅ Lot Mapping
+            CreateMap<Lot, LotDTO>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
+                .ForMember(dest => dest.ShelfName, opt => opt.MapFrom(src => src.Shelf!.Name))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : "Unknown"));
+
+            // ✅ Supplier Mapping
+            CreateMap<Supplier, SupplierDTO>();
+
+            // ✅ CreateProductFromTransaction Mapping
+            CreateMap<CreateProductFromTransaction, Product>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
         }
 
     }

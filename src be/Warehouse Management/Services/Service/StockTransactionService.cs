@@ -61,7 +61,7 @@ namespace Warehouse_Management.Services.Service
                 var supplier = supplierResponse.Result as Supplier;
 
                 // Kiểm tra số lượng nếu xuất kho
-                if (dto.Type == TransactionType.OUT && lot.Quantity < dto.Quantity)
+                if (dto.Type == TransactionType.Export && lot.Quantity < dto.Quantity)
                 {
                     throw new InvalidOperationException($"Số lượng hàng trong kho không đủ. Yêu cầu: {dto.Quantity}, Tồn kho: {lot.Quantity}.");
                 }
@@ -74,7 +74,7 @@ namespace Warehouse_Management.Services.Service
                 await _transactionRepo.AddTransactionAsync(transaction);
 
                 // Cập nhật số lượng lô hàng thông qua `LotService`
-                await _lotService.UpdateLotQuantityAsync(dto.LotId, dto.Type == TransactionType.IN ? dto.Quantity : -dto.Quantity);
+                await _lotService.UpdateLotQuantityAsync(dto.LotId, dto.Type == TransactionType.Import ? dto.Quantity : -dto.Quantity);
 
                 await _transactionRepo.SaveChangesAsync();
 
@@ -126,7 +126,7 @@ namespace Warehouse_Management.Services.Service
                     StatusCode = HttpStatusCode.OK,
                     Result = new
                     {
-                        Items = _mapper.Map<IEnumerable<StockTransactionDTO>>(transactions),
+                        Items = _mapper.Map<IEnumerable<StockTransactionDTO>>(transactions.ToList()), // 🛠 Dùng ToList() // ✅ Chỉ ánh xạ danh sách Items
                         TotalCount = transactions.TotalCount,
                         PageSize = transactions.PageSize,
                         CurrentPage = transactions.CurrentPage,

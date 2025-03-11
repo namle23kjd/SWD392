@@ -122,6 +122,7 @@ builder.Services.AddScoped<ILotService, LotService>();
 builder.Services.AddScoped<IShelfRepository, ShelfRepository>();
 builder.Services.AddScoped<IShelfService, ShelfService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddLogging();
 
 //Handler
 builder.Services.AddScoped<IExceptionHandler, BadRequestExceptionHandler>();

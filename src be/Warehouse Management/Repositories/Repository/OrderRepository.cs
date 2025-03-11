@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Warehouse_Management.Data;
+using Warehouse_Management.Helpers;
 using Warehouse_Management.Models.Domain;
 using Warehouse_Management.Repositories.IRepository;
 
@@ -19,16 +20,14 @@ namespace Warehouse_Management.Repositories.Repository
 
         public async Task DeleteOrderAsync(Order order)
         {
-            _db.Orders.Remove(order);
+            order.OrderStatus = false; 
+            _db.Orders.Update(order);
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync(int pageNumber = 1, int pageSize = 10)
+        public async Task<PagedList<Order>> GetAllOrdersAsync(int pageNumber, int pageSize)
         {
-            return await _db.Orders
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .Include(o => o.OrderItems)
-                    .ToListAsync();
+            var query = _db.Orders.Include(o => o.OrderItems).AsQueryable();
+            return await PagedList<Order>.CreateAsync(query, pageNumber, pageSize);
         }
 
         public async Task<Order?> GetOrderByIdAsync(int id)

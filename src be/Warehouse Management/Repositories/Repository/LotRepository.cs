@@ -9,6 +9,7 @@ namespace Warehouse_Management.Repositories.Repository
     public class LotRepository : ILotRepository
     {
         private readonly WareHouseDbContext _db;
+        private readonly ILogger<LotRepository> _logger;
         public LotRepository(WareHouseDbContext db)
         {
             _db = db;
@@ -37,6 +38,23 @@ namespace Warehouse_Management.Repositories.Repository
             .Include(l => l.Shelf)
             .Include(l => l.User)
             .FirstOrDefaultAsync(l => l.LotId == id);
+        }
+
+        public async Task<Lot?> GetByProductIdAsync(int productId)
+        {
+           var lots = await _db.Lots
+                .Include(l => l.Product)
+                .Include(l => l.Shelf)// Đảm bảo Load Product
+                .Include(l => l.User) // Load User nếu cần
+                .Where(l => l.ProductId == productId && l.Quantity > 0)
+                .OrderBy(l => l.ManufactureDate)
+                .ToListAsync();
+
+            if (!lots.Any())
+            {
+                return null;
+            }
+            return lots.FirstOrDefault();
         }
 
         public async Task SaveChangesAsync()

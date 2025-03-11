@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Warehouse_Management.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateDatabase : Migration
+    public partial class UpdateStocjTransaction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -78,7 +78,8 @@ namespace Warehouse_Management.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreateAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -249,7 +250,7 @@ namespace Warehouse_Management.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PlatformId = table.Column<int>(type: "int", nullable: false),
                     PlatformOrderId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OrderStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OrderStatus = table.Column<bool>(type: "bit", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -339,7 +340,7 @@ namespace Warehouse_Management.Migrations
                     TransactionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(type: "int", nullable: false),
-                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    SupplierId = table.Column<int>(type: "int", nullable: true),
                     LotId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: false),
@@ -379,8 +380,9 @@ namespace Warehouse_Management.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "373e112e - 121b - 4f3f - bb3e - dc30c08b9999", "373e112e - 121b - 4f3f - bb3e - dc30c08b9999", "Admin", "ADMIN" },
-                    { "9116bb38-85b1-4345-bf4a-7c0819a8ef3b", "9116bb38-85b1-4345-bf4a-7c0819a8ef3b", "Staff", "STAFF" }
+                    { "373e112e-121b-4f3f-bb3e-dc30c08b9999", "373e112e-121b-4f3f-bb3e-dc30c08b9999", "Admin", "ADMIN" },
+                    { "9116bb38-85b1-4345-bf4a-7c0819a8ef3b", "9116bb38-85b1-4345-bf4a-7c0819a8ef3b", "Staff", "STAFF" },
+                    { "b1234567-89ab-cdef-0123-456789abcdef", "b1234567-89ab-cdef-0123-456789abcdef", "Manager", "MANAGER" }
                 });
 
             migrationBuilder.CreateIndex(
