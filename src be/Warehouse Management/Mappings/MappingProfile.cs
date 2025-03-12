@@ -104,6 +104,8 @@ namespace Warehouse_Management.Mappings
                           .ForMember(dest => dest.LotCode, opt => opt.MapFrom(src => src.Lot!.LotCode))
                           .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
 
+
+
             CreateMap<TransactionFilterDTO, StockTransaction>()
              .ForMember(dest => dest.Type, opt =>
                  opt.MapFrom(src => src.Type));
@@ -121,7 +123,9 @@ namespace Warehouse_Management.Mappings
             CreateMap<CreateProductFromTransaction, Product>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
+
         }
+
 
     }
 }
