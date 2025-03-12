@@ -36,9 +36,12 @@ namespace Warehouse_Management.Repositories.Repository
             .Include(t => t.Supplier)
             .Include(t => t.Lot)
             .Include(t => t.User)
+            .AsNoTracking()
             .AsQueryable();
 
-            // Apply filters
+            // Apply filter
+
+
             if (filter.StartDate.HasValue)
                 query = query.Where(t => t.TransactionDate >= filter.StartDate);
 
@@ -51,8 +54,8 @@ namespace Warehouse_Management.Repositories.Repository
             if (filter.LotId.HasValue)
                 query = query.Where(t => t.LotId == filter.LotId);
 
-            if (filter.Type.HasValue)
-                query = query.Where(t => t.Type == filter.Type.ToString());
+            if (!string.IsNullOrEmpty(filter.Type))
+                query = query.Where(t => t.Type == filter.Type);
 
             return await PagedList<StockTransaction>.CreateAsync(
                 query.OrderByDescending(t => t.TransactionDate),

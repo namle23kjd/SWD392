@@ -2,7 +2,7 @@
 {
     public enum TransactionType
     {
-        IN,
-        OUT
+        Import,  // Giá trị 0
+        Export
     }
 }

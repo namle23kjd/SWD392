@@ -98,10 +98,15 @@ namespace Warehouse_Management.Mappings
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive));
 
             CreateMap<StockTransaction, StockTransactionDTO>()
-               .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
-               .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier!.Name))
-               .ForMember(dest => dest.LotCode, opt => opt.MapFrom(src => src.Lot!.LotCode))
-               .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
+                           .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
+                          .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product!.ProductName))
+                          .ForMember(dest => dest.SupplierName, opt => opt.MapFrom(src => src.Supplier!.Name))
+                          .ForMember(dest => dest.LotCode, opt => opt.MapFrom(src => src.Lot!.LotCode))
+                          .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User!.UserName));
+
+            CreateMap<TransactionFilterDTO, StockTransaction>()
+             .ForMember(dest => dest.Type, opt =>
+                 opt.MapFrom(src => src.Type));
 
             // ✅ Lot Mapping
             CreateMap<Lot, LotDTO>()
