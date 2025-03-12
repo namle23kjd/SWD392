@@ -14,7 +14,7 @@ namespace Warehouse_Management.Models.DTO.StockTransaction
         public int LotId { get; set; }
         public string LotCode { get; set; }
         public int Quantity { get; set; }
-        public TransactionType Type { get; set; }
+        public string Type { get; set; }
         public DateTime TransactionDate { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }

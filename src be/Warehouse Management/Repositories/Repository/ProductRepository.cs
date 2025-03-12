@@ -2,6 +2,7 @@
 using Warehouse_Management.Data;
 using Warehouse_Management.Helpers;
 using Warehouse_Management.Models.Domain;
+using Warehouse_Management.Models.DTO.Product;
 using Warehouse_Management.Repositories.IRepository;
 
 namespace Warehouse_Management.Repositories.Repository
@@ -25,9 +26,10 @@ namespace Warehouse_Management.Repositories.Repository
 
         public async Task<PagedList<Product>> GetALlProductsAsync(int pageNumber, int pageSize)
         {
-            var query = _db.Products.Include(p => p.User).AsQueryable();
+            var query = _db.Products.Include(p => p.User).Include(p => p.Lots).AsQueryable();
             return await PagedList<Product>.CreateAsync(query, pageNumber, pageSize);
         }
+
 
         public async Task<Product?> GetProductByIdAsync(int id)
         => await _db.Products.FirstOrDefaultAsync(p => p.ProductId == id);

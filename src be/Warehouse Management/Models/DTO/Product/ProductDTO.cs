@@ -5,6 +5,8 @@ namespace Warehouse_Management.Models.DTO.Product
     public class ProductDTO
     {
         public int ProductId { get; set; }
+
+        public int? LotId { get; set; }
         public string? SKU { get; set; }
 
         public string? Barcode { get; set; }
