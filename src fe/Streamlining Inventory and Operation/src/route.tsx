@@ -290,7 +290,7 @@ export const router = createBrowserRouter([
                 </>)
             }
             , {
-                path: 'recover-password',
+                path: 'recover-password/reset',
                 element: (<>
                     <PageTitle title="Recover Password | Warehouse management" />
                     <RecoverPassword />
