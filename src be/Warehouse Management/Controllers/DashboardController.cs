@@ -33,5 +33,42 @@ namespace Warehouse_Management.Controllers
 
             return Ok(dashboardData);
         }
+
+        //GET: 
+        [HttpGet("orders-by-platform")]
+        public IActionResult GetOrdersByPlatform()
+        {
+            var platformData = _dashboardService.GetOrdersByPlatform();
+            return Ok(platformData);
+        }
+
+
+        // Phương thức lấy tất cả các nhà cung cấp
+        [HttpGet("all-suppliers")]
+        public IActionResult GetAllSuppliers()
+        {
+            var suppliers = _dashboardService.GetAllSuppliers();  // Gọi từ service
+            return Ok(suppliers);  // Trả về kết quả cho client
+        }
+
+
+
+        [HttpGet("transaction-type-summary")]
+        public IActionResult GetTransactionTypeSummary()
+        {
+            var transactionData = _dashboardService.GetTransactionTypeSummary();
+            return Ok(transactionData);
+        }
+
+
+        [HttpGet("low-stock-products")]
+        public IActionResult GetLowStockProducts()
+        {
+            var lowStockProducts = _dashboardService.GetLowStockProducts();
+            return Ok(lowStockProducts);
+        }
+
     }
+
+
 }

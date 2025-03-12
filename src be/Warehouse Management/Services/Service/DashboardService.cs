@@ -1,4 +1,5 @@
-﻿using Warehouse_Management.Repositories.IRepository;
+﻿using Warehouse_Management.Models.DTO.Lot;
+using Warehouse_Management.Repositories.IRepository;
 using Warehouse_Management.Services.IService;
 
 namespace Warehouse_Management.Services.Service
@@ -31,6 +32,24 @@ namespace Warehouse_Management.Services.Service
         {
             return _dashboardRepository.GetTotalQuantity();
         }
+        public IEnumerable<object> GetOrdersByPlatform()
+        {
+            return _dashboardRepository.GetOrdersByPlatform();
+        }
+        public IEnumerable<object> GetAllSuppliers()
+        {
+            return _dashboardRepository.GetAllSuppliers();  // Gọi từ repository
+        }
+
+        public object GetTransactionTypeSummary()
+        {
+            return _dashboardRepository.GetTransactionTypeSummary();
+        }
+        public IEnumerable<object> GetLowStockProducts()
+        {
+            return _dashboardRepository.GetLowStockProducts();
+        }
+
     }
 }
 
