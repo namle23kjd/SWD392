@@ -19,7 +19,7 @@ const RecoverPassword: React.FC = () => {
     console.log('token', tokenParam);
     
     if (tokenParam && emailParam) {
-      setToken(tokenParam);
+      setToken(tokenParam.replace(/ /g, '+'));
       setEmail(emailParam);
     }
   }, [location.search]);
