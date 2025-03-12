@@ -72,7 +72,7 @@ namespace Warehouse_Management.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO model)
         {
-            var response = await _userService.ResetPasswordAsync(model.Email);
+            var response = await _userService.ResetPasswordAsync(model);
             return StatusCode((int)response.StatusCode, response);
         }
 

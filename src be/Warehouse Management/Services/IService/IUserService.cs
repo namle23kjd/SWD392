@@ -13,7 +13,7 @@ namespace Warehouse_Management.Services.IService
 
         Task<ApiResponse> LoginAsync(LoginRequestDTO loginRequestDTO);
 
-        Task<ApiResponse> ResetPasswordAsync(string email);
+        Task<ApiResponse> ResetPasswordAsync(ResetPasswordRequestDTO resetPasswordRequestDTO);
         Task<ApiResponse> ConfirmResetPasswordAsync(string email, string token, string newPassword);
         Task<ApiResponse> EditUserAsync(string userId, EditUserDTO userDto);
         Task<ApiResponse> DeleteUserAsync(string userId);
