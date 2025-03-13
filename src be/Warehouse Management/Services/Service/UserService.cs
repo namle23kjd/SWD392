@@ -262,11 +262,11 @@ namespace Warehouse_Management.Services.Service
             return response;
         }
 
-        public async Task<ApiResponse> ResetPasswordAsync(string email)
+        public async Task<ApiResponse> ResetPasswordAsync(ResetPasswordRequestDTO resetPasswordRequestDTO)
         {
             var response = new ApiResponse();
 
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(resetPasswordRequestDTO.Email);
             if (user == null)
             {
                 response.StatusCode = HttpStatusCode.NotFound;
@@ -278,10 +278,11 @@ namespace Warehouse_Management.Services.Service
             // Tạo token đặt lại mật khẩu
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
             var encodedToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(resetToken));
-            var resetUrl = $"https://yourfrontend.com/reset-password?token={resetToken}&email={email}";
+
+            var resetUrl = $"{resetPasswordRequestDTO.Link}{resetToken}&email={resetPasswordRequestDTO.Email}";
 
             // Gửi email đặt lại mật khẩu
-            var emailResponse = await _emailService.SendEmailAsync(email, "Reset Password",
+            var emailResponse = await _emailService.SendEmailAsync(resetPasswordRequestDTO.Email, "Reset Password",
                 $"<p>Click vào link sau để đặt lại mật khẩu: <a href='{resetUrl}'>Đặt lại mật khẩu</a></p>");
 
             if (!emailResponse.IsSuccess)
