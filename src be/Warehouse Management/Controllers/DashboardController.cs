@@ -53,12 +53,12 @@ namespace Warehouse_Management.Controllers
 
 
 
-        [HttpGet("transaction-type-summary")]
-        public IActionResult GetTransactionTypeSummary()
-        {
-            var transactionData = _dashboardService.GetTransactionTypeSummary();
-            return Ok(transactionData);
-        }
+        //[HttpGet("transaction-type-summary")]
+        //public IActionResult GetTransactionTypeSummary()
+        //{
+        //    var transactionData = _dashboardService.GetTransactionTypeSummary();
+        //    return Ok(transactionData);
+        //}
 
 
         [HttpGet("low-stock-products")]
@@ -68,7 +68,16 @@ namespace Warehouse_Management.Controllers
             return Ok(lowStockProducts);
         }
 
-    }
 
+        [HttpGet("top-products")]
+        public IActionResult GetTopOrderProducts()
+        {
+            var topOrderProducts = _dashboardService.GetTopOrderProducts();
+            return Ok(topOrderProducts);
+        }
+
+
+
+    }
 
 }

@@ -9,7 +9,10 @@ namespace Warehouse_Management.Repositories.IRepository
         int GetTotalQuantity();
         IEnumerable<object> GetOrdersByPlatform();
         IEnumerable<object> GetAllSuppliers();
-        object GetTransactionTypeSummary();
+        //object GetTransactionTypeSummary();
         IEnumerable<object> GetLowStockProducts();
+
+        IEnumerable<object> GetTopOrderProducts();
+
     }
 }

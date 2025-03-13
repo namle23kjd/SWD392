@@ -41,15 +41,19 @@ namespace Warehouse_Management.Services.Service
             return _dashboardRepository.GetAllSuppliers();  // Gọi từ repository
         }
 
-        public object GetTransactionTypeSummary()
-        {
-            return _dashboardRepository.GetTransactionTypeSummary();
-        }
+        //public object GetTransactionTypeSummary()
+        //{
+        //    return _dashboardRepository.GetTransactionTypeSummary();
+        //}
         public IEnumerable<object> GetLowStockProducts()
         {
             return _dashboardRepository.GetLowStockProducts();
         }
 
+        public IEnumerable<object> GetTopOrderProducts()
+        {
+            return _dashboardRepository.GetTopOrderProducts();
+        }
     }
 }
 
