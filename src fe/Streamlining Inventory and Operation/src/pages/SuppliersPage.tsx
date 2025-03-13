@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify"; 
-import { Table, Modal, Input, Button } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { Button, Input, Modal, Table } from "antd";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const SuppliersPage: React.FC = () => {
     const [suppliers, setSuppliers] = useState<any[]>([]);

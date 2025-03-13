@@ -111,8 +111,6 @@ const OrderHistory: React.FC = () => {
         setIsModalVisible(true);
     };
 
-    console.log(selectedOrder)
-
     const handleModalSave = async () => {
         try {
             const submitData = {
@@ -127,6 +125,7 @@ const OrderHistory: React.FC = () => {
                     };
                 }),
             };
+            console.log(selectedOrder)
 
             const response = await updateOrderById(selectedOrder.orderId, submitData);
             if (response.statusCode === 200) {
@@ -143,34 +142,6 @@ const OrderHistory: React.FC = () => {
         } catch (error: any) {
             toast.error(error.message || "An error occurred while updating the order.");
         }
-    };
-
-    const handleProductChange = (value: string, index: number) => {
-        const selectedProduct = products.find(product => product.productId === value);
-
-        if (selectedProduct) {
-            setSelectedOrder((prevOrder: any) => {
-                const updatedProducts = [...prevOrder.products];
-                updatedProducts[index] = {
-                    ...updatedProducts[index],
-                    productId: selectedProduct.productId,
-                    name: selectedProduct.name,
-                    price: selectedProduct.price,
-                    totalPrice: updatedProducts[index].quantity * selectedProduct.price,
-                };
-
-                return { ...prevOrder, products: updatedProducts };
-            });
-        }
-    };
-
-    const getAvailableProducts = (index: number) => {
-        const selectedProductIds = selectedOrder.products
-            .filter((_: number, idx: number) => idx !== index)  // Loại bỏ sản phẩm đã chọn ở index hiện tại
-            .map((item: { productId: string }) => item.productId); // Lấy ra các productId đã chọn
-
-        // Trả về danh sách sản phẩm chưa được chọn
-        return products.filter((product) => !selectedProductIds.includes(product.productId));
     };
 
     const handleModalCancel = () => {
@@ -204,21 +175,6 @@ const OrderHistory: React.FC = () => {
                 : item
         );
         setSelectedOrder({ ...selectedOrder, products: updatedProducts });
-    };
-
-    // Add new order item
-    const addNewOrderItem = () => {
-        const newProduct = {
-            productId: '',
-            name: '',
-            quantity: 1,
-            price: 0,
-            orderItemId: Date.now().toString(), // Unique ID for the new item
-        };
-        setSelectedOrder({
-            ...selectedOrder,
-            products: [...selectedOrder.products, newProduct],
-        });
     };
 
     const paginatedOrders = orders.slice(
@@ -325,19 +281,13 @@ const OrderHistory: React.FC = () => {
                             dataSource={selectedOrder.products}
                             columns={[{
                                 title: 'Product Name', dataIndex: 'name', key: 'name',
-                                render: (_value: string, record: any, index: number) => {
+                                render: (_value: string, record: any) => {
                                     return (
-                                        <Select
-                                            value={record.productId}
-                                            onChange={(value) => handleProductChange(value, index)}
+                                        <Input
+                                            disabled
+                                            value={record.name}
                                             style={{ width: '100%' }}
-                                        >
-                                            {getAvailableProducts(index).map((product) => (
-                                                <Option key={product.productId} value={product.productId}>
-                                                    {product.name}  {/* Hiển thị tên sản phẩm */}
-                                                </Option>
-                                            ))}
-                                        </Select>
+                                        />
                                     )
                                 }
                             }, {
@@ -360,22 +310,13 @@ const OrderHistory: React.FC = () => {
                             }, {
                                 title: 'Actions', key: 'actions',
                                 render: (_text, record: any) => (
-                                    selectedOrder.products.length > 1 ? (
+                                    selectedOrder.products.length > 1 && (
                                         <div className="flex items-center space-x-2">
                                             <DeleteOutlined
                                                 onClick={() => deleteOrderItem(record.productId)}
                                                 className="text-red-600 cursor-pointer"
                                             />
-                                            <PlusOutlined
-                                                onClick={addNewOrderItem}
-                                                className="text-green-600 cursor-pointer"
-                                            />
                                         </div>
-                                    ) : (
-                                        <PlusOutlined
-                                            onClick={addNewOrderItem}
-                                            className="text-green-600 cursor-pointer"
-                                        />
                                     )
                                 )
                             }]}

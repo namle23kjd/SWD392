@@ -1,25 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
-import { useNavigate } from 'react-router-dom';
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  ZoomInOutlined,
-} from '@ant-design/icons';
-import { toast } from 'react-toastify';
 import { Button, Collapse, Form, Input, InputNumber, Table } from 'antd';
-import { shelfColumns } from '../util/shelfColumns';
-import { LAYOUT_SHELF, VALIDATE_MESSAGES } from '../validate/validateMessages';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
+import DeleteModal from '../components/ModalDelete';
 import '../css/buttonSearch.css';
+import { useStyle } from '../css/useStyle';
 import {
   createShelfs,
   deleteShelfs,
   getShelfs,
   updateShelfs,
 } from '../services/shelfApi';
-import { useStyle } from '../css/useStyle';
-import DeleteModal from '../components/ModalDelete';
+import { shelfColumns } from '../util/shelfColumns';
+import { LAYOUT_SHELF, VALIDATE_MESSAGES } from '../validate/validateMessages';
 
 export interface Shelf {
   shelfId: number;

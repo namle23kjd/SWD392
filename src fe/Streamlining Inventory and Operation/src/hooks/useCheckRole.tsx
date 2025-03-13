@@ -22,19 +22,19 @@ export const useCheckRole = () => {
         }
 
         // Kiểm tra xem đường dẫn có chứa /admin không và role có phải là admin không
-        if (currentPath.includes('/admin') && !currentRoles.includes('Admin')) {
+        if (currentPath.includes('/admin') && !currentRoles.includes('Admin') && currentRoles.length <= 1) {
             navigate('/auth/signin')
             return
         }
 
         // Kiểm tra xem đường dẫn có chứa /manager không và role có phải là manager không
-        if (currentPath.includes('/manager') && !currentRoles.includes('Manager')) {
+        if (currentPath.includes('/manager') && !currentRoles.includes('Manager') && currentRoles.length <= 1) {
             navigate('/auth/signin')
             return
         }
 
         // Kiểm tra xem đường dẫn có chứa /staff không và role có phải là staff không
-        if (currentPath.includes('/staff') && !currentRoles.includes('Staff')) {
+        if (currentPath.includes('/staff') && !currentRoles.includes('Staff') && currentRoles.length <= 1) {
             navigate('/auth/signin')
             return
         }

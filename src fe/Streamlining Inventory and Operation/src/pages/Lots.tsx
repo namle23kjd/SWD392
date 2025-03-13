@@ -1,7 +1,3 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
-import { useNavigate } from 'react-router-dom';
 import {
   Button,
   Collapse,
@@ -12,10 +8,13 @@ import {
   Select,
   Table,
 } from 'antd';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { lotColumns } from '../util/lotColumns';
+import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
+import DeleteModal from '../components/ModalDelete';
 import '../css/buttonSearch.css';
-import { LAYOUT_LOT, VALIDATE_MESSAGES } from '../validate/validateMessages';
 import { useStyle } from '../css/useStyle';
 import {
   createLots,
@@ -23,9 +22,10 @@ import {
   getLots,
   updateLots,
 } from '../services/lotApi';
-import { getAllShelfs, getShelfs } from '../services/shelfApi';
 import { getAllProducts } from '../services/productApi';
-import DeleteModal from '../components/ModalDelete';
+import { getAllShelfs } from '../services/shelfApi';
+import { lotColumns } from '../util/lotColumns';
+import { LAYOUT_LOT, VALIDATE_MESSAGES } from '../validate/validateMessages';
 
 export interface Lot {
   lotId: number;

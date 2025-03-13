@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import {
   Button,
   Collapse,
   Form,
   Input,
   InputNumber,
-  Select,
-  Table,
+  Table
 } from 'antd';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { LAYOUT_LOT, VALIDATE_MESSAGES } from '../validate/validateMessages';
-import { productColumns } from '../util/productColumns';
+import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
+import DeleteModal from '../components/ModalDelete';
+import { useStyle } from '../css/useStyle';
 import {
   createProducts,
   deleteProducts,
@@ -20,10 +19,8 @@ import {
   searchProducts,
   updateProducts,
 } from '../services/productApi';
-import { useStyle } from '../css/useStyle';
-import DeleteModal from '../components/ModalDelete';
-import { getAllShelfs } from '../services/shelfApi';
-import { getAllLots } from '../services/lotApi';
+import { productColumns } from '../util/productColumns';
+import { LAYOUT_LOT, VALIDATE_MESSAGES } from '../validate/validateMessages';
 
 export interface Product {
   productId: number;
