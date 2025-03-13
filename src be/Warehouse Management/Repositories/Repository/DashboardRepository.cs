@@ -60,21 +60,21 @@ namespace Warehouse_Management.Repositories.Repository
         }
 
 
-        public object GetTransactionTypeSummary()
-        {
-            var importQuantity = _context.StockTransactions
-                                          .Where(st => st.Type == "Import")
-                                          .Sum(st => st.Quantity);
-            var exportQuantity = _context.StockTransactions
-                                           .Where(st => st.Type == "Export")
-                                           .Sum(st => st.Quantity);
+        //public object GetTransactionTypeSummary()
+        //{
+        //    var importQuantity = _context.StockTransactions
+        //                                  .Where(st => st.Type == "Import")
+        //                                  .Sum(st => st.Quantity);
+        //    var exportQuantity = _context.StockTransactions
+        //                                   .Where(st => st.Type == "Export")
+        //                                   .Sum(st => st.Quantity);
 
-            return new
-            {
-                import = importQuantity,
-                export = exportQuantity
-            };
-        }
+        //    return new
+        //    {
+        //        import = importQuantity,
+        //        export = exportQuantity
+        //    };
+        //}
         public IEnumerable<object> GetLowStockProducts()
         {
             var warningDate = DateTime.UtcNow.AddMonths(3); // Tính toán ngày cảnh báo (CreateAt + 3 tháng)
@@ -90,5 +90,23 @@ namespace Warehouse_Management.Repositories.Repository
                            .ToList();
         }
 
+        public IEnumerable<object> GetTopOrderProducts()
+        {
+            return _context.OrderItems
+                           .GroupBy(oi => oi.ProductId)
+                           .Select(g => new
+                           {
+                                productId = g.Key,
+                                productName = _context.Products
+                           .Where(p => p.ProductId == g.Key)
+                           .Select(p => p.ProductName)
+                           .FirstOrDefault(),
+                                totalSold = g.Sum(oi => oi.Quantity)
+                           })
+                           .OrderByDescending(p => p.totalSold)
+                           .Take(5)
+                           .ToList();
+
+        }
     }
 }
