@@ -1,7 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e1af2305-6fcf-4447-998f-4d90d4a27437" name="Changes" comment="" />
+    <list default="true" id="e1af2305-6fcf-4447-998f-4d90d4a27437" name="Changes" comment="push BE">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Controllers/DashboardController.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Logs/WareHouse_log20250309.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Properties/PublishProfiles/warehousemanagement-api-dev - FTP1.pubxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Properties/PublishProfiles/warehousemanagement-api-dev - FTP1.pubxml.user" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Properties/PublishProfiles/warehousemanagement-api-dev - ReadOnly - FTP.pubxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Properties/PublishProfiles/warehousemanagement-api-dev - ReadOnly - FTP.pubxml.user" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Properties/PublishProfiles/warehousemanagement-api-dev - Zip Deploy1.pubxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Properties/PublishProfiles/warehousemanagement-api-dev - Zip Deploy1.pubxml.user" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Repositories/IRepository/IDashboardRepository.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Repositories/Repository/DashboardRepository.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/IService/IDashboardService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/Service/DashboardService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Warehouse Management.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Controllers/AuthController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/AuthController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Mappings/MappingProfile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Mappings/MappingProfile.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Migrations/20250304035722_Fix enitity StockTransaction.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Migrations/20250304035722_Fix enitity StockTransaction.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Migrations/20250304041349_UpdateStocjTransaction.Designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Migrations/20250314085101_TenMigrationMoi.Designer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Migrations/20250304041349_UpdateStocjTransaction.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Migrations/20250314085101_TenMigrationMoi.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/DTO/Product/ProductDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/DTO/Product/ProductDTO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/DTO/ResetPasswordRequestDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/DTO/ResetPasswordRequestDTO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Properties/PublishProfiles/warehousemanagement-api-dev - Web Deploy.pubxml.user" beforeDir="false" afterPath="$PROJECT_DIR$/Properties/PublishProfiles/warehousemanagement-api-dev - Web Deploy.pubxml.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Services/IService/IUserService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/IService/IUserService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Services/Service/ProductService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/Service/ProductService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Services/Service/UserService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/Service/UserService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Warehouse Management.csproj.user" beforeDir="false" afterPath="$PROJECT_DIR$/Warehouse Management.csproj.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/appsettings.Development.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,18 +54,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Materail_FPTU/Semester 7/SWD392/Project/SWD392/src be/Warehouse Management&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Develop-FE",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Materail_FPTU/Semester 7/SWD392/Project/SWD392/src be/Warehouse Management",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.3.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -55,6 +91,15 @@
       <workItem from="1741938361923" duration="46000" />
       <workItem from="1741938419852" duration="5000" />
     </task>
+    <task id="LOCAL-00001" summary="push BE">
+      <option name="closed" value="true" />
+      <created>1741942989338</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1741942989338</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -70,5 +115,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="test" />
+    <MESSAGE value="push BE" />
+    <option name="LAST_COMMIT_MESSAGE" value="push BE" />
   </component>
 </project>
