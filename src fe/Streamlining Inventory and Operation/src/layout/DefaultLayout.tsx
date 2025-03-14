@@ -3,8 +3,9 @@ import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { getUserInfo } from '../util/auth';
-
+import {useCheckRole} from "../hooks/"
 const DefaultLayout: React.FC = () => {
+  useCheckRole()
   const navigate = useNavigate();
   useEffect(() => {
     const userInfo = getUserInfo();
