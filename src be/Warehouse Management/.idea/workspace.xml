@@ -6,8 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="e1af2305-6fcf-4447-998f-4d90d4a27437" name="Changes" comment="push BE">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Logs/WareHouse_log20250314.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Logs/WareHouse_log20250314.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src fe/Streamlining Inventory and Operation/.env" beforeDir="false" afterPath="$PROJECT_DIR$/../../src fe/Streamlining Inventory and Operation/.env" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -233,15 +233,6 @@ export const router = createBrowserRouter([
                         )
                     },
                     {
-                        path: 'confirm-stock-daily',
-                        element: (
-                            <>
-                                <PageTitle title="Confirm Stock Daily" />
-                                <InventoryTracking />
-                            </>
-                        )
-                    },
-                    {
                         path: 'order-history',
                         element: (
                             <>

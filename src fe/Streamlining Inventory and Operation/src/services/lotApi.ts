@@ -1,11 +1,11 @@
-import axios from "axios"
+import { axiosInstanceJson } from "../fetch/axios-instance";
 import { baseURL } from "./baseURL";
 
 export const createLots = async (body: any) => {
-    return axios.post(`${baseURL}/Lot`, body);
+    return axiosInstanceJson.post(`${baseURL}/Lot`, body);
 }
 export const getLots = async (pageNumber:number, pageSize: number) => {
-    return axios.get(`${baseURL}/Lot`,{
+    return axiosInstanceJson.get(`${baseURL}/Lot`,{
         params:{
             pageNumber,
             pageSize
@@ -13,11 +13,11 @@ export const getLots = async (pageNumber:number, pageSize: number) => {
     });
 }
 export const getAllLots = async () =>{
-    return axios.get(`${baseURL}/Lot`);
+    return axiosInstanceJson.get(`${baseURL}/Lot`);
 }
 export const updateLots = async (lotId: number, body: any) => {
-    return axios.put(`${baseURL}/Lot/${lotId}`, body);
+    return axiosInstanceJson.put(`${baseURL}/Lot/${lotId}`, body);
 }
 export const deleteLots = async (lotId: number) => {
-    return axios.delete(`${baseURL}/Lot/${lotId}`);
+    return axiosInstanceJson.delete(`${baseURL}/Lot/${lotId}`);
 }

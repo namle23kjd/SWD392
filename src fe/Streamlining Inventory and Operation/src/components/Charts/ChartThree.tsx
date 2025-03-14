@@ -96,7 +96,6 @@ const ChartThree: React.FC = () => {
 
       <div className="-mx-8 flex flex-wrap items-center justify-center gap-y-3">
         {state.labels.map((label, index) => {
-          console.log(['#3C50E0', '#6577F3', '#8FD0EF', '#0FADCF'][index])
           return (
             <div key={index} className="sm:w-1/2 w-full px-8">
               <div className="flex w-full items-center">

@@ -28,27 +28,39 @@ export const getOrdersByPlatform = async () => {
 
 export const getLowStockProducts = async () => {
     const data = await axiosInstanceJson.get('/api/Dashboard/low-stock-products')
-      .then((response) => {
+        .then((response) => {
             return response.data
         }
-      ).catch((error) => {
-          const errors = error.response.data.errorMessages
-            || error.response.data.errors || []
-          return errors
-      })
+        ).catch((error) => {
+            const errors = error.response.data.errorMessages
+                || error.response.data.errors || []
+            return errors
+        })
     return data
 }
 
 export const getSupplierImports = async () => {
     const data = await axiosInstanceJson.get('/api/Dashboard/all-suppliers')
-      .then((response) => {
+        .then((response) => {
             return response.data
         }
-      ).catch((error) => {
-          const errors = error.response.data.errorMessages
-            || error.response.data.errors || []
-          return errors
-      })
+        ).catch((error) => {
+            const errors = error.response.data.errorMessages
+                || error.response.data.errors || []
+            return errors
+        })
     return data
 }
 
+export const getTopProducts = async () => {
+    const data = await axiosInstanceJson.get('/api/Dashboard/top-products')
+        .then((response) => {
+            return response.data
+        }
+        ).catch((error) => {
+            const errors = error.response.data.errorMessages
+                || error.response.data.errors || []
+            return errors
+        })
+    return data
+}
