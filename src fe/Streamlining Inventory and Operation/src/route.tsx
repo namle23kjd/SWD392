@@ -261,7 +261,6 @@ export const router = createBrowserRouter([
                     }
                 ]
             }
-            // other roles here...
         ]
     }, {
         path: '/auth',

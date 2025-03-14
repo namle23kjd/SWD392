@@ -8,8 +8,11 @@ import logo from '/src/images/user/user-avatar.png';
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { email } = getUserInfo()
-  function getUsernameFromEmail(email: string) {
+  const email = getUserInfo()?.email || null
+  function getUsernameFromEmail(email: string | null) {
+    if (!email) {
+      return null
+    }
     // Tìm vị trí dấu '@' và lấy phần trước nó
     const atIndex = email.indexOf('@');
     if (atIndex === -1) {

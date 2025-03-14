@@ -16,7 +16,6 @@ const CreateOrder: React.FC = () => {
         orderDate: "",
         supplierId: "",
         totalPrice: 0,
-        status: "In Progress",
     });
 
     // State for the products in the order
@@ -46,10 +45,11 @@ const CreateOrder: React.FC = () => {
         // Simulate fetching product, platform, and supplier data
         const fetchData = async () => {
             const platformData = await getListPlatforms();
-            setPlatforms(platformData.result.map((platformItem: { platformId: number, name: string }) => ({
-                id: platformItem.platformId,
-                name: platformItem.name
-            })));
+            setPlatforms(platformData.result.map((platformItem:
+                { platformId: number, name: string }) => ({
+                    id: platformItem.platformId,
+                    name: platformItem.name
+                })));
 
             const productData = await getListProducts();
             setProducts(productData.result.products.map((productData: {
@@ -222,20 +222,6 @@ const CreateOrder: React.FC = () => {
                                 {platform.name}
                             </option>
                         ))}
-                    </select>
-                </div>
-
-                {/* Status */}
-                <div>
-                    <label className="block text-gray-600">Status</label>
-                    <select
-                        name="status"
-                        value={orderDetails.status}
-                        onChange={handleOrderDetailsChange}
-                        className="w-full border rounded-lg px-4 py-2 mt-1"
-                    >
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
                     </select>
                 </div>
 
