@@ -1166,3 +1166,28 @@ WHERE [a].[UserId] = @__userId_0
 2025-03-14 15:58:37.158 +07:00 [INF] Executed action Warehouse_Management.Controllers.AuthController.GetAllUser (Warehouse Management) in 190.499ms
 2025-03-14 15:58:37.159 +07:00 [INF] Executed endpoint 'Warehouse_Management.Controllers.AuthController.GetAllUser (Warehouse Management)'
 2025-03-14 15:58:37.162 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5299/api/Auth - 200 null application/json; charset=utf-8 250.5992ms
+2025-03-14 16:05:45.264 +07:00 [INF] Application is shutting down...
+2025-03-14 16:05:54.694 +07:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-03-14 16:05:54.709 +07:00 [WRN] No store type was specified for the decimal property 'UnitPrice' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-03-14 16:05:54.710 +07:00 [WRN] No store type was specified for the decimal property 'BasePrice' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-03-14 16:05:54.853 +07:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-03-14 16:05:54.864 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-03-14 16:05:54.871 +07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-03-14 16:05:54.977 +07:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [Products] AS [p]) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-03-14 16:05:54.980 +07:00 [INF] Products table already contains data, no seed required.
+2025-03-14 16:05:54.988 +07:00 [INF] User profile is available. Using 'C:\Users\BINH\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-03-14 16:05:55.015 +07:00 [INF] Now listening on: http://localhost:5299
+2025-03-14 16:05:55.015 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-03-14 16:05:55.016 +07:00 [INF] Hosting environment: Development
+2025-03-14 16:05:55.017 +07:00 [INF] Content root path: D:\Materail_FPTU\Semester 7\SWD392\Project\SWD392\src be\Warehouse Management
