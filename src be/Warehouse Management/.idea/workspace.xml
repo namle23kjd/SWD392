@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="e1af2305-6fcf-4447-998f-4d90d4a27437" name="Changes" comment="push BE">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Logs/WareHouse_log20250314.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Logs/WareHouse_log20250314.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +36,7 @@
     "git-widget-placeholder": "Develop-FE",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Materail_FPTU/Semester 7/SWD392/Project/SWD392/src be/Warehouse Management",
+    "last_opened_file_path": "D:/Materail_FPTU/Semester 7/SBA301/ProjectGroup/ProjectSBA/Spring2025_SBA301_SE1701_SaoPhaiLo_BE/School-Psychological-Health-Support-System",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -45,6 +46,17 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -64,6 +76,7 @@
       <workItem from="1741938122661" duration="191000" />
       <workItem from="1741938361923" duration="46000" />
       <workItem from="1741938419852" duration="5000" />
+      <workItem from="1741998042408" duration="83000" />
     </task>
     <task id="LOCAL-00001" summary="push BE">
       <option name="closed" value="true" />
