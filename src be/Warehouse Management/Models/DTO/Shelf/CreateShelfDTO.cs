@@ -17,6 +17,8 @@ namespace Warehouse_Management.Models.DTO.Shelf
         [StringLength(200, ErrorMessage = "Location cannot exceed 200 characters")]
         public string Location { get; set; } = string.Empty;
 
+        public bool? IsActive { get; set; }
+
         [Required(ErrorMessage = "Capacity is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Capacity must be greater than 0")]
         public int Capacity { get; set; }
