@@ -358,7 +358,8 @@ namespace Warehouse_Management.Services.Service
                         LotCode = $"LOT-{Guid.NewGuid().ToString().Substring(0, 8)}",
                         Quantity = 0,  // Sẽ cập nhật số lượng sau
                         ManufactureDate = importDto.ManufactureDate,
-                        ExpiryDate = DateTime.UtcNow.AddYears(1),
+                        // Thay đổi phần tính toán ExpiryDate: ExpiryDate = ManufactureDate + 1 năm
+                        ExpiryDate = importDto.ManufactureDate.AddYears(1),
                         Status = true,
                         CreateAt = DateTime.UtcNow,
                         UpdateAt = DateTime.UtcNow,
@@ -368,6 +369,7 @@ namespace Warehouse_Management.Services.Service
                     await _lotRepository.CreateAsync(lot);
                     await _lotRepository.SaveChangesAsync();
                 }
+
 
                 // Kiểm tra nếu ManufactureDate không hợp lệ
                 if (importDto.ManufactureDate == default(DateTime))

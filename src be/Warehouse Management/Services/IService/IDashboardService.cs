@@ -9,8 +9,10 @@ namespace Warehouse_Management.Services.IService {
 
         IEnumerable<object> GetOrdersByPlatform();
         IEnumerable<object> GetAllSuppliers();
-        object GetTransactionTypeSummary();
+        //object GetTransactionTypeSummary();
         IEnumerable<object> GetLowStockProducts();
+
+        IEnumerable<object> GetTopOrderProducts();
     }
 }
 
