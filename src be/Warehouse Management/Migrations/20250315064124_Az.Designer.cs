@@ -12,8 +12,8 @@ using Warehouse_Management.Data;
 namespace Warehouse_Management.Migrations
 {
     [DbContext(typeof(WareHouseDbContext))]
-    [Migration("20250304035722_Fix enitity StockTransaction")]
-    partial class FixenitityStockTransaction
+    [Migration("20250315064124_Az")]
+    partial class Az
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
