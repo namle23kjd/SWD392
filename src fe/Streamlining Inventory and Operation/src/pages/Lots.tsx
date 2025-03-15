@@ -25,7 +25,7 @@ import {
 import { getAllProducts } from '../services/productApi';
 import { getAllShelfs } from '../services/shelfApi';
 import { lotColumns } from '../util/lotColumns';
-import { LAYOUT_LOT, VALIDATE_MESSAGES } from '../validate/validateMessages';
+import { LAYOUT_LOT, VALIDATE_MESSAGES, validateExpiryDate, validateManufactureDate } from '../validate/validateMessages';
 
 export interface Lot {
   lotId: number;
@@ -59,6 +59,7 @@ const Lots: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
   console.log('selectedLot', selectedLot);
+  const [form] = Form.useForm();
   
   useEffect(() => {
     fecthLots(pagination.pageNumber, pagination.pageSize);
@@ -175,9 +176,11 @@ const Lots: React.FC = () => {
             <Form
               {...LAYOUT_LOT}
               name="lots"
+              form={form}
               onFinish={onFinish}
               style={{ maxWidth: 600 }}
               validateMessages={VALIDATE_MESSAGES}
+
             >
               <Form.Item
                 name={['lotCode']}
@@ -188,42 +191,46 @@ const Lots: React.FC = () => {
               </Form.Item>
               <Form.Item
                 name={['shelfId']}
-                label="Shelf ID"
+                label="Choose Shelf"
                 rules={[{ required: true }]}
               >
                 <Select>
                   {shelfs.map((item) => (
                     <Select.Option key={item.shelfId} value={item.shelfId}>
-                      {item.shelfId}
+                      {item.name}
                     </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
               <Form.Item
                 name={['productId']}
-                label="Product ID"
+                label="Choose Product"
                 rules={[{ required: true }]}
               >
                 <Select>
                   {products.map((item) => (
                     <Select.Option key={item.productId} value={item.productId}>
-                      {item.productId}
+                      {item.productName}
                     </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
 
               <Form.Item
-                name={['managefactureDate']}
-                label="Managefacture Date"
-                rules={[{ required: true, type: 'object' }]}
+                name={['manufactureDate']} 
+                label="Manufacture Date"
+                rules={[{ required: true}, validateManufactureDate()]}
               >
                 <DatePicker format={dateFormat} />
               </Form.Item>
               <Form.Item
                 name={['expiryDate']}
                 label="Expiry Date"
-                rules={[{ required: true, type: 'object' }]}
+                dependencies={['manufactureDate']}
+                rules={[
+                  { required: true },
+                  validateExpiryDate(form.getFieldValue)
+                ]}
               >
                 <DatePicker format={dateFormat} />
               </Form.Item>
@@ -305,59 +312,30 @@ const Lots: React.FC = () => {
               </Form.Item>
               <Form.Item
                 name={['shelfId']}
-                label="Shelf ID"
+                label="Choose Shelf"
                 rules={[{ required: true }]}
               >
                 <Select>
                   {shelfs.map((item) => (
                     <Select.Option key={item.shelfId} value={item.shelfId}>
-                      {item.shelfId}
+                      {item.name}
                     </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
               <Form.Item
                 name={['productId']}
-                label="Product ID"
+                label="Choose Product"
                 rules={[{ required: true }]}
               >
                 <Select>
                   {products.map((item) => (
                     <Select.Option key={item.productId} value={item.productId}>
-                      {item.productId}
+                      {item.productName}
                     </Select.Option>
                   ))}
                 </Select>
               </Form.Item>
-
-              {/* <Form.Item
-                name={['managefactureDate']}
-                label="Managefacture Date"
-                //rules={[{ required: true, type: 'object' }]}
-              >
-                <span>{selectedLot?.manufactureDate}</span>
-              </Form.Item>
-              <Form.Item
-                name={['expiryDate']}
-                label="Expiry Date"
-                // rules={[{ required: true, type: 'object' }]}
-              >
-                  <span>{selectedLot?.expiryDate}</span>
-              </Form.Item> */}
-              {/* <Form.Item
-                name={['createdAt']}
-                label="Created At"
-                // rules={[{ required: true, type: 'object' }]}
-              >
-                  <span>{selectedLot?.expiryDate}</span>
-              </Form.Item>
-              <Form.Item
-                name={['updatedAt']}
-                label="updated At"
-                // rules={[{ required: true, type: 'object' }]}
-              >
-                  <span>{selectedLot?.expiryDate}</span>
-              </Form.Item> */}
               <Form.Item
                 name={['quantity']}
                 label="Quantity"

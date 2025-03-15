@@ -20,15 +20,15 @@ export const lotColumns = (
     sortDirections: ['descend', 'ascend'],
    },
   {
-    title: 'Product Id',
-    dataIndex: 'productId',
-    key: 'productId',
+    title: 'Product Name',
+    dataIndex: 'productName',
+    key: 'productName',
     fixed: 'left',
   },
   {
-    title: 'Shelf Id',
-    dataIndex: 'shelfId',
-    key: 'shelfId',
+    title: 'Shelf Name',
+    dataIndex: 'shelfName',
+    key: 'shelfName',
     fixed: 'left',
   },
   {
