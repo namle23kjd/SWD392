@@ -1,0 +1,34 @@
+2025-03-14 15:20:24.148 +07:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'Order'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-03-14 15:20:24.178 +07:00 [WRN] No store type was specified for the decimal property 'UnitPrice' on entity type 'OrderItem'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-03-14 15:20:24.180 +07:00 [WRN] No store type was specified for the decimal property 'BasePrice' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-03-14 15:20:24.440 +07:00 [ERR] An error occurred while seeding the database: The ConnectionString property has not been initialized.
+2025-03-14 15:20:24.478 +07:00 [INF] User profile is available. Using 'C:\Users\PC-PHUONG NAM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-03-14 15:20:24.759 +07:00 [INF] Now listening on: https://localhost:7190
+2025-03-14 15:20:24.760 +07:00 [INF] Now listening on: http://localhost:5299
+2025-03-14 15:20:24.761 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-03-14 15:20:24.761 +07:00 [INF] Hosting environment: Development
+2025-03-14 15:20:24.762 +07:00 [INF] Content root path: C:\Users\PC-PHUONG NAM\source\repos\SWD392\src be\Warehouse Management
+2025-03-14 15:20:26.394 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger - null null
+2025-03-14 15:20:26.607 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger - 301 0 null 224.1033ms
+2025-03-14 15:20:26.613 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/index.html - null null
+2025-03-14 15:20:26.739 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/index.html - 200 null text/html;charset=utf-8 126.4105ms
+2025-03-14 15:20:26.754 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/swagger-ui.css - null null
+2025-03-14 15:20:26.760 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/index.css - null null
+2025-03-14 15:20:26.763 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/_framework/aspnetcore-browser-refresh.js - null null
+2025-03-14 15:20:26.761 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/swagger-ui-standalone-preset.js - null null
+2025-03-14 15:20:26.807 +07:00 [INF] Sending file. Request path: '/index.css'. Physical path: 'N/A'
+2025-03-14 15:20:26.768 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/index.js - null null
+2025-03-14 15:20:26.813 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/index.css - 200 202 text/css 54.386ms
+2025-03-14 15:20:26.832 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/index.js - 200 null application/javascript;charset=utf-8 65.2329ms
+2025-03-14 15:20:26.845 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/_framework/aspnetcore-browser-refresh.js - 200 13776 application/javascript; charset=utf-8 82.044ms
+2025-03-14 15:20:26.763 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/swagger-ui-bundle.js - null null
+2025-03-14 15:20:26.775 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/_vs/browserLink - null null
+2025-03-14 15:20:26.855 +07:00 [INF] Sending file. Request path: '/swagger-ui-standalone-preset.js'. Physical path: 'N/A'
+2025-03-14 15:20:26.855 +07:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2025-03-14 15:20:26.875 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/swagger-ui-standalone-preset.js - 200 230007 text/javascript 113.6896ms
+2025-03-14 15:20:26.877 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/swagger-ui.css - 200 152035 text/css 122.7229ms
+2025-03-14 15:20:26.955 +07:00 [INF] Sending file. Request path: '/swagger-ui-bundle.js'. Physical path: 'N/A'
+2025-03-14 15:20:26.959 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/swagger-ui-bundle.js - 200 1426050 text/javascript 198.0751ms
+2025-03-14 15:20:26.987 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/_vs/browserLink - 200 null text/javascript; charset=UTF-8 211.9422ms
+2025-03-14 15:20:27.169 +07:00 [INF] Request starting HTTP/2 GET https://localhost:7190/swagger/v1/swagger.json - null null
+2025-03-14 15:20:27.418 +07:00 [INF] Request finished HTTP/2 GET https://localhost:7190/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 248.8849ms
