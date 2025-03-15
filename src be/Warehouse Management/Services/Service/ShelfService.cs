@@ -53,6 +53,7 @@ namespace Warehouse_Management.Services.Service
                 shelf.CreatedAt = nowInVietnam;
                 shelf.UpdatedAt = nowInVietnam;
                 shelf.UserId = userId;
+                shelf.IsActive = true;
 
                 await _shelfRepository.CreateAsync(shelf);
                 await _shelfRepository.SaveChangesAsync();
