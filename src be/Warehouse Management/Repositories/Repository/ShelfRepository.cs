@@ -64,5 +64,12 @@ namespace Warehouse_Management.Repositories.Repository
             _db.Shelves.Remove(shelf);
             await _db.SaveChangesAsync();
         }
+
+        public async Task<bool> IsCodeUniqueAsync(string code, int? excludeShelfId = null)
+        {
+            return await _db.Shelves
+                .Where(s => s.Code == code && (!excludeShelfId.HasValue || s.ShelfId != excludeShelfId.Value))
+                .AnyAsync();
+        }
     }
 }
