@@ -11,7 +11,7 @@ namespace Warehouse_Management.Repositories.Repository
         private readonly WareHouseDbContext _db;
         public ShelfRepository(WareHouseDbContext db)
         {
-            _db = db;   
+            _db = db;
         }
         public async Task CreateAsync(Shelf shelf)
         {
@@ -63,6 +63,13 @@ namespace Warehouse_Management.Repositories.Repository
         {
             _db.Shelves.Remove(shelf);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<bool> IsCodeUniqueAsync(string code, int? excludeShelfId = null)
+        {
+            return await _db.Shelves
+                .Where(s => s.Code == code && (!excludeShelfId.HasValue || s.ShelfId != excludeShelfId.Value))
+                .AnyAsync();
         }
     }
 }

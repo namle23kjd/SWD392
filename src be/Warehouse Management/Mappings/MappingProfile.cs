@@ -71,6 +71,11 @@ namespace Warehouse_Management.Mappings
             CreateMap<CreateShelfDTO, Shelf>()
                 .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
+            CreateMap<UpdateShelfDTO, Shelf>()
+           .ForMember(dest => dest.ShelfId, opt => opt.Ignore()) // Đảm bảo không thay đổi ShelfId
+           .ForMember(dest => dest.Code, opt => opt.Ignore())   // Đảm bảo không thay đổi Code
+           .ForMember(dest => dest.UserId, opt => opt.Ignore());
+
 
             CreateMap<CreateLotDTO, Lot>()
                .ForMember(dest => dest.UserId, opt => opt.Ignore());
