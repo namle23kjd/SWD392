@@ -44,16 +44,28 @@ namespace Warehouse_Management.Services.Service
                     };
                 }
 
-                if (!await _shelfRepository.IsCodeUniqueAsync(dto.Code))
-                    throw new Exception($"Shelf code {dto.Code} is already taken");
+                // Kiểm tra tính duy nhất của mã kệ (code) trước khi tạo mới
+                var codeExists = await _shelfRepository.IsCodeUniqueAsync(dto.Code);
+                if (!codeExists) // Sửa đổi điều kiện này để phản hồi khi mã kệ đã tồn tại
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = new List<string> { $"Shelf with the code '{dto.Code}' already exists." }
+                    };
+                }
 
+                // Map DTO sang entity Shelf
                 var shelf = _mapper.Map<Shelf>(dto);
                 var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var nowInVietnam = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vietnamTimeZone);
                 shelf.CreatedAt = nowInVietnam;
                 shelf.UpdatedAt = nowInVietnam;
                 shelf.UserId = userId;
+                shelf.IsActive = true;
 
+                // Lưu kệ vào cơ sở dữ liệu
                 await _shelfRepository.CreateAsync(shelf);
                 await _shelfRepository.SaveChangesAsync();
 
@@ -72,6 +84,8 @@ namespace Warehouse_Management.Services.Service
                 return await HandleExceptionAsync(ex);
             }
         }
+
+
 
         public async Task<ApiResponse> GetAllShelvesAsync(int page = 1, int pageSize = 10)
         {
@@ -131,7 +145,7 @@ namespace Warehouse_Management.Services.Service
             }
         }
 
-        public async Task<ApiResponse> UpdateShelfAsync(int id, CreateShelfDTO dto)
+        public async Task<ApiResponse> UpdateShelfAsync(int id, UpdateShelfDTO dto)
         {
             try
             {
@@ -146,8 +160,24 @@ namespace Warehouse_Management.Services.Service
                     };
                 }
 
+
+                // Cập nhật giá trị từ dto
                 _mapper.Map(dto, shelf);
+
+                // Cập nhật thời gian sửa đổi
                 shelf.UpdatedAt = DateTime.UtcNow;
+
+                // Kiểm tra và cập nhật IsActive nếu có thay đổi trong dto
+                if (dto.IsActive != null)
+                {
+                    shelf.IsActive = dto.IsActive.Value;
+                }
+
+                // Cập nhật Capacity nếu có thay đổi
+                if (dto.Capacity.HasValue)
+                {
+                    shelf.Capacity = dto.Capacity.Value;
+                }
 
                 await _shelfRepository.UpdateAsync(shelf);
                 await _shelfRepository.SaveChangesAsync();
@@ -168,6 +198,7 @@ namespace Warehouse_Management.Services.Service
                 return await HandleExceptionAsync(ex);
             }
         }
+
 
         public async Task<ApiResponse> DeleteShelfAsync(int id)
         {
