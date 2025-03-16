@@ -47,6 +47,11 @@ namespace Warehouse_Management.Repositories.Repository
         {
             return await _db.Suppliers.FirstOrDefaultAsync(x => x.Email == email);
         }
+        public async Task<Supplier?> GetByPhoneAsync(string phone)
+        {
+            return await _db.Suppliers
+                .FirstOrDefaultAsync(s => s.Phone == phone);
+        }
 
         public async Task<Supplier?> GetByIdAsync(int id)
         {
