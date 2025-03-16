@@ -364,12 +364,14 @@ namespace Warehouse_Management.Services.Service
                 // ✅ Cập nhật trạng thái đơn hàng
                 order.OrderStatus = orderDto.OrderStatus;
 
+                List<OrderItem> itemsToRemove = new List<OrderItem>();
+
                 // ✅ Cập nhật số lượng OrderItem
                 foreach (var orderItemDto in orderDto.OrderItems)
                 {
                     var existingItem = order.OrderItems.FirstOrDefault(oi => oi.OrderItemId == orderItemDto.OrderItemId);
 
-                    if(existingItem == null)
+                    if (existingItem == null)
                     {
                         return new ApiResponse
                         {
@@ -379,20 +381,25 @@ namespace Warehouse_Management.Services.Service
                         };
                     }
 
-                    if (existingItem != null)
+                    // 🔥 Kiểm tra tồn kho Lot
+                    var lot = await _lotRepository.GetByProductIdAsync(existingItem.ProductId);
+                    if (lot == null || lot.Quantity + existingItem.Quantity < orderItemDto.Quantity)
                     {
-                        // 🔥 Kiểm tra tồn kho Lot
-                        var lot = await _lotRepository.GetByProductIdAsync(existingItem.ProductId);
-                        if (lot == null || lot.Quantity + existingItem.Quantity < orderItemDto.Quantity)
+                        return new ApiResponse
                         {
-                            return new ApiResponse
-                            {
-                                IsSuccess = false,
-                                StatusCode = HttpStatusCode.BadRequest,
-                                ErrorMessages = { $"Not enough stock for Product ID {existingItem.ProductId}" }
-                            };
-                        }
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.BadRequest,
+                            ErrorMessages = { $"Not enough stock for Product ID {existingItem.ProductId}" }
+                        };
+                    }
 
+                    // 🔥 Nếu số lượng mới là 0, thêm vào danh sách xóa
+                    if (orderItemDto.Quantity == 0)
+                    {
+                        itemsToRemove.Add(existingItem);
+                    }
+                    else
+                    {
                         // 🔥 Cập nhật số lượng trong OrderItem
                         int quantityDiff = orderItemDto.Quantity - existingItem.Quantity;
                         existingItem.Quantity = orderItemDto.Quantity;
@@ -401,6 +408,12 @@ namespace Warehouse_Management.Services.Service
                         lot.Quantity -= quantityDiff;
                         await _lotRepository.UpdateAsync(lot);
                     }
+                }
+
+                // ✅ Xóa OrderItem có số lượng = 0
+                foreach (var item in itemsToRemove)
+                {
+                    order.OrderItems.Remove(item);
                 }
 
                 // ✅ Cập nhật tổng tiền đơn hàng
@@ -421,5 +434,6 @@ namespace Warehouse_Management.Services.Service
                 return await HandlerExceptionAsync(ex);
             }
         }
+
     }
 }
