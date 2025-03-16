@@ -1,13 +1,11 @@
 import {
   Button,
-  Collapse,
   Form,
   Input,
   InputNumber,
   Table
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import DeleteModal from '../components/ModalDelete';
@@ -35,12 +33,9 @@ export interface Product {
 }
 
 const Products = () => {
-  const navigate = useNavigate();
   const { Search } = Input;
-  const { Panel } = Collapse;
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [searchLoading, setSearchLoading] = useState<boolean>(false);
-  const [activeKey, setActiveKey] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const { styles } = useStyle();
   const [pagination, setPagination] = useState({
@@ -53,8 +48,6 @@ const Products = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedProductDelete, setSelectedProductDelete] =
     useState<Product | null>(null);
-  const [shelfs, setShelfs] = useState<any[]>([]);
-  const [lots, setLots] = useState<any[]>([]);
   const fetchProducts = async (pageNumber: number, pageSize: number) => {
     try {
       const response = await getProducts(pageNumber, pageSize);
@@ -159,12 +152,6 @@ const Products = () => {
     setOpenModal(false);
     setIsEditMode(false);
     setSelectedProduct(null);
-  };
-
-  const toggleCollapse = () => {
-    console.log('activeKey', activeKey);
-    console.log('activeKey', activeKey.length);
-    setActiveKey(activeKey.length ? [] : ['1']);
   };
 
   return (

@@ -97,7 +97,6 @@ const ImportProduct: React.FC = () => {
       !importDetails.sku ||
       !importDetails.barcode ||
       !importDetails.productName ||
-      !importDetails.description ||
       !importDetails.basePrice ||
       !importDetails.supplierId ||
       !importDetails.shelfId ||
@@ -199,40 +198,40 @@ const ImportProduct: React.FC = () => {
                   value={importDetails.shelfId}
                   onChange={handleInputChange}
                   options={[
-                    { value: '', label: 'Select Shelf Id' },
+                    { value: '', label: 'Select Shelf' },
                     ...shelfs.map((shelf) => ({
                       value: shelf.shelfId,
-                      label: shelf.shelfId + ' - ' + shelf.name,
+                      label: shelf.name,
                     })),
                   ]}
                 />
               </div>
               <div>
                 <SelectGroupTwo
-                  label="Supplier Id"
+                  label="Supplier"
                   name="supplierId"
                   value={importDetails.supplierId}
                   onChange={handleInputChange}
                   options={[
-                    { value: '', label: 'Select Supplier Id' },
+                    { value: '', label: 'Select Supplier' },
                     ...suppliers.map((supplier) => ({
                       value: supplier.supplierId,
-                      label: supplier.supplierId + ' - ' + supplier.name,
+                      label: supplier.name,
                     })),
                   ]}
                 />
               </div>
               <div>
                 <SelectGroupTwo
-                  label="User Id"
+                  label="User"
                   name="userId"
                   value={importDetails.userId}
                   onChange={handleInputChange}
                   options={[
-                    { value: '', label: 'Select Supplier Id' },
+                    { value: '', label: 'Select User' },
                     ...users.map((user) => ({
                       value: user.id,
-                      label: user.id + ' - ' + user.email,
+                      label: user.email,
                     })),
                   ]}
                 />
@@ -307,7 +306,7 @@ const ImportProduct: React.FC = () => {
               {/* Giá nhập */}
               <div>
                 <label className="mb-3 block text-black dark:text-white">
-                  Price
+                  Price ($)
                 </label>
                 <input
                   type="number"

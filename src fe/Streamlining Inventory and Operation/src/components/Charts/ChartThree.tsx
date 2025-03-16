@@ -105,7 +105,7 @@ const ChartThree: React.FC = () => {
                 ></span>
                 <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
                   <span> {label} </span>
-                  <span> {state.series[index]}% </span>
+                  <span> {state.series[index]} </span>
                 </p>
               </div>
             </div>
