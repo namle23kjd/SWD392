@@ -45,7 +45,7 @@ namespace Warehouse_Management.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateShelf(int id, [FromBody] CreateShelfDTO dto)
+        public async Task<IActionResult> UpdateShelf(int id, [FromBody] UpdateShelfDTO dto)
         {
             var response = await _shelfService.UpdateShelfAsync(id, dto);
             return StatusCode((int)response.StatusCode, response);

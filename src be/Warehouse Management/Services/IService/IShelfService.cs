@@ -5,11 +5,11 @@ namespace Warehouse_Management.Services.IService
 {
     public interface IShelfService
     {
-       Task<ApiResponse> GetAllShelvesAsync(int page, int pageSize);
+        Task<ApiResponse> GetAllShelvesAsync(int page, int pageSize);
         Task<ApiResponse> GetShelfByIdAsync(int id);
         Task<ApiResponse> CreateShelfAsync(CreateShelfDTO dto, string userId);
-        Task<ApiResponse> UpdateShelfAsync(int id, CreateShelfDTO dto);
+        Task<ApiResponse> UpdateShelfAsync(int id, UpdateShelfDTO dto);
         Task<ApiResponse> DeleteShelfAsync(int id);
-        Task<ApiResponse> HandleExceptionAsync (Exception ex);
+        Task<ApiResponse> HandleExceptionAsync(Exception ex);
     }
 }

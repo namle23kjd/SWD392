@@ -12,5 +12,7 @@ namespace Warehouse_Management.Repositories.IRepository
         Task UpdateAsync(Shelf shelf);
         Task DeleteAsync(Shelf shelf);
         Task SaveChangesAsync();
+        Task<bool> IsCodeUniqueAsync(string code, int? excludeShelfId = null);
+
     }
 }
