@@ -8,6 +8,7 @@ namespace Warehouse_Management.Repositories.IRepository
 
         Task<Supplier?> GetByIdAsync(int id);
         Task<Supplier?> GetByEmailAsync(string email);
+        Task<Supplier?> GetByPhoneAsync(string phone);
         Task CreateAsync(Supplier supplier);
         Task UpdateAsync(Supplier supplier);
         Task DeleteAsync(int id);

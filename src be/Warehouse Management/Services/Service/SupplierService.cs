@@ -27,9 +27,31 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                if(await _supplierRepository.GetByEmailAsync(dto.Email) != null)
-                    throw new BadHttpRequestException($"Email {dto.Email} is already taken");
+                // Kiểm tra nếu email đã tồn tại trong cơ sở dữ liệu
+                var existingSupplierByEmail = await _supplierRepository.GetByEmailAsync(dto.Email);
+                if (existingSupplierByEmail != null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = new List<string> { $"Email '{dto.Email}' is already used by another provider." }
+                    };
+                }
 
+                // Kiểm tra nếu số điện thoại đã tồn tại trong cơ sở dữ liệu
+                var existingSupplierByPhone = await _supplierRepository.GetByPhoneAsync(dto.Phone);
+                if (existingSupplierByPhone != null)
+                {
+                    return new ApiResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        ErrorMessages = new List<string> { $"Phone number '{dto.Phone}' is already used by another provider." }
+                    };
+                }
+
+                // Nếu email và số điện thoại chưa tồn tại, tiến hành tạo mới nhà cung cấp
                 var supplier = _mapper.Map<Supplier>(dto);
                 supplier.CreateAt = DateTime.UtcNow;
 
@@ -39,16 +61,16 @@ namespace Warehouse_Management.Services.Service
                 return new ApiResponse
                 {
                     IsSuccess = true,
-                    StatusCode = System.Net.HttpStatusCode.Created,
+                    StatusCode = HttpStatusCode.Created,
                     Result = _mapper.Map<SupplierDTO>(supplier)
                 };
-
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
             }
         }
+
 
         public async Task<ApiResponse> DeleteSupplierAsync(int id)
         {
@@ -139,19 +161,34 @@ namespace Warehouse_Management.Services.Service
         {
             try
             {
-                
                 var supplier = await _supplierRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"No supplier found with ID {id}");
-                
+
+                // Kiểm tra trùng email
                 if (supplier.Email != dto.Email)
                 {
-                    var existingSupplier = await _supplierRepository.GetByEmailAsync(dto.Email);
-                    if (existingSupplier != null && existingSupplier.SupplierId != id)
+                    var existingSupplierByEmail = await _supplierRepository.GetByEmailAsync(dto.Email);
+                    if (existingSupplierByEmail != null && existingSupplierByEmail.SupplierId != id)
                     {
                         return new ApiResponse
                         {
                             IsSuccess = false,
                             StatusCode = HttpStatusCode.BadRequest,
-                            ErrorMessages = { $"Email {dto.Email} already used by another provider." }
+                            ErrorMessages = { $"Email '{dto.Email}' is already used by another provider." }
+                        };
+                    }
+                }
+
+                // Kiểm tra trùng số điện thoại
+                if (supplier.Phone != dto.Phone)
+                {
+                    var existingSupplierByPhone = await _supplierRepository.GetByPhoneAsync(dto.Phone);
+                    if (existingSupplierByPhone != null && existingSupplierByPhone.SupplierId != id)
+                    {
+                        return new ApiResponse
+                        {
+                            IsSuccess = false,
+                            StatusCode = HttpStatusCode.BadRequest,
+                            ErrorMessages = { $"Phone number '{dto.Phone}' is already used by another provider." }
                         };
                     }
                 }
@@ -164,16 +201,15 @@ namespace Warehouse_Management.Services.Service
                 return new ApiResponse
                 {
                     IsSuccess = true,
-                    StatusCode = System.Net.HttpStatusCode.OK,
+                    StatusCode = HttpStatusCode.OK,
                     Result = _mapper.Map<SupplierDTO>(supplier)
                 };
-
             }
             catch (Exception ex)
             {
                 return await HandleExceptionAsync(ex);
-
             }
         }
+
     }
 }
