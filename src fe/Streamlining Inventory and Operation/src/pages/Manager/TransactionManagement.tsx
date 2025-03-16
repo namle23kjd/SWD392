@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import { fetchTransactions } from '../../fetch/transactions.ts';
 import { getListLots, getListProducts } from '../../fetch/order.ts';
-import { Pagination } from 'antd';
+import { Flex, Pagination, Spin } from 'antd';
 import * as XLSX from 'xlsx';  // Import thư viện xlsx
 import { formatDate } from '../../util/convertUtils.ts';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 const pageSize = 10
 
 const TransactionManagement: React.FC = () => {
-    const [transactions, setTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [products, setProducts] = useState<any[]>([]);
     const [lots, setLots] = useState<any[]>([]);
@@ -34,16 +34,10 @@ const TransactionManagement: React.FC = () => {
         currentPage * pageSize
     );
 
-    // Hàm fetch dữ liệu từ API
-    async function handleFetchTransaction() {
-        const response = await fetchTransactions(filters);
-        if (response.statusCode === 200) {
-            setTransactions(response.result.items);
-            setFilteredTransactions(response.result.items); // Đặt filteredTransactions bằng dữ liệu nhận được
-        } else {
-            toast.error('Failed to fetch transaction data');
-        }
-    }
+    const { data, isPending } = useQuery({
+        queryKey: ['transactions'],
+        queryFn: ({ signal }) => fetchTransactions({ signal, filters: filters }),
+    })
 
     async function handleFetchProducts() {
         const productData = await getListProducts();
@@ -61,8 +55,19 @@ const TransactionManagement: React.FC = () => {
         })));
     }
 
+    async function handleFetchTransactions() {
+        if (data && data.statusCode === 200) {
+            setFilteredTransactions(data.result.items);
+        } else {
+            toast.error(data[0])
+        }
+    }
+
     useEffect(() => {
-        handleFetchTransaction();
+        handleFetchTransactions()
+    }, [data]);
+
+    useEffect(() => {
         handleFetchProducts();
         handleFetchLots();
     }, [filters]);
@@ -72,18 +77,6 @@ const TransactionManagement: React.FC = () => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
-    // Hàm lọc giao dịch theo kiểu (Import/Export)
-    const handleTypeFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedType = e.target.value;
-        // Lọc các giao dịch theo kiểu giao dịch đã chọn
-        if (selectedType === '') {
-            setFilteredTransactions(transactions); // Nếu không chọn lọc, hiển thị tất cả
-        } else {
-            setFilteredTransactions(
-                transactions.filter((transaction: any) => transaction.type === selectedType)
-            );
-        }
-    };
     // Hàm export dữ liệu ra file Excel (xlsx)
     const handleExportData = () => {
         const ws = XLSX.utils.json_to_sheet(filteredTransactions.map((transaction: any) => ({
@@ -200,8 +193,6 @@ const TransactionManagement: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Bảng giao dịch */}
                             <table className="w-full table-auto">
                                 <thead>
                                     <tr>
@@ -215,7 +206,9 @@ const TransactionManagement: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {paginatedTransactions.map((transaction: any) => (
+                                    {isPending ? <Flex align="center" gap="middle">
+                                        <Spin size="small" />
+                                    </Flex> : paginatedTransactions.map((transaction: any) => (
                                         <tr key={transaction.transactionId}>
                                             <td className="px-4 py-2 text-left">{transaction.transactionId}</td>
                                             <td className="px-4 py-2 text-left">{transaction.productName}</td>

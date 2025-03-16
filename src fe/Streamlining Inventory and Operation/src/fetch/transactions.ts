@@ -10,7 +10,7 @@ interface Filters {
     pageSize: number;
 }
 
-export const fetchTransactions = async (filters: Filters) => {
+export const fetchTransactions = async ({ signal, filters }: { signal?: AbortSignal, filters: Filters }) => {
     const params = {
         startDate: filters.startDate,
         endDate: filters.endDate,
@@ -21,7 +21,7 @@ export const fetchTransactions = async (filters: Filters) => {
         pageSize: filters.pageSize
     };
 
-    return axiosInstanceJson.get('/api/StockTransaction', { params })
+    return axiosInstanceJson.get('/api/StockTransaction', { signal: signal, params })
         .then((response) => {
             return response.data;
         })

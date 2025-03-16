@@ -153,12 +153,12 @@ const ListAccount: React.FC = () => {
                                                     >
                                                         <EditOutlined />
                                                     </button>
-                                                    <button
+                                                    {!account.role.includes("Admin") && <button
                                                         onClick={() => handleDelete(account.id)}
                                                         className="text-red-600 hover:text-red-800"
                                                     >
                                                         <DeleteOutlined />
-                                                    </button>
+                                                    </button>}
                                                 </td>
                                             </tr>
                                         ))

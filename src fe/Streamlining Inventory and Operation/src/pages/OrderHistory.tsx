@@ -1,45 +1,52 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { Col, Input, Modal, notification, Pagination, Row, Select, Table } from "antd";
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Col, Flex, Input, Modal, notification, Pagination, Row, Select, Spin, Table } from "antd";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { accountListLoader } from '../fetch/account';
-import { getListOrders, getListProducts, getPlatformById, getProductById, updateOrderById } from '../fetch/order';
-import { getUserInfo } from '../util/auth';
+import { getListOrders, getPlatformById, getProductById, updateOrderById } from '../fetch/order';
 import { formatDate, formatNumber } from '../util/convertUtils';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { queryClient } from '../util/queryClient';
 
 const { Option } = Select;
 const pageSize = 10
-
-
 const OrderHistory: React.FC = () => {
     const [orders, setOrders] = useState<any[]>([]);
-    const [editedOrders, setEditedOrders] = useState<any[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
-    const [userId, setUserId] = useState(null);
     const [allOrders, setAllOrders] = useState<any[]>([]); // State to store the original list of orders
     const [currentPage, setCurrentPage] = useState(1);  // Trang hiện tại
-    const [products, setProducts] = useState<any[]>([]);
-    async function fetchUserId() {
-        const response = await accountListLoader();
-        if (response.statusCode === 200) {
-            const listAccount = response.result;
-            const userIdFetch = listAccount.find((account: { email: string }) =>
-                account.email === getUserInfo()?.email).id;
-            setUserId(userIdFetch);
-        }
-    }
-
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
+    const { data, isPending } = useQuery({
+        queryKey: ['orders'],
+        queryFn: () => getListOrders(),
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchInterval: 1000 * 60 * 5, // 5 minutes
+    })
+
+    const { mutate } = useMutation({
+        mutationKey: ['updateOrder'],
+        mutationFn: (variables: {
+            id: number, submitData:
+                { orderStatus: boolean; orderItems: any[] }
+        }) =>
+            updateOrderById(variables.id, variables.submitData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["orders"] })
+            toast.success("Order updated successfully!");
+            setIsModalVisible(false);
+        },
+        onError: (error: any) => {
+            toast.error(error[0]);
+        },
+    })
 
     const fetchOrders = async () => {
-        try {
-            const response = await getListOrders();
-            if (response.statusCode === 200 && response.isSuccess) {
-                const fetchedOrders = response.result.orders;
-                const ordersWithDetails = await Promise.all(fetchedOrders.map(async (order: any) => {
+        if (data && data.statusCode === 200) {
+            const fetchedOrders = data.result.orders;
+            const ordersWithDetails = await
+                Promise.all(fetchedOrders.map(async (order: any) => {
                     const platform = await getPlatformById(order.platformId);
                     const productsWithDetails = await Promise.all(order.orderItems.map(async (item: any) => {
                         const product = await getProductById(item.productId);
@@ -56,39 +63,20 @@ const OrderHistory: React.FC = () => {
                     };
                 }));
 
-                const sortedOrders = ordersWithDetails.sort((a, b) => {
-                    const dateA = new Date(a.orderDate);
-                    const dateB = new Date(b.orderDate);
-                    return dateB.getTime() - dateA.getTime();  // descending order
-                });
-                setOrders(sortedOrders);
-                setEditedOrders(sortedOrders);
-                setAllOrders(sortedOrders);
-            } else {
-                toast.error(response[0]);
-            }
-        } catch (error) {
-            toast.error("Failed to fetch orders.");
+            const sortedOrders = ordersWithDetails.sort((a, b) => {
+                const dateA = new Date(a.orderDate);
+                const dateB = new Date(b.orderDate);
+                return dateB.getTime() - dateA.getTime();  // descending order
+            });
+            setOrders(sortedOrders);
+            setAllOrders(sortedOrders);
+        } else {
+            toast.error(data[0]);
         }
     };
-
-    const fetchProducts = async () => {
-        const productData = await getListProducts();
-        setProducts(productData.result.products.map((productData: { sku: string, productName: string, basePrice: number, productId: string }) => ({
-            id: productData.sku,
-            name: productData.productName,
-            price: productData.basePrice,
-            productId: productData.productId
-        })));
-    }
-
-    useEffect(() => {
-        fetchUserId();
-        fetchProducts()
-    }, []);
     useEffect(() => {
         fetchOrders();
-    }, []);
+    }, [data]);
 
     // Update the handleSearch function:
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,19 +114,7 @@ const OrderHistory: React.FC = () => {
                 }),
             };
             console.log(selectedOrder)
-
-            const response = await updateOrderById(selectedOrder.orderId, submitData);
-            if (response.statusCode === 200) {
-                const updatedOrders = editedOrders.map(order =>
-                    order.orderId === selectedOrder.orderId ? selectedOrder : order
-                );
-                setEditedOrders(updatedOrders);
-                setIsModalVisible(false);
-                fetchOrders(); // Ensure the orders are re-fetched after update
-                toast.success("Order updated successfully!");
-            } else {
-                toast.error("Failed to update order.");
-            }
+            mutate({ id: selectedOrder.orderId, submitData });
         } catch (error: any) {
             toast.error(error.message || "An error occurred while updating the order.");
         }
@@ -207,7 +183,7 @@ const OrderHistory: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedOrders.length > 0 ? (
+                        {!isPending ? (
                             paginatedOrders.map((order) => (
                                 <tr key={order.orderId} className="border-b">
                                     <td className="px-6 py-3 text-sm text-gray-800">{order.orderId}</td>
@@ -234,7 +210,9 @@ const OrderHistory: React.FC = () => {
                         ) : (
                             <tr>
                                 <td colSpan={5} className="px-6 py-3 text-sm text-center text-gray-500">
-                                    No orders found.
+                                    <Flex align="center" gap="middle">
+                                        <Spin size="small" />
+                                    </Flex>
                                 </td>
                             </tr>
                         )}
@@ -331,7 +309,6 @@ const OrderHistory: React.FC = () => {
                                 </Table.Summary.Row>
                             )}
                         />
-
                         <div>
                             <label className="block text-gray-600">Status</label>
                             <Select

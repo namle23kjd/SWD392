@@ -58,8 +58,7 @@ export const router = createBrowserRouter([
                                 <Lots />
                             </>
                         )
-                    }
-                    ,
+                    },
                     {
                         path: 'products',
                         element: (

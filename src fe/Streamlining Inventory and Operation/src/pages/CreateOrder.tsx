@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify"; // For displaying error messages
 import { DeleteOutlined } from '@ant-design/icons'; // Import delete icon from Ant Design
-import { getListPlatforms, getListProducts, getListSuppliers } from "../fetch/order";
-import { createOrder } from "../fetch/order"; // Import the createOrder API function
-import { accountListLoader } from "../fetch/account";
-import { getUserInfo } from "../util/auth";
+import { useMutation } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatDate, formatNumber } from "../util/convertUtils";
 import Select from 'react-select';
+import { toast } from "react-toastify"; // For displaying error messages
+import { accountListLoader } from "../fetch/account";
+import { createOrder, getListPlatforms, getListProducts, getListSuppliers } from "../fetch/order";
+import { getUserInfo } from "../util/auth";
+import { formatDate, formatNumber } from "../util/convertUtils";
+import { queryClient } from "../util/queryClient";
 const CreateOrder: React.FC = () => {
     // State for the order fields
     const navigate = useNavigate()
@@ -158,6 +159,20 @@ const CreateOrder: React.FC = () => {
         setOrderDetails((prev) => ({ ...prev, totalPrice: newTotalPrice }));
     };
 
+    const { mutate, isPending } = useMutation({
+        mutationFn: async (data: any) => {
+            return await createOrder(data);
+        },
+        onError: (error: any) => {
+            toast.error(error[0]);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['orders'] })
+            navigate("/manager/order-history")
+            toast.success("Order created successfully!");
+        },
+    })
+
     // Handle form submission (simulating an API call)
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -172,30 +187,17 @@ const CreateOrder: React.FC = () => {
             toast.error("Please add products with valid quantities.");
             return;
         }
-
-        try {
-            const submitData = {
-                userId: userId,
-                platformId: parseInt(orderDetails.platformId),
-                platformOrderId: "string",
-                orderDate: new Date().toISOString(),
-                orderItems: orderItems.map(item => ({
-                    productId: parseInt(item.id),
-                    quantity: item.quantity,
-                })),
-            };
-
-            const response = await createOrder(submitData);
-
-            if (response.statusCode === 201) {
-                navigate("/manager/order-history")
-                toast.success("Order created successfully!");
-            } else {
-                toast.error(response[0]);
-            }
-        } catch (error: any) {
-            toast.error("An error ocurred! Please try again");
-        }
+        const submitData = {
+            userId: userId,
+            platformId: parseInt(orderDetails.platformId),
+            platformOrderId: "string",
+            orderDate: new Date().toISOString(),
+            orderItems: orderItems.map(item => ({
+                productId: parseInt(item.id),
+                quantity: item.quantity,
+            })),
+        };
+        mutate(submitData)
     };
 
     const getAvailableProducts = (index: number) => {
@@ -342,15 +344,15 @@ const CreateOrder: React.FC = () => {
                 {/* Submit Button */}
                 <div className="mt-6">
                     <button
+                        disabled={isPending}
                         type="submit"
                         className="w-full bg-blue-600 text-white py-2 rounded-lg"
                     >
-                        Create Order
+                        {isPending ? 'Submitting...' : 'Create Order'}
                     </button>
                 </div>
             </form>
         </div>
     );
 };
-
 export default CreateOrder;
