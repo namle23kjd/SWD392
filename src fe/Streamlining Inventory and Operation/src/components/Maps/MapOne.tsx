@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { getLowStockProducts } from "../../fetch/dashboard";
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from "apexcharts";
+import { useQuery } from "@tanstack/react-query";
+import { Spin } from "antd";
 
 const colorPalette = [
   '#3C50E0', '#80CAEE', '#FF5733', '#FFBD33', '#FF8D33',
@@ -9,7 +11,6 @@ const colorPalette = [
 ];
 
 const MapOne = () => {
-  const [data, setData] = useState([]);
   const [chartData, setChartData] = useState({
     categories: [], series: [{
       name: 'Products in Stock',
@@ -17,23 +18,29 @@ const MapOne = () => {
     }]
   });
 
+  const { data, isPending } = useQuery({
+    queryKey: ['lowstock-products'],
+    queryFn: () => getLowStockProducts(),
+  })
+
   async function fetchData() {
-    const response = await getLowStockProducts();
-    setData(response);
-    const categories = response.map((item: any) => item.lot);
-    const series = response.map((item: any) => item.products);
-    setChartData({
-      categories,
-      series: [{
-        name: 'Products in Stock',
-        data: series,
-      }]
-    });
+    if (data) {
+      const categories = data.map((item: any) => item.lot);
+      const series = data.map((item: any) => item.products);
+      setChartData({
+        categories,
+        series: [{
+          name: 'Products in Stock',
+          data: series,
+        }]
+      });
+    }
+
   }
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [data]);
 
   const options: ApexOptions = {
     chart: {
@@ -66,12 +73,12 @@ const MapOne = () => {
         Low Stock Products
       </h4>
       <div id="chart">
-        <ReactApexChart
+        {isPending ? <Spin /> : <ReactApexChart
           options={options}
           series={chartData.series}
           type="bar"
           height={350}
-        />
+        />}
       </div>
     </div>
   );

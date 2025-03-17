@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx';  // Import thư viện xlsx
 import { formatDate } from '../../util/convertUtils.ts';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { queryClient } from '../../util/queryClient.ts';
 const pageSize = 10
 
 const TransactionManagement: React.FC = () => {
@@ -41,10 +42,12 @@ const TransactionManagement: React.FC = () => {
 
     async function handleFetchProducts() {
         const productData = await getListProducts();
-        setProducts(productData.result.products.map((productData: { productName: string, productId: string }) => ({
-            productId: productData.productId,
-            name: productData.productName,
-        })));
+        setProducts(productData.result.products.map((productData:
+            { productName: string, productId: string, sku: string }) => ({
+                productId: productData.productId,
+                name: productData.productName,
+                sku: productData.sku
+            })));
     }
 
     async function handleFetchLots() {
@@ -72,10 +75,16 @@ const TransactionManagement: React.FC = () => {
         handleFetchLots();
     }, [filters]);
 
-    // Hàm xử lý thay đổi các trường filter
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            [e.target.name]: e.target.value,
+        }));
     };
+
+    useEffect(() => {
+        queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    }, [filters]);
 
     // Hàm export dữ liệu ra file Excel (xlsx)
     const handleExportData = () => {
@@ -156,7 +165,7 @@ const TransactionManagement: React.FC = () => {
                                             <option value="">Select Product</option>
                                             {products.map((product) => (
                                                 <option key={product.productId} value={product.productId}>
-                                                    {product.name}
+                                                    {product.name} - {product.sku}
                                                 </option>
                                             ))}
                                         </select>

@@ -14,7 +14,6 @@ import ErrorPage from './pages/Error/ErrorPage';
 import Lots from './pages/Lots';
 import ExportProduct from './pages/Manager/ExportProduct';
 import ImportProduct from './pages/Manager/ImportProduct';
-import InventoryTracking from './pages/Manager/InventoryTracking';
 import Report from './pages/Manager/Report';
 import TransactionManagement from './pages/Manager/TransactionManagement';
 import OrderHistory from './pages/OrderHistory';
@@ -83,15 +82,6 @@ export const router = createBrowserRouter([
                             <>
                                 <PageTitle title="Export Product" />
                                 <ExportProduct />
-                            </>
-                        )
-                    },
-                    {
-                        path: 'confirm-stock-daily',
-                        element: (
-                            <>
-                                <PageTitle title="Confirm Stock Daily" />
-                                <InventoryTracking />
                             </>
                         )
                     },

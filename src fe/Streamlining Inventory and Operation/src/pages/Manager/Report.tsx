@@ -13,7 +13,7 @@ import MapOne from '../../components/Maps/MapOne';
 import { getOveralData } from '../../fetch/dashboard';
 const Report: React.FC = () => {
     const { data, isLoading } = useQuery({
-        queryKey: ['dashboard'],
+        queryKey: ['dashboard-overal'],
         queryFn: () => getOveralData()
     })
 
@@ -24,19 +24,19 @@ const Report: React.FC = () => {
                 {isLoading ? <Flex align="center" gap="middle">
                     <Spin size="small" />
                 </Flex> : <>
-                    <CardDataStats title="Total Exports" total={data.totalExports.toString()}>
+                    <CardDataStats title="Total Exports" total={data.totalExports?.toString()}>
                         <ExportOutlined className="fill-primary dark:fill-white" style={{ fontSize: '22px' }} />
                     </CardDataStats>
 
-                    <CardDataStats title="Total Users" total={data.totalUsers.toString()}>
+                    <CardDataStats title="Total Users" total={data.totalUsers?.toString()}>
                         <UserOutlined className="fill-primary dark:fill-white" style={{ fontSize: '22px' }} />
                     </CardDataStats>
 
-                    <CardDataStats title="Total Imports" total={data.totalImports.toString()}>
+                    <CardDataStats title="Total Imports" total={data.totalImports?.toString()}>
                         <ImportOutlined className="fill-primary dark:fill-white" style={{ fontSize: '22px' }} />
                     </CardDataStats>
 
-                    <CardDataStats title="Total Quantity" total={data.totalQuantity.toString()}>
+                    <CardDataStats title="Total Quantity" total={data.totalQuantity?.toString()}>
                         <AppstoreAddOutlined className="fill-primary dark:fill-white" style={{ fontSize: '22px' }} />
                     </CardDataStats>
                 </>}

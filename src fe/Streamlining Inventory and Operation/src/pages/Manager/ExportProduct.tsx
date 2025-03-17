@@ -1,9 +1,8 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
-import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import SelectGroupTwo from '../../components/Forms/SelectGroup/SelectGroupTwo';
-import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
-import { useNavigate } from "react-router-dom";
+import React, { ChangeEvent, FormEvent, useState } from "react";
 import { toast } from "react-toastify";
+import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
+import SelectGroupTwo from '../../components/Forms/SelectGroup/SelectGroupTwo';
 
 // Các kiểu dữ liệu cần thiết (Product, Shelf)
 interface ExportProductDetails {
@@ -28,9 +27,6 @@ const ExportProduct: React.FC = () => {
         note: "",
         proof: "",
     });
-
-    const navigate = useNavigate();
-
     // Hàm xử lý thay đổi input
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

@@ -2,6 +2,8 @@ import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { getTopProducts } from '../../fetch/dashboard';
+import { useQuery } from '@tanstack/react-query';
+import { Spin } from 'antd';
 
 const colorPalette = ['#6577F3', '#8FD0EF', '#0FADCF', '#FF5733', '#33FF57', '#FF33A1',
   '#8B00FF', '#FF4500', '#FFD700', '#00CED1'];
@@ -93,37 +95,43 @@ const ChartOne: React.FC = () => {
     colors: [],
   });
 
+  const { data, isPending } = useQuery({
+    queryKey: ['top-product'],
+    queryFn: () => getTopProducts()
+  })
+
   async function fetchData() {
-    const response = await getTopProducts();
-    const seriesData = response.map((item: any) => item.totalSold);
-    const categoriesData = response.map((item: any) => item.productName);
+    if (data) {
+      const seriesData = data.map((item: any) => item.totalSold);
+      const categoriesData = data.map((item: any) => item.productName);
 
-    // Calculate total revenue and total sales
-    const totalSales = seriesData.reduce((acc: any, curr: any) => acc + curr, 0);
-    const totalRevenue = totalSales * 100; // Example: assume each product sold generates 100 revenue
+      // Calculate total revenue and total sales
+      const totalSales = seriesData.reduce((acc: any, curr: any) => acc + curr, 0);
+      const totalRevenue = totalSales * 100; // Example: assume each product sold generates 100 revenue
 
-    // Create a color array based on the number of products
-    const colors = colorPalette.slice(0, Math.min(categoriesData.length, 10));
+      // Create a color array based on the number of products
+      const colors = colorPalette.slice(0, Math.min(categoriesData.length, 10));
 
-    setState({
-      series: [
-        {
-          name: 'Total Sold',
-          data: seriesData,
-        },
-      ],
-      categories: categoriesData, // Set product names as categories
-      totalRevenue: totalRevenue,
-      totalSales: totalSales,
-      colors: colors, // Set dynamic colors for each product
-    });
+      setState({
+        series: [
+          {
+            name: 'Total Sold',
+            data: seriesData,
+          },
+        ],
+        categories: categoriesData, // Set product names as categories
+        totalRevenue: totalRevenue,
+        totalSales: totalSales,
+        colors: colors, // Set dynamic colors for each product
+      });
 
-    options.colors = colors; // Apply color palette to the chart
+      options.colors = colors; // Apply color palette to the chart
+    }
   }
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [data]);
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
@@ -149,7 +157,7 @@ const ChartOne: React.FC = () => {
 
       <div>
         <div id="chartOne" className="-ml-5">
-          <ReactApexChart
+          {isPending ? <Spin /> : <ReactApexChart
             options={{
               ...options,
               xaxis: { categories: state.categories }, // Dynamically set categories (product names)
@@ -157,7 +165,7 @@ const ChartOne: React.FC = () => {
             series={state.series}
             type="bar"
             height={350}
-          />
+          />}
         </div>
       </div>
     </div>

@@ -2,9 +2,11 @@ import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { getSupplierImports } from '../../fetch/dashboard';
+import { useQuery } from '@tanstack/react-query';
+import { Spin } from 'antd';
 
 const colorPalette = [
-  '#3C50E0', '#80CAEE', '#FF5733', '#FFBD33', '#FF8D33', 
+  '#3C50E0', '#80CAEE', '#FF5733', '#FFBD33', '#FF8D33',
   '#FF33A1', '#33FF57', '#33D6FF', '#B033FF', '#FF5733'
 ];
 
@@ -83,31 +85,37 @@ const ChartTwo: React.FC = () => {
     categories: [],
   });
 
+  const { data, isPending } = useQuery({
+    queryKey: ['supplier-import'],
+    queryFn: () => getSupplierImports(),
+  })
+
   async function handleFetchData() {
-    const response = await getSupplierImports();
-    const seriesData = response.map((item: any) => item.totalImport);
-    const categoriesData = response.map((item: any) => item.supplierName);
+    if (data) {
+      const seriesData = data.map((item: any) => item.totalImport);
+      const categoriesData = data.map((item: any) => item.supplierName);
 
-    // Create a color array based on the number of suppliers
-    const colors = colorPalette.slice(0, Math.min(categoriesData.length, 10));
+      // Create a color array based on the number of suppliers
+      const colors = colorPalette.slice(0, Math.min(categoriesData.length, 10));
 
-    setState({
-      series: [
-        {
-          name: 'Total Import',
-          data: seriesData,
-        },
-      ],
-      categories: categoriesData, // Set supplier names here
-    });
+      setState({
+        series: [
+          {
+            name: 'Total Import',
+            data: seriesData,
+          },
+        ],
+        categories: categoriesData, // Set supplier names here
+      });
 
-    // Dynamically update the color palette for the chart
-    options.colors = colors;
+      // Dynamically update the color palette for the chart
+      options.colors = colors;
+    }
   }
 
   useEffect(() => {
     handleFetchData();
-  }, []);
+  }, [data]);
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
@@ -121,7 +129,7 @@ const ChartTwo: React.FC = () => {
 
       <div>
         <div id="chartTwo" className="-ml-5 -mb-9">
-          <ReactApexChart
+          {isPending ? <Spin /> : <ReactApexChart
             options={{
               ...options,
               xaxis: { categories: state.categories }, // Dynamically set categories (supplier names)
@@ -129,7 +137,7 @@ const ChartTwo: React.FC = () => {
             series={state.series}
             type="bar"
             height={350}
-          />
+          />}
         </div>
       </div>
     </div>
