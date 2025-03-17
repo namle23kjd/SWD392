@@ -23,7 +23,7 @@ import Shelfs from './pages/Shelfs';
 import { accountListLoader } from './fetch/account';
 import CreateOrder from './pages/CreateOrder';
 import SuppliersPage from './pages/SuppliersPage';
-import Platforms from './pages/Platform';
+import Platforms from './pages/PlatformsPage';
 
 export const router = createBrowserRouter([
     {
@@ -113,10 +113,10 @@ export const router = createBrowserRouter([
                         )
                     },
                     {
-                        path: 'platforms',
+                        path: 'platforms-page',
                         element: (
                             <>
-                                <PageTitle title="platforms" />
+                                <PageTitle title="Platforms Page" />
                                 <Platforms />
                             </>
                         )

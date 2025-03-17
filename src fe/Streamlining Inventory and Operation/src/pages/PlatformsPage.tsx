@@ -1,29 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { Table, Modal, Input, Button } from "antd";
 import { EditOutlined, DeleteOutlined, FileAddOutlined } from "@ant-design/icons";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
+import { getAllPlatforms, createPlatform, updatePlatform, deletePlatform, Platform } from "../fetch/platform";
 
 const PlatformsPage: React.FC = () => {
-    const [platforms, setPlatforms] = useState<any[]>([]);
+    const [platforms, setPlatforms] = useState<Platform[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedPlatform, setSelectedPlatform] = useState<any>(null);
+    const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
     const [platformDetails, setPlatformDetails] = useState({
         name: "",
         isActive: true,
     });
 
+    // Fetch all platforms on component mount
     useEffect(() => {
         const fetchPlatforms = async () => {
-            const fetchedPlatforms = [
-                { id: "P001", name: "Platform A", isActive: true },
-                { id: "P002", name: "Platform B", isActive: false },
-            ];
-            setPlatforms(fetchedPlatforms);
+            try {
+                const data = await getAllPlatforms();
+                setPlatforms(data);
+            } catch (error) {
+                toast.error("Failed to fetch platforms.");
+            }
         };
         fetchPlatforms();
     }, []);
 
-    const showModal = (platform?: any) => {
+    const showModal = (platform?: Platform) => {
         setSelectedPlatform(platform || null);
         setPlatformDetails(platform || { name: "", isActive: true });
         setIsModalVisible(true);
@@ -34,30 +37,42 @@ const PlatformsPage: React.FC = () => {
         setPlatformDetails((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!platformDetails.name) {
             toast.error("Please fill in the platform name.");
             return;
         }
 
-        if (selectedPlatform) {
-            setPlatforms((prev) =>
-                prev.map((p) => (p.id === selectedPlatform.id ? { ...p, ...platformDetails } : p))
-            );
-            toast.success("Platform updated successfully!");
-        } else {
-            const newPlatform = { id: Date.now().toString(), ...platformDetails };
-            setPlatforms([...platforms, newPlatform]);
-            toast.success("Platform added successfully!");
+        try {
+            if (selectedPlatform) {
+                // Update platform
+                await updatePlatform(selectedPlatform.id, platformDetails);
+                setPlatforms((prev) =>
+                    prev.map((p) => (p.id === selectedPlatform.id ? { ...p, ...platformDetails } : p))
+                );
+                toast.success("Platform updated successfully!");
+            } else {
+                // Add new platform
+                const newPlatform = await createPlatform(platformDetails);
+                setPlatforms([...platforms, newPlatform]);
+                toast.success("Platform added successfully!");
+            }
+        } catch (error) {
+            toast.error("Error saving platform!");
         }
 
         setIsModalVisible(false);
         setPlatformDetails({ name: "", isActive: true });
     };
 
-    const handleDelete = (id: string) => {
-        setPlatforms(platforms.filter((p) => p.id !== id));
-        toast.error("Platform deleted!");
+    const handleDelete = async (id: string) => {
+        try {
+            await deletePlatform(id);
+            setPlatforms(platforms.filter((p) => p.id !== id));
+            toast.success("Platform deleted successfully!");
+        } catch (error) {
+            toast.error("Error deleting platform!");
+        }
     };
 
     return (
