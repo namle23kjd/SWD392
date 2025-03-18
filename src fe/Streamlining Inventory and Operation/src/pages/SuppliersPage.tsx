@@ -1,26 +1,44 @@
-import React, { useState, useEffect } from "react";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Modal, Table, message, Form, Input, DatePicker } from "antd";
-import dayjs from "dayjs";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { Button, Spin, Table, message, Modal, Input } from "antd";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import {
-    getListSuppliers,
-    getSupplierById,
     createSupplier,
-    updateSupplierById,
     deleteSupplierById,
-    checkSupplierExists,
+    getListSuppliers,
+    updateSupplierById,
 } from "../fetch/supplier";
+import { formatDate } from "../util/convertUtils";
+import { queryClient } from "../util/queryClient";
 
 const SuppliersPage: React.FC = () => {
     const [suppliers, setSuppliers] = useState<any[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
     const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
-    const [form] = Form.useForm();
+    const [supplierToDelete, setSupplierToDelete] = useState<number | null>(null);
+
+    // State for input fields
+    const [name, setName] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [phone, setPhone] = useState<string>('');
+    const [errors, setErrors] = useState<any>({});
+
+    const [pageNumber, setPageNumber] = useState(1);
+    const pageSize = 7;
+
+    const { data, isLoading } = useQuery({
+        queryKey: ["suppliers", pageNumber, pageSize],
+        queryFn: () => getListSuppliers(pageNumber, pageSize),
+        placeholderData: keepPreviousData
+    });
 
     const fetchSuppliers = async () => {
         try {
-            const data = await getListSuppliers();
-            setSuppliers(data.result.suppliers || []);
+            if (data) {
+                setSuppliers(data.result.suppliers || []);
+            }
         } catch (error) {
             message.error("Failed to load suppliers");
         }
@@ -28,74 +46,129 @@ const SuppliersPage: React.FC = () => {
 
     useEffect(() => {
         fetchSuppliers();
-    }, []);
+    }, [data]);
 
     const showModal = async (supplier?: any) => {
         if (supplier) {
-            try {
-                const supplierData = await getSupplierById(supplier.id);
-                setSelectedSupplier(supplier);
-                form.setFieldsValue({
-                    ...supplierData,
-                    createdAt: supplierData.createdAt ? dayjs(supplierData.createdAt) : null,
-                });
-            } catch (error) {
-                message.error("Failed to fetch supplier details");
-                return;
+            // Tìm nhà cung cấp trong mảng suppliers thay vì gọi API
+            const supplierData = suppliers.find(item => item.supplierId === supplier.supplierId);
+            if (supplierData) {
+                // Cập nhật giá trị vào form trực tiếp
+                setName(supplierData.name);
+                setEmail(supplierData.email);
+                setPhone(supplierData.phone);
+                setSelectedSupplier(supplierData);
             }
         } else {
+            // Reset form khi mở modal thêm mới
             setSelectedSupplier(null);
-            form.resetFields();
+            setName('');
+            setEmail('');
+            setPhone('');
+            setErrors({});
         }
         setIsModalVisible(true);
     };
 
+    const validateForm = () => {
+        const newErrors: any = {};
+
+        // Validate name
+        if (!name) newErrors.name = "Please enter a supplier name";
+
+        // Validate email with regex
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        if (!email) newErrors.email = "Please enter an email";
+        else if (!emailRegex.test(email)) newErrors.email = "Invalid email format";
+
+        // Validate phone number with regex
+        const phoneRegex = /^0[0-9]{3}-[0-9]{3}-[0-9]{3}$/;
+        if (!phone) newErrors.phone = "Please enter a phone number";
+        else if (!phoneRegex.test(phone)) newErrors.phone = "Phone number must be in the format XXXX-XXX-XXX";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async () => {
+        if (!validateForm()) return;
+        const supplierDetails = { name, email, phone };
+
         try {
-            // Validate form fields
-            const supplierDetails = await form.validateFields();
-
-            // Kiểm tra ngày tạo không vượt quá ngày hiện tại
-            const today = dayjs().endOf("day");
-            if (!supplierDetails.createdAt || dayjs(supplierDetails.createdAt).isAfter(today)) {
-                message.error("Creation date cannot be in the future.");
-                return;
-            }
-
-            supplierDetails.createdAt = supplierDetails.createdAt.format("YYYY-MM-DD");
-
-            // Kiểm tra trùng tên, email, phone
-            const isExist = await checkSupplierExists(supplierDetails);
-            if (isExist) {
-                message.error("Supplier with the same name, email, or phone already exists.");
-                return;
-            }
-
             if (selectedSupplier) {
-                await updateSupplierById(selectedSupplier.id, supplierDetails);
-                message.success("Supplier updated successfully!");
+                const response = await updateSupplierById(selectedSupplier.supplierId, supplierDetails);
+                if (response.statusCode === 200) {
+                    toast.success("Supplier updated successfully!");
+                    setIsModalVisible(false);
+                    // Reset form sau khi lưu
+                    setName('');
+                    setEmail('');
+                    setPhone('');
+                    queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+                } else {
+                    toast.error(response[0]);
+                }
             } else {
-                await createSupplier(supplierDetails);
-                message.success("Supplier added successfully!");
+                const response = await createSupplier(supplierDetails);
+                if (response.statusCode === 201) {
+                    toast.success("Supplier added successfully!");
+                    setIsModalVisible(false);
+                    // Reset form sau khi lưu
+                    setName('');
+                    setEmail('');
+                    setPhone('');
+                    queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+                } else {
+                    toast.error(response[0]);
+                }
             }
-
-            setIsModalVisible(false);
-            fetchSuppliers();
+            fetchSuppliers(); // Cập nhật lại danh sách nhà cung cấp
         } catch (error: any) {
             console.error("Save error:", error);
             message.error(error.message || "Failed to save supplier");
         }
     };
 
-    const handleDelete = async (id: number) => {
-        try {
-            await deleteSupplierById(id);
-            message.success("Supplier deleted successfully!");
-            setSuppliers((prev) => prev.filter((supplier) => supplier.id !== id));
-        } catch (error: any) {
-            console.error("Delete error:", error);
-            message.error(error.message || "Failed to delete supplier");
+    const handleCancelModal = () => {
+        setIsModalVisible(false);
+        // Reset form khi đóng modal
+        setName('');
+        setEmail('');
+        setPhone('');
+        setErrors({});
+    };
+
+    const handleDelete = (id: number) => {
+        setSupplierToDelete(id);
+        setIsDeleteModalVisible(true);
+    };
+
+    const confirmDeleteSupplier = async () => {
+        if (supplierToDelete) {
+            const response = await deleteSupplierById(supplierToDelete);
+            if (response.statusCode === 200) {
+                toast.success("Supplier deleted successfully!");
+                queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+                setSuppliers((prev) => prev.filter
+                    ((supplier) => supplier.id !== supplierToDelete));
+            } else {
+                toast.error(response[0]);
+            }
+            setIsDeleteModalVisible(false);
         }
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setPageNumber(newPage);
+    };
+
+    // Automatically format phone number with dashes
+    const formatPhoneNumber = (value: string) => {
+        // Remove any non-numeric characters
+        const numbers = value.replace(/\D/g, '');
+        if (numbers.length <= 4) return numbers;
+        if (numbers.length <= 7) return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+        return `${numbers.slice(0, 4)}-${numbers.slice(4, 7)}-${numbers.slice(7, 10)}`;
     };
 
     return (
@@ -104,27 +177,35 @@ const SuppliersPage: React.FC = () => {
             <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()} className="mb-6 mt-6 bg-blue-600 text-white">
                 Add Supplier
             </Button>
-            <Table dataSource={suppliers} rowKey="id" bordered>
-                <Table.Column title="Name" dataIndex="name" key="name" align="center" />
-                <Table.Column title="Email" dataIndex="email" key="email" align="center" />
-                <Table.Column title="Phone" dataIndex="phone" key="phone" align="center" />
-                <Table.Column title="Created At" dataIndex="createdAt" key="createdAt" align="center" render={(text) => text ? dayjs(text).format("YYYY-MM-DD") : "-"} />
-                <Table.Column title="Actions" key="actions" align="center" render={(_, record: any) => (
-                    <div className="flex justify-center gap-2">
-                        <Button icon={<EditOutlined />} onClick={() => showModal(record)} />
-                        <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.id)} />
-                    </div>
-                )} />
-            </Table>
+            {isLoading ? <Spin /> : (
+                <Table dataSource={suppliers} rowKey="id" bordered pagination={{
+                    current: pageNumber,
+                    pageSize: pageSize,
+                    total: data?.result?.totalCount || 0,
+                    onChange: handlePageChange,
+                    showSizeChanger: false,
+                }}>
+                    <Table.Column title="Name" dataIndex="name" key="name" align="center" />
+                    <Table.Column title="Email" dataIndex="email" key="email" align="center" />
+                    <Table.Column title="Phone" dataIndex="phone" key="phone" align="center" />
+                    <Table.Column title="Created At" dataIndex="createAt" key="createAt" align="center" render={(text) => formatDate(text)} />
+                    <Table.Column title="Actions" key="actions" align="center" render={(_, record: any) => (
+                        <div className="flex justify-center gap-2">
+                            <Button icon={<EditOutlined />} onClick={() => showModal(record)} />
+                            <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.supplierId)} />
+                        </div>
+                    )} />
+                </Table>
+            )}
+
             <Modal
                 title={selectedSupplier ? "Edit Supplier" : "Add Supplier"}
                 open={isModalVisible}
-                onOk={handleSave}
-                onCancel={() => setIsModalVisible(false)}
                 okText="Save"
                 cancelText="Cancel"
+                onCancel={handleCancelModal}
                 footer={[
-                    <Button key="cancel" onClick={() => setIsModalVisible(false)}>
+                    <Button key="cancel" onClick={handleCancelModal}>
                         Cancel
                     </Button>,
                     <Button key="save" type="primary" onClick={handleSave} className="bg-blue-600 text-white">
@@ -132,51 +213,58 @@ const SuppliersPage: React.FC = () => {
                     </Button>,
                 ]}
             >
-                <Form form={form} layout="vertical">
-                    <Form.Item 
-                        name="name" 
-                        label="Supplier Name"
-                        rules={[
-                            { required: true, message: "Please enter a supplier name" },
-                            { pattern: /^[A-Za-z\s]+$/, message: "Name must only contain letters and spaces" },
-                            { min: 3, max: 50, message: "Name must be between 3 and 50 characters" }
-                        ]}
-                    >
-                        <Input placeholder="Supplier Name" />
-                    </Form.Item>
+                <div>
+                    <div>
+                        <label>Supplier Name</label>
+                        <Input
+                            placeholder="Supplier Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            style={{ marginBottom: "10px" }}
+                        />
+                        {errors.name && <div style={{ color: 'red' }}>{errors.name}</div>}
+                    </div>
+                    <div>
+                        <label>Email</label>
+                        <Input
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            style={{ marginBottom: "10px" }}
+                        />
+                        {errors.email && <div style={{ color: 'red' }}>{errors.email}</div>}
+                    </div>
+                    <div>
+                        <label>Phone Number</label>
+                        <Input
+                            placeholder="Phone Number"
+                            value={formatPhoneNumber(phone)}
+                            onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+                            style={{ marginBottom: "10px" }}
+                        />
+                        {errors.phone && <div style={{ color: 'red' }}>{errors.phone}</div>}
+                    </div>
+                </div>
+            </Modal>
 
-                    <Form.Item 
-                        name="email" 
-                        label="Email"
-                        rules={[
-                            { required: true, message: "Please enter an email" },
-                            { type: "email", message: "Invalid email format (e.g., example@email.com)" }
-                        ]}
-                    >
-                        <Input placeholder="Email" />
-                    </Form.Item>
-
-                    <Form.Item 
-                        name="phone" 
-                        label="Phone Number" 
-                        rules={[
-                            { required: true, message: "Please enter a phone number" },
-                            { pattern: /^0[0-9]{9,10}$/, message: "Phone number must be a valid Vietnamese number (10-11 digits)" }
-                        ]}
-                    >
-                        <Input placeholder="Phone Number" />
-                    </Form.Item>
-
-                    <Form.Item 
-                        name="createdAt" 
-                        label="Created At"
-                        rules={[
-                            { required: true, message: "Please select a creation date" }
-                        ]}
-                    >
-                        <DatePicker format="YYYY-MM-DD" className="w-full" allowClear />
-                    </Form.Item>
-                </Form>
+            <Modal
+                onClose={() => setIsDeleteModalVisible(false)}
+                onCancel={() => setIsDeleteModalVisible(false)}
+                title="Confirm Deletion"
+                open={isDeleteModalVisible}
+                okText="Delete"
+                cancelText="Cancel"
+                centered
+                footer={[
+                    <Button key="cancel" onClick={() => setIsDeleteModalVisible(false)}>
+                        Cancel
+                    </Button>,
+                    <Button key="save" type="primary" onClick={confirmDeleteSupplier} className="bg-red-500 text-white">
+                        Delete
+                    </Button>,
+                ]}
+            >
+                <p>Are you sure you want to delete this supplier? This action cannot be undone.</p>
             </Modal>
         </div>
     );
