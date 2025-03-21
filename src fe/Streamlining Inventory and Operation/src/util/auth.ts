@@ -1,7 +1,11 @@
 import { redirect } from 'react-router-dom'
+import Cookies from 'js-cookie'
+
+const COOKIE_EXPIRATION_DAYS = 1 / 24;
 
 export const getAuthToken = () => {
-  const token = localStorage.getItem('token')
+  const userInfo = getUserInfo()
+  const token = userInfo?.token
   if (!token) {
     return null
   }
@@ -14,11 +18,16 @@ export const getAuthToken = () => {
 }
 
 export const setAuthToken = (token: string) => {
-  localStorage.setItem('token', token)
+  // Lưu token vào cookie với HttpOnly và Secure flags
+  Cookies.set('token', token, {
+    expires: COOKIE_EXPIRATION_DAYS,
+    secure: true,
+    sameSite: 'Strict',
+  })
 }
 
 export const getUserInfo = () => {
-  const userInfo = localStorage.getItem('userInfo')
+  const userInfo = Cookies.get('userInfo') // Sử dụng cookies thay vì sessionStorage
   if (!userInfo) {
     return null
   }
@@ -26,18 +35,28 @@ export const getUserInfo = () => {
 }
 
 export const setUserInfoToStorage = (userInfo: object) => {
-  localStorage.setItem('userInfo', JSON.stringify(userInfo))
+  // Lưu thông tin người dùng vào cookie
+  Cookies.set('userInfo', JSON.stringify(userInfo), {
+    expires: COOKIE_EXPIRATION_DAYS,
+    secure: true,
+    sameSite: 'Strict',
+  })
 }
 
 export const getAuthTokenDuration = () => {
-  const storeExpirationDate = localStorage.getItem('expiration') ?? ''
-  const expirationDate = new Date(storeExpirationDate)
+  const userInfo = getUserInfo()
+  if (!userInfo || !userInfo.expiration) {
+    return 0  // Nếu không có expiration, trả về 0 (hết hạn ngay lập tức)
+  }
 
+  const expirationDate = new Date(userInfo.expiration)
   const now = new Date()
+
   const duration = expirationDate.getTime() - now.getTime()
 
   return duration
 }
+
 
 export const tokenLoader = () => {
   return getAuthToken()

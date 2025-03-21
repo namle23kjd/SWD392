@@ -1,103 +1,172 @@
-import { EditOutlined } from '@ant-design/icons';
-import { Col, Modal, Row, Select, Table } from "antd";
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Col, Flex, Input, Modal, notification, Pagination, Row, Select, Spin, Table } from "antd";
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify"; // For displaying error messages
+import { toast } from "react-toastify";
+import { getListOrders, getPlatformById, getProductById, updateOrderById } from '../fetch/order';
+import { formatDate, formatNumber } from '../util/convertUtils';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { queryClient } from '../util/queryClient';
 
 const { Option } = Select;
-
+const pageSize = 10
 const OrderHistory: React.FC = () => {
-    // State to store order data and selected status
     const [orders, setOrders] = useState<any[]>([]);
-    const [searchTerm, setSearchTerm] = useState<string>(''); // State for search term
-    const [editedOrders, setEditedOrders] = useState<any[]>([]); // Store orders with edited statuses
-    const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility
-    const [selectedOrder, setSelectedOrder] = useState<any>(null); // Selected order for editing
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
+    const [allOrders, setAllOrders] = useState<any[]>([]); // State to store the original list of orders
+    const [currentPage, setCurrentPage] = useState(1);  // Trang hiện tại
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+    const { data, isPending } = useQuery({
+        queryKey: ['orders'],
+        queryFn: () => getListOrders(),
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchInterval: 1000 * 60 * 5, // 5 minutes
+    })
 
-    // Fetching orders data (simulated, replace with actual API call)
+    const { mutate } = useMutation({
+        mutationKey: ['updateOrder'],
+        mutationFn: (variables: {
+            id: number, submitData:
+                { orderStatus: boolean; orderItems: any[] }
+        }) =>
+            updateOrderById(variables.id, variables.submitData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["orders"] })
+            toast.success("Order updated successfully!");
+            setIsModalVisible(false);
+        },
+        onError: (error: any) => {
+            toast.error(error[0]);
+        },
+    })
+
+    const fetchOrders = async () => {
+        if (data && data.statusCode === 200) {
+            const fetchedOrders = data.result.orders;
+            const ordersWithDetails = await
+                Promise.all(fetchedOrders.map(async (order: any) => {
+                    const platform = await getPlatformById(order.platformId);
+                    const productsWithDetails = await Promise.all(order.orderItems.map(async (item: any) => {
+                        const product = await getProductById(item.productId);
+                        return {
+                            ...item,
+                            name: product.result.productName,
+                            price: product.result.basePrice,
+                        };
+                    }));
+                    return {
+                        ...order,
+                        platform: platform.result.name,
+                        products: productsWithDetails,
+                    };
+                }));
+
+            const sortedOrders = ordersWithDetails.sort((a, b) => {
+                const dateA = new Date(a.orderDate);
+                const dateB = new Date(b.orderDate);
+                return dateB.getTime() - dateA.getTime();  // descending order
+            });
+            setOrders(sortedOrders);
+            setAllOrders(sortedOrders);
+        } else {
+            toast.error(data[0]);
+        }
+    };
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const fetchedOrders = [
-                    {
-                        orderId: "ORD001",
-                        platform: "Platform A",
-                        status: "In Progress",
-                        orderDate: "2025-02-19",
-                        products: [
-                            { productId: "P001", name: "Product A", quantity: 1, price: 100 },
-                            { productId: "P002", name: "Product B", quantity: 2, price: 200 },
-                        ],
-                        notes: "Urgent",
-                    },
-                    {
-                        orderId: "ORD002",
-                        platform: "Platform B",
-                        status: "Completed",
-                        orderDate: "2025-02-18",
-                        products: [
-                            { productId: "P003", name: "Product C", quantity: 1, price: 150 },
-                        ],
-                        notes: "Standard delivery",
-                    },
-                ];
-                setOrders(fetchedOrders);
-                setEditedOrders(fetchedOrders);
-            } catch (error) {
-                toast.error("Failed to fetch orders.");
-            }
-        };
-
         fetchOrders();
-    }, []);
+    }, [data]);
 
-    // Handle search functionality
+    // Update the handleSearch function:
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
+        const searchTerm = e.target.value.toLowerCase(); // Convert search term to lowercase for case insensitive search
+
+        // If search term is empty, reset to all orders
+        if (searchTerm === "") {
+            setOrders(allOrders);
+        } else {
+            const filteredOrders = allOrders.filter(order =>
+                order.orderId.toString().toLowerCase().includes(searchTerm) ||
+                order.platform.toLowerCase().includes(searchTerm)
+            );
+            setOrders(filteredOrders);
+        }
     };
 
-    // Filter orders based on the search term
-    const filteredOrders = orders.filter(order =>
-        order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.platform.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Function to show the modal and set the selected order
     const showModal = (order: any) => {
         setSelectedOrder(order);
         setIsModalVisible(true);
     };
 
-    // Function to handle modal save
-    const handleModalSave = () => {
-        const updatedOrders = editedOrders.map(order =>
-            order.orderId === selectedOrder.orderId ? selectedOrder : order
-        );
-        setEditedOrders(updatedOrders);
-        setIsModalVisible(false);
-        toast.success("Order status updated successfully!");
+    const handleModalSave = async () => {
+        try {
+            const submitData = {
+                orderStatus: selectedOrder.orderStatus,
+                orderItems: selectedOrder.products.map((item: any) => {
+                    if (item.quantity < 1) {
+                        throw new Error(`Quantity of ${item.name} cannot be less than 1.`);
+                    }
+                    return {
+                        orderItemId: item.orderItemId,
+                        quantity: item.quantity,
+                    };
+                }),
+            };
+            console.log(selectedOrder)
+            mutate({ id: selectedOrder.orderId, submitData });
+        } catch (error: any) {
+            toast.error(error.message || "An error occurred while updating the order.");
+        }
     };
 
-    // Function to handle modal cancel
     const handleModalCancel = () => {
         setIsModalVisible(false);
     };
 
-    // Calculate total price of the order based on products
     const calculateTotalPrice = (products: any[]) => {
         return products.reduce((total, product) => total + (product.quantity * product.price), 0);
     };
+
+    const deleteOrderItem = (productId: string) => {
+        if (selectedOrder.products.length <= 1) {
+            notification.error({
+                message: "Error",
+                description: "Cannot delete the last item in the order.",
+            });
+            return;
+        }
+        const updatedProducts = selectedOrder.products.filter((item: {
+            productId: string
+        }) => item.productId !== productId);
+        setSelectedOrder({ ...selectedOrder, products: updatedProducts });
+        toast.success("Order item deleted successfully!");
+    };
+
+    // Handle quantity change
+    const handleQuantityChange = (productId: string, quantity: number) => {
+        const updatedProducts = selectedOrder.products.map((item: { productId: string }) =>
+            item.productId === productId
+                ? { ...item, quantity: quantity }
+                : item
+        );
+        setSelectedOrder({ ...selectedOrder, products: updatedProducts });
+    };
+
+    const paginatedOrders = orders.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
 
     return (
         <div className="p-6 bg-gray-50">
             <h3 className="text-xl font-semibold text-gray-900">Order History</h3>
 
-            {/* Search Bar */}
             <div className="mt-4 mb-6 flex justify-between items-center">
                 <input
                     type="text"
                     placeholder="Search by Order ID or Platform"
                     className="p-2 border rounded-lg w-1/3"
-                    value={searchTerm}
                     onChange={handleSearch}
                 />
             </div>
@@ -114,26 +183,22 @@ const OrderHistory: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredOrders.length > 0 ? (
-                            filteredOrders.map((order) => (
+                        {!isPending ? (
+                            paginatedOrders.map((order) => (
                                 <tr key={order.orderId} className="border-b">
                                     <td className="px-6 py-3 text-sm text-gray-800">{order.orderId}</td>
                                     <td className="px-6 py-3 text-sm text-gray-800">{order.platform}</td>
                                     <td className="px-6 py-3 text-sm">
                                         <span
-                                            className={`font-medium ${order.status === "In Progress"
-                                                ? "text-blue-600"
-                                                : order.status === "Completed"
-                                                    ? "text-green-600"
-                                                    : order.status === "In Transit"
-                                                        ? "text-orange-600"
-                                                        : "text-red-600"
+                                            className={`font-medium ${!order.orderStatus
+                                                ? "text-green-600"
+                                                : "text-blue-600"
                                                 }`}
                                         >
-                                            {order.status}
+                                            {order.orderStatus ? 'Completed' : 'In progress'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-3 text-sm text-gray-800">{order.orderDate}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800">{formatDate(order.orderDate)}</td>
                                     <td className="px-6 py-3 text-sm">
                                         <EditOutlined
                                             onClick={() => showModal(order)}
@@ -145,26 +210,30 @@ const OrderHistory: React.FC = () => {
                         ) : (
                             <tr>
                                 <td colSpan={5} className="px-6 py-3 text-sm text-center text-gray-500">
-                                    No orders found.
+                                    <Flex align="center" gap="middle">
+                                        <Spin size="small" />
+                                    </Flex>
                                 </td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
-
-            {/* Modal for editing order status */}
+            <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={orders.length}
+                onChange={handlePageChange}
+                showSizeChanger={false}
+                className="mt-4 flex justify-center"
+            />
             <Modal
                 title="Edit Order"
-                visible={isModalVisible}
+                open={isModalVisible}
                 onOk={handleModalSave}
                 onCancel={handleModalCancel}
-                okText="Save"
-                cancelText="Cancel"
-                footer={null}  // Remove the default footer with Save button
+                footer={null}
                 width={800}
-                style={{ padding: "20px", borderRadius: "10px" }}
-                bodyStyle={{ padding: "20px", backgroundColor: "#f9f9f9" }}
             >
                 {selectedOrder && (
                     <div className="space-y-4">
@@ -178,28 +247,57 @@ const OrderHistory: React.FC = () => {
                         </Row>
                         <Row gutter={16}>
                             <Col span={12}>
-                                <p><strong>Order Date:</strong> {selectedOrder.orderDate}</p>
+                                <p><strong>Order Date:</strong> {formatDate(selectedOrder.orderDate)}</p>
                             </Col>
                             <Col span={12}>
                                 <p><strong>Notes:</strong> {selectedOrder.notes}</p>
                             </Col>
                         </Row>
 
-                        {/* Products Table */}
                         <h4 className="text-lg font-medium text-gray-600">Products</h4>
                         <Table
                             dataSource={selectedOrder.products}
-                            columns={[
-                                { title: 'Product ID', dataIndex: 'productId', key: 'productId' },
-                                { title: 'Product Name', dataIndex: 'name', key: 'name' },
-                                { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
-                                { title: 'Price', dataIndex: 'price', key: 'price' },
-                                {
-                                    title: 'Total Price',
-                                    key: 'totalPrice',
-                                    render: (_text, record: { quantity: number; price: number }) => record.quantity * record.price
-                                },
-                            ]}
+                            columns={[{
+                                title: 'Product Name', dataIndex: 'name', key: 'name',
+                                render: (_value: string, record: any) => {
+                                    return (
+                                        <Input
+                                            disabled
+                                            value={record.name}
+                                            style={{ width: '100%' }}
+                                        />
+                                    )
+                                }
+                            }, {
+                                title: 'Quantity', dataIndex: 'quantity', key: 'quantity',
+                                render: (value: number, record: any) => (
+                                    <Input
+                                        type="number"
+                                        value={value}
+                                        onChange={(e) => handleQuantityChange(record.productId, +e.target.value)}
+                                        min={1}
+                                    />
+                                )
+                            }, {
+                                title: 'Price', dataIndex: 'price', key: 'price'
+                            }, {
+                                title: 'Total Price', key: 'totalPrice',
+                                render: (_text, record:
+                                    { quantity: number; price: number }) =>
+                                    formatNumber(record.quantity * record.price)
+                            }, {
+                                title: 'Actions', key: 'actions',
+                                render: (_text, record: any) => (
+                                    selectedOrder.products.length > 1 && (
+                                        <div className="flex items-center space-x-2">
+                                            <DeleteOutlined
+                                                onClick={() => deleteOrderItem(record.productId)}
+                                                className="text-red-600 cursor-pointer"
+                                            />
+                                        </div>
+                                    )
+                                )
+                            }]}
                             pagination={false}
                             rowKey="productId"
                             summary={() => (
@@ -211,43 +309,35 @@ const OrderHistory: React.FC = () => {
                                 </Table.Summary.Row>
                             )}
                         />
-
-                        {/* Status update with dropdown */}
                         <div>
                             <label className="block text-gray-600">Status</label>
                             <Select
-                                defaultValue={selectedOrder.status}
-                                onChange={(value) => setSelectedOrder({ ...selectedOrder, status: value })}
+                                value={selectedOrder.orderStatus ? "Completed" : "In progress"}
+                                onChange={(value) => {
+                                    setSelectedOrder({ ...selectedOrder, orderStatus: value === "Completed" })
+                                }}
                                 style={{ width: "100%" }}
                             >
-                                <Option value="In Progress">In Progress</Option>
                                 <Option value="Completed">Completed</Option>
-                                <Option value="In Transit">In Transit</Option>
-                                <Option value="Canceled">Canceled</Option>
+                                <Option value="In progress">In progress</Option>
                             </Select>
                         </div>
                     </div>
                 )}
-                {/* Custom Footer */}
                 <div className="mt-4 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleModalSave}
+                        className="ant-btn ant-btn-primary px-6 py-2 rounded-md"
+                    >
+                        Save
+                    </button>
                     <button
                         type="button"
                         onClick={handleModalCancel}
                         className="ant-btn ant-btn-default px-6 py-2 rounded-md"
                     >
                         Cancel
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleModalSave}
-                        className="ant-btn ant-btn-primary px-6 py-2 rounded-md"
-                        style={{
-                            backgroundColor: "#1890ff", // Ensure visibility with a solid color
-                            borderColor: "#1890ff", // Make border color same as background
-                            color: "white", // Ensure visibility with white text color
-                        }}
-                    >
-                        Save
                     </button>
                 </div>
             </Modal>

@@ -1,72 +1,92 @@
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Modal, Pagination } from 'antd';
 import React, { useState } from "react";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify"; // Import toast for error messages
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons'; // Import icons from Ant Design
-import { Modal } from 'antd'; // Import Modal for confirmation dialog
-
-// Sample data for the accounts (replace with actual data in a real scenario)
-const sampleAccounts = [
-    { id: "U001", username: "JohnDoe", email: "johndoe@gmail.com", phone: "123-456-7890", role: "Admin", status: "Active" },
-    { id: "U002", username: "JaneSmith", email: "janesmith@gmail.com", phone: "987-654-3210", role: "User", status: "Inactive" },
-    { id: "U003", username: "MikeJohnson", email: "mikejohnson@gmail.com", phone: "555-123-4567", role: "User", status: "Active" },
-];
+import * as XLSX from 'xlsx';
+import { deleteAccountAction } from '../../fetch/account';
 
 const ListAccount: React.FC = () => {
-    const [accounts, setAccounts] = useState(sampleAccounts);
+    const accountsLoad = useLoaderData()
+    let accountList = []
+    if (accountsLoad.statusCode === 200) {
+        accountList = accountsLoad.result.map((account: { id: string; email: string; phoneNumber: string; roles: string[]; status: string; }) => ({
+            id: account.id || 'N/A',
+            email: account.email || 'N/A',
+            phone: account.phoneNumber || 'N/A',
+            role: account.roles.join(', ') || 'N/A',
+            status: account.status ? 'Active' : 'Inactive',
+        }))
+    } else {
+        toast.error("Failed to load account data")
+    }
+
+    const [accounts, setAccounts] = useState(accountList);
     const [searchTerm, setSearchTerm] = useState("");
-    const [isDeleting, setIsDeleting] = useState<string | null>(null); // State to track the account being deleted
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);  // Trang hiện tại
+    const [pageSize] = useState(5);  // Số lượng item mỗi trang
+    const [showModal, setShowModal] = useState(false); // To manage modal visibility
+    const [deleteAccountId, setDeleteAccountId] = useState<string | null>(null);
+
     const navigate = useNavigate();
 
     // Function to filter accounts based on search term
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
     };
-
+    const handleCancel = () => {
+        setShowModal(false); // Close the modal when cancel is clicked
+        setDeleteAccountId(null); // Clear the account ID
+    };
     // Filter accounts by search term
-    const filteredAccounts = accounts.filter((account) =>
-        account.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const filteredAccounts = accounts.filter((account: { id: string; email: string; phone: string; role: string; status: string }) =>
         account.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        account.status.toLowerCase().includes(searchTerm.toLowerCase())
+        account.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        account.role.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Function to handle the Export Data button
     const handleExport = () => {
-        // Example export functionality, you can export it as a CSV or JSON
-        const data = JSON.stringify(filteredAccounts, null, 2);
-        const blob = new Blob([data], { type: "application/json" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "accounts_data.csv";
-        link.click();
+        const ws = XLSX.utils.json_to_sheet(filteredAccounts);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Accounts");
+        XLSX.writeFile(wb, "accounts_data.xlsx");
         toast.success("Data exported successfully!");
     };
 
-    // Function to handle the edit action
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const paginatedAccounts = filteredAccounts.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
+
     const handleEdit = (id: string) => {
-        // Implement edit functionality (e.g., navigate to edit page)
         navigate(`/admin/edit-account/${id}`);
     };
 
-    // Function to show delete confirmation modal
     const handleDelete = (id: string) => {
-        setIsDeleting(id); // Set the account id to be deleted
-        Modal.confirm({
-            title: "Are you sure you want to delete this account?",
-            content: "This action cannot be undone.",
-            okText: "Yes",
-            okType: "danger",
-            cancelText: "No",
-            onOk: () => deleteAccount(id), // Delete account on confirmation
-            onCancel: () => setIsDeleting(null), // Reset deleting state if canceled
-        });
+        setDeleteAccountId(id); // Set account ID for deletion
+        setShowModal(true); // Show the modal
     };
 
-    // Function to delete the account
-    const deleteAccount = (id: string) => {
-        setAccounts(accounts.filter(account => account.id !== id)); // Remove the account from the list
-        setIsDeleting(null); // Reset deleting state
-        toast.success("Account deleted successfully!"); // Show success message
+    const deleteAccount = async (id: string | null) => {
+        if (!id) {
+            return;
+        }
+        const response = await deleteAccountAction(id)
+        if (response.statusCode === 200) {
+            setAccounts(accounts.filter((account:
+                { id: string; email: string; phone: string; role: string; status: string }) => account.id !== id));
+            setIsDeleting(null);
+            toast.success("Account deleted successfully!");
+            setShowModal(false);
+        } else {
+            toast.error("Failed to delete account. Please try again later.");
+        }
     };
 
     return (
@@ -77,14 +97,14 @@ const ListAccount: React.FC = () => {
                     {/* Account Management */}
                     <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
                         <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                            <h3 className="font-medium text-black dark:text-white">Manage Accounts</h3>
+                            <h3 className="font-medium text-black dark:text-white">Account list</h3>
                         </div>
                         <div className="flex flex-col gap-5.5 p-6.5">
                             {/* Search Bar */}
                             <div className="flex items-center gap-4 mb-4">
                                 <input
                                     type="text"
-                                    placeholder="Search by username, email, or status"
+                                    placeholder="Search by username, email, or role"
                                     className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                                     value={searchTerm}
                                     onChange={handleSearch}
@@ -107,40 +127,38 @@ const ListAccount: React.FC = () => {
                             <table className="w-full">
                                 <thead>
                                     <tr>
-                                        <th className="px-4 py-2">Account ID</th>
-                                        <th className="px-4 py-2">Username</th>
-                                        <th className="px-4 py-2">Email</th>
-                                        <th className="px-4 py-2">Phone Number</th>
-                                        <th className="px-4 py-2">Role</th>
-                                        <th className="px-4 py-2">Status</th>
-                                        <th className="px-4 py-2">Action</th>
+                                        <th className="px-4 py-4">Account ID</th>
+                                        <th className="px-4 py-4">Email</th>
+                                        <th className="px-4 py-4">Phone Number</th>
+                                        <th className="px-4 py-4">Role</th>
+                                        <th className="px-4 py-4">Status</th>
+                                        <th className="px-4 py-4">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredAccounts.length > 0 ? (
-                                        filteredAccounts.map((account) => (
+                                    {paginatedAccounts.length > 0 ? (
+                                        paginatedAccounts.map((account: { id: string; email: string; phone: string; role: string; status: string }) => (
                                             <tr key={account.id}>
-                                                <td className="px-4 py-2 text-center">{account.id}</td>
-                                                <td className="px-4 py-2 text-center">{account.username}</td>
-                                                <td className="px-4 py-2 text-center">{account.email}</td>
-                                                <td className="px-4 py-2 text-center">{account.phone}</td>
-                                                <td className="px-4 py-2 text-center">{account.role}</td>
-                                                <td className={`px-4 py-2 text-center text-${account.status === 'Active' ? 'green-600' : 'red-600'}`}>
+                                                <td className="px-4 py-4 text-center">{account.id}</td>
+                                                <td className="px-4 py-4 text-center">{account.email}</td>
+                                                <td className="px-4 py-4 text-center">{account.phone}</td>
+                                                <td className="px-4 py-4 text-center">{account.role}</td>
+                                                <td className={`px-4 py-4 text-center text-${account.status === 'Active' ? 'green-600' : 'red-600'}`}>
                                                     {account.status}
                                                 </td>
-                                                <td className="px-4 py-2 text-center">
+                                                <td className="px-4 py-4 text-center">
                                                     <button
                                                         onClick={() => handleEdit(account.id)}
                                                         className="text-blue-600 hover:text-blue-800 mr-4"
                                                     >
                                                         <EditOutlined />
                                                     </button>
-                                                    <button
+                                                    {!account.role.includes("Admin") && <button
                                                         onClick={() => handleDelete(account.id)}
                                                         className="text-red-600 hover:text-red-800"
                                                     >
                                                         <DeleteOutlined />
-                                                    </button>
+                                                    </button>}
                                                 </td>
                                             </tr>
                                         ))
@@ -153,10 +171,32 @@ const ListAccount: React.FC = () => {
                                     )}
                                 </tbody>
                             </table>
+
+                            {/* Pagination */}
+                            <Pagination
+                                current={currentPage}
+                                pageSize={pageSize}
+                                total={filteredAccounts.length}
+                                onChange={handlePageChange}
+                                showSizeChanger={false}
+                                className="mt-4 flex justify-center"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
+
+            <Modal
+                title="Are you sure you want to delete this account?"
+                open={showModal}
+                onOk={() => deleteAccount(deleteAccountId)}
+                onCancel={handleCancel}
+                okText="Yes"
+                cancelText="No"
+                okButtonProps={{ danger: true }}
+            >
+                <p>This action cannot be undone.</p>
+            </Modal>
         </>
     );
 };

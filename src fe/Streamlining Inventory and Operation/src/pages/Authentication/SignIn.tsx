@@ -1,43 +1,106 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useActionState } from 'react';
+import { Link, useNavigate, useSubmit } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { setUserInfoToStorage } from '../../util/auth';
+import { DecodedToken, decodeToken, loginAction } from '../../fetch/authentication';
+import { getAuthToken, getAuthTokenDuration, setUserInfoToStorage } from '../../util/auth';
+import { validateNonEmptyString, validatePassword } from '../../util/validation';
+
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState({
-    email: '123',
-    password: '123',
-    role: 'admin',
-  })
-  const handleLogin = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const submit = useSubmit()
 
+  const handleAutoLogout = () => {
+    const token = getAuthToken()
+
+    if (!token) {
+      return
+    }
+
+    if (token === 'EXPIRED') {
+      submit(null, { action: '/auth/logout', method: 'POST' })
+      return
+    }
+
+    const tokenDuration = getAuthTokenDuration()
+    const timer = setTimeout(() => {
+      submit(null, { action: '/auth/logout', method: 'POST' })
+    }, tokenDuration)
+
+    return () => clearTimeout(timer)
+  }
+
+  const handleLogin = async (_prevState: any, formData: any): Promise<any> => {
     try {
-      if (userInfo) {
-        // Kiểm tra thông tin đăng nhập
-        if (!userInfo.email || !userInfo.password) {
-          console.log(123)
-          toast.error("Please enter both email and password.");
-          return;
+      const email = formData.get('email');
+      const password = formData.get('password');
+
+      if (!validateNonEmptyString(email)) {
+        toast.error("Email is required.");
+        return {
+          email, password
+        };
+      }
+
+      if (!validateNonEmptyString(password)) {
+        toast.error("Password is required.");
+        return {
+          email, password
+        };
+      }
+
+      if (!validatePassword(password)) {
+        toast.error("Password must contain at least 6 characters, 1 capital letter, 1 number, and 1 special character.");
+        return {
+          email, password
+        };
+      }
+
+      const response = await loginAction(email, password);
+      if (response?.statusCode === 200) {
+        const decodedToken: DecodedToken | null = decodeToken(response.result.token);
+        console.log(decodedToken);
+        if (!decodedToken) {
+          throw new Error("Failed to decode token.");
+        }
+        const userInfo = {
+          email, password,
+          roles: decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+          token: response.result.token,
+          expiration: response.result.expiration
         }
 
         setUserInfoToStorage(userInfo);
-        if (userInfo.role === 'admin') {
-          navigate("/");
-        } else if (userInfo.role === 'manager') {
-          navigate("/");
-        } else {
-          navigate("/");
+        if (userInfo.roles.includes('Admin')) {
+          navigate("/admin/accounts");
+        } else if (userInfo.roles.includes('Manager')) {
+          navigate("/manager/reports");
+        } else if (userInfo.roles.includes('Staff')) {
+          navigate("/staff/products")
         }
 
+        handleAutoLogout()
         toast.success("Login successful!");
       } else {
-        toast.error("Login failed: User not found.");
+        toast.error(response[0].toString());
+        return {
+          email, password
+        }
       }
     } catch (error) {
+      console.log(error);
       toast.error("Login failed: Incorrect credentials.");
     }
+    return {
+      email: '',
+      password: '',
+    }
   };
+
+  const [formState, formAction, pending] = useActionState(handleLogin, {
+    email: String,
+    password: String,
+  });
+
   return (
     <div className='flex justify-center items-center h-screen'>
       <div className="w-2/5 m-auto rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -49,13 +112,15 @@ const SignIn: React.FC = () => {
                 Sign In to WareEase
               </h2>
 
-              <form onSubmit={handleLogin}>
+              <form action={formAction}>
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Email
                   </label>
                   <div className="relative">
                     <input
+                      defaultValue={formState?.email}
+                      name='email'
                       type="email"
                       placeholder="Enter your email"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -87,8 +152,10 @@ const SignIn: React.FC = () => {
                   </label>
                   <div className="relative">
                     <input
+                      defaultValue={formState?.password}
+                      name='password'
                       type="password"
-                      placeholder="6+ Characters, 1 Capital letter"
+                      placeholder="Enter your password"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 
@@ -118,19 +185,11 @@ const SignIn: React.FC = () => {
 
                 <div className="mb-5">
                   <input
+                    disabled={pending}
                     type="submit"
-                    value="Sign In"
+                    value={pending ? 'Submitting...' : "Sign In"}
                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                   />
-                </div>
-
-                <div className="mt-6 text-center">
-                  <p>
-                    Don’t have any account?{' '}
-                    <Link to="/auth/signup" className="text-primary">
-                      Sign Up
-                    </Link>
-                  </p>
                 </div>
 
                 <div className="mt-6 text-center">

@@ -1,8 +1,27 @@
 import { Link } from 'react-router-dom';
+import { resetPassword } from '../../services/userApi';
+import { toast } from 'react-toastify';
+import { useState } from 'react';
 
 export default function ForgotPassword() {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response =  await resetPassword(e.currentTarget[0].value);
+      toast.success(response.data.result);
+    } catch (error) {
+        toast.error("An error occurred, please try again later");
+        console.log(error);
+    }finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className='flex justify-center items-center h-screen'>
+    <div className="flex justify-center items-center h-screen">
       <div className="w-2/5 m-auto rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="flex flex-wrap items-center">
           <div className="w-full border-stroke dark:border-strokedark xl:w-full xl:border-l-2">
@@ -10,9 +29,12 @@ export default function ForgotPassword() {
               <h2 className="mb-3 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
                 Forgot Password
               </h2>
-              <span className="mb-4 block font-medium">Type your email you register with us here, we will send a link that you can reset your password</span>
+              <span className="mb-4 block font-medium">
+                Type your email you register with us here, we will send a link
+                that you can reset your password
+              </span>
 
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                   <div className="relative">
                     <input
@@ -44,16 +66,17 @@ export default function ForgotPassword() {
                 <div className="mb-5">
                   <input
                     type="submit"
-                    value="Send Request"
+                    value={loading ? "Sending..." : "Send Request"}
                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+                    disabled={loading}
                   />
                 </div>
 
                 <div className="mt-6 text-center">
                   <p>
-                    Don’t have any account?{' '}
-                    <Link to="/auth/signup" className="text-primary">
-                      Sign Up
+                    Back To{' '}
+                    <Link to="/auth/signin" className="text-primary">
+                      Login
                     </Link>
                   </p>
                 </div>

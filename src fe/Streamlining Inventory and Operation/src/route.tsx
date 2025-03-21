@@ -1,37 +1,29 @@
 import { createBrowserRouter } from 'react-router-dom';
-import DefaultLayout from './layout/DefaultLayout';
-import ScrollToTop from './components/ScrollToTop';
 import PageTitle from './components/PageTitle';
-import ECommerce from './pages/Dashboard/ECommerce';
-import Profile from './pages/Profile';
-import Tables from './pages/Tables';
-import Chart from './pages/Chart';
-import FormElements from './pages/Form/FormElements';
-import FormLayout from './pages/Form/FormLayout';
-import Alerts from './pages/UiElements/Alerts';
-import Buttons from './pages/UiElements/Buttons';
-import SignIn from './pages/Authentication/SignIn';
-import SignUp from './pages/Authentication/SignUp';
-import { action as logoutAction } from './pages/Authentication/Logout'
-import Order from './pages/Dashboard/Order';
-import Shelfs from './pages/Shelfs';
-import Lots from './pages/Lots';
-import Products from './pages/Products';
-import Orders from './pages/Orders';
-import ErrorPage from './pages/Error/ErrorPage';
-import ForgotPassword from './pages/Authentication/ForgotPassword';
-import RecoverPassword from './pages/Authentication/RecoverPassword';
-import ImportProduct from './pages/Manager/ImportProduct';
-import ExportProduct from './pages/Manager/ExportProduct';
-import Report from './pages/Manager/Report';
-import TransactionManagement from './pages/Manager/TransactionManagement';
-import InventoryTracking from './pages/Manager/InventoryTracking';
-import ManageAccount from './pages/Admin/ListAccount';
-import ListAccount from './pages/Admin/ListAccount';
+import ScrollToTop from './components/ScrollToTop';
+import DefaultLayout from './layout/DefaultLayout';
 import AddAccount from './pages/Admin/AddAccount';
 import EditAccount from './pages/Admin/EditAccount';
+import ListAccount from './pages/Admin/ListAccount';
+import ForgotPassword from './pages/Authentication/ForgotPassword';
+import { action as logoutAction } from './pages/Authentication/Logout';
+import RecoverPassword from './pages/Authentication/RecoverPassword';
+import SignIn from './pages/Authentication/SignIn';
+import SignUp from './pages/Authentication/SignUp';
+import ErrorPage from './pages/Error/ErrorPage';
+import Lots from './pages/Lots';
+import ExportProduct from './pages/Manager/ExportProduct';
+import ImportProduct from './pages/Manager/ImportProduct';
+import Report from './pages/Manager/Report';
+import TransactionManagement from './pages/Manager/TransactionManagement';
 import OrderHistory from './pages/OrderHistory';
+import Products from './pages/Products';
+import Profile from './pages/Profile';
+import Shelfs from './pages/Shelfs';
+import { accountListLoader } from './fetch/account';
 import CreateOrder from './pages/CreateOrder';
+import SuppliersPage from './pages/SuppliersPage';
+import Platforms from './pages/PlatformsPage';
 
 export const router = createBrowserRouter([
     {
@@ -42,6 +34,10 @@ export const router = createBrowserRouter([
         </>,
         errorElement: <ErrorPage />,
         children: [
+            {
+                path: 'profile',
+                element: <Profile />
+            },
             {
                 path: 'staff',
                 children: [
@@ -61,8 +57,125 @@ export const router = createBrowserRouter([
                                 <Lots />
                             </>
                         )
+                    },
+                    {
+                        path: 'products',
+                        element: (
+                            <>
+                                <PageTitle title="Product Manage" />
+                                <Products />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'import-product',
+                        element: (
+                            <>
+                                <PageTitle title="Import Product" />
+                                <ImportProduct />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'export-product',
+                        element: (
+                            <>
+                                <PageTitle title="Export Product" />
+                                <ExportProduct />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'order-history',
+                        element: (
+                            <>
+                                <PageTitle title="Order History" />
+                                <OrderHistory />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'create-order',
+                        element: (
+                            <>
+                                <PageTitle title="Create Order" />
+                                <CreateOrder />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'suppliers-page',
+                        element: (
+                            <>
+                                <PageTitle title="Suppliers Page" />
+                                <SuppliersPage />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'platforms-page',
+                        element: (
+                            <>
+                                <PageTitle title="Platforms Page" />
+                                <Platforms />
+                            </>
+                        )
                     }
-
+                ]
+            }, {
+                path: 'admin',
+                children: [
+                    {
+                        id: 'accountList',
+                        path: 'accounts',
+                        loader: accountListLoader,
+                        element: (
+                            <>
+                                <PageTitle title="Account List" />
+                                <ListAccount />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'add-account',
+                        element: (
+                            <>
+                                <PageTitle title="Add new Account" />
+                                <AddAccount />
+                            </>
+                        )
+                    },
+                    {
+                        path: 'edit-account/:id',
+                        loader: accountListLoader,
+                        element: (
+                            <>
+                                <PageTitle title="Edit Account" />
+                                <EditAccount />
+                            </>
+                        )
+                    },
+                ]
+            }, {
+                path: 'manager',
+                children: [
+                    {
+                        path: "shelfs",
+                        element: (
+                            <>
+                                <PageTitle title="Shelfs Manage" />
+                                <Shelfs />
+                            </>
+                        )
+                    }, {
+                        path: "lots",
+                        element: (
+                            <>
+                                <PageTitle title="Lots Manage" />
+                                <Lots />
+                            </>
+                        )
+                    }
                     , {
                         path: 'products',
                         element: (
@@ -109,15 +222,6 @@ export const router = createBrowserRouter([
                         )
                     },
                     {
-                        path: 'confirm-stock-daily',
-                        element: (
-                            <>
-                                <PageTitle title="Confirm Stock Daily" />
-                                <InventoryTracking />
-                            </>
-                        )
-                    },
-                    {
                         path: 'order-history',
                         element: (
                             <>
@@ -136,44 +240,7 @@ export const router = createBrowserRouter([
                         )
                     }
                 ]
-            }, {
-                path: 'admin',
-                children: [
-                    {
-                        path: 'accounts',
-                        element: (
-                            <>
-                                <PageTitle title="Account List" />
-                                <ListAccount />
-                            </>
-                        )
-                    },
-                    {
-                        path: 'add-account',
-                        element: (
-                            <>
-                                <PageTitle title="Add new Account" />
-                                <AddAccount />
-                            </>
-                        )
-                    },
-                    {
-                        path: 'edit-account/:id',
-                        element: (
-                            <>
-                                <PageTitle title="Edit Account" />
-                                <EditAccount />
-                            </>
-                        )
-                    },
-                ]
-            }, {
-                path: 'manager',
-                children: [
-
-                ]
             }
-            // other roles here...
         ]
     }, {
         path: '/auth',
@@ -202,7 +269,7 @@ export const router = createBrowserRouter([
                 </>)
             }
             , {
-                path: 'recover-password',
+                path: 'recover-password/reset',
                 element: (<>
                     <PageTitle title="Recover Password | Warehouse management" />
                     <RecoverPassword />

@@ -1,120 +1,391 @@
-import React, { useState } from 'react'
-import Breadcrumb from '../components/Breadcrumbs/Breadcrumb'
+import {
+  Button,
+  Collapse,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Table,
+} from 'antd';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
+import DeleteModal from '../components/ModalDelete';
+import '../css/buttonSearch.css';
+import { useStyle } from '../css/useStyle';
+import {
+  createLots,
+  deleteLots,
+  getLots,
+  updateLots,
+} from '../services/lotApi';
+import { getAllProducts } from '../services/productApi';
+import { getAllShelfs } from '../services/shelfApi';
+import { lotColumns } from '../util/lotColumns';
+import { LAYOUT_LOT, VALIDATE_MESSAGES, validateExpiryDate, validateManufactureDate } from '../validate/validateMessages';
 
-interface Lot {
-  id: number;
+export interface Lot {
+  lotId: number;
   productId: number;
   shelfId: number;
-  code: string;
-  name: string;
-  location: string;
-  capacity: number;
+  lotCode: string;
+  manufactureDate: string;
+  expiryDate: string;
+  quantity: number;
+  status: string;
+  createAt: string;
+  updateAt: string;
+  createBy: string;
 }
 
-
-const Lots:React.FC = () => {
+const Lots: React.FC = () => {
   const navigate = useNavigate();
-  const [search, setSearch] = useState<string>('');
-  const [lots,setLots] = useState<Lot[]>([
-    {
-      id: 1,
-      productId: 1,
-      shelfId: 1,
-      code: 'L001',
-      name: 'A',
-      location: 'A14',
-      capacity: 10,
-    },
-    {
-      id: 2,
-      productId: 1,
-      shelfId: 2,
-      code: 'L003',
-      name: 'B',
-      location: 'A31',
-      capacity: 10,
-    },
-    {
-      id: 3,
-      productId: 3,
-      shelfId: 2,
-      code: 'L004',
-      name: 'C',
-      location: 'A12',
-      capacity: 10,
-    },
-    {
-      id: 4,
-      productId: 4,
-      shelfId: 1,
-      code: 'L001',
-      name: 'D',
-      location: 'A11',
-      capacity: 10,
-    },
-  ])
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      console.log('search lots', search);
+  const { Search } = Input;
+  const { Panel } = Collapse;
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [searchLoading, setSearchLoading] = useState<boolean>(false);
+  const [activeKey, setActiveKey] = useState<string[]>([]);
+  const [lots, setLots] = useState<Lot[]>([]);
+  const [shelfs, setShelfs] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const { styles } = useStyle();
+  const dateFormat = 'DD-MM-YYYY';
+  const [pagination, setPagination] = useState({ pageNumber: 1, pageSize: 10 ,total: 0, });
+  const [selectedLotDelete, setSelectedLotDelete] = useState<Lot | null>(null);
+  const [openModalDelete, setModalDelete] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
+  console.log('selectedLot', selectedLot);
+  const [form] = Form.useForm();
+  
+  useEffect(() => {
+    fecthLots(pagination.pageNumber, pagination.pageSize);
+    const fetchShelfIds = async () => {
+      try {
+        const response = await getAllShelfs();
+        setShelfs(response.data.result.items);
+      } catch (error) {
+        toast.error('Failed to fetch shelf IDs');
+      }
+    };
+    const fetchProductIds = async () => {
+      try {
+        const response = await getAllProducts();
+        setProducts(response.data.result.products);
+      } catch (error) {
+        toast.error('Failed to fetch product IDs');
+      }
+    };
+    fetchShelfIds();
+    fetchProductIds();
+  }, []);
+  const fecthLots = async (pageNumber: number, pageSize: number) => {
+    try {
+      const response = await getLots(pageNumber, pageSize);
+      setPagination({
+        pageNumber: response.data.result.currentPage,
+        pageSize: response.data.result.pageSize,
+        total: response.data.result.totalCount,
+      });
+      //console.log('fecthlots', fetchLots);
+      setLots(response.data.result.lots);
+    } catch (error) {
+      toast.error('Failed to fetch lots');
     }
-  }
+  };
+  const handleTalbeChange = (pagination: any) => {
+    fecthLots(pagination.current, pagination.pageSize);
+  };
+  const handleSearch = (record: any) => {
+    setSearchLoading(true);
+    console.log('search Lot', record);
+    setSearchLoading(false);
+  };
+  const handleEdit = (record: Lot) => {
+    setSelectedLot(record);
+    setOpenModal(true);
+    console.log('edit lot', record);
+  };
+  const handleSelectedDelete = (record: Lot) => {
+    setSelectedLotDelete(record);
+    setModalDelete(true);
+  };
+  const handleDelete = async () => {
+    if (selectedLotDelete) {
+      try {
+        const response = await deleteLots(selectedLotDelete.lotId);
+        console.log(response);
+        setLots(lots.filter((lot) => lot.lotId !== selectedLotDelete.lotId));
+        toast.success('Delete Lot success');
+      } catch (error) {
+        console.log(error);
+        toast.error('Delete Lot failed');
+      }
+    }
+    setModalDelete(false);
+  };
+  const handleView = (record: Lot) => {
+    console.log('view Lot', record);
+  };
+
+
+  const onFinish = async (values: any) => {
+    console.log('value', values);
+    try {
+      if (selectedLot) {
+        const response = await updateLots(selectedLot.lotId, values);
+        console.log(response);
+        toast.success('Update Lot success');
+        setLots(
+          lots.map((lot) =>
+            lot.lotId === selectedLot.lotId ? response.data.result : lot,
+          ),
+        );
+      } else {
+        const response = await createLots(values);
+        console.log(response);
+        toast.success('Create Lot success');
+        setLots([...lots, response.data.result]);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(selectedLot ? 'Update Lot failed' : 'Create Lot failed');
+    }
+    setOpenModal(false);
+    setIsEditMode(false);
+    setSelectedLot(null);
+  };
+  const toggleCollapse = () => {
+    console.log('activeKey', activeKey);
+    console.log('activeKey', activeKey.length);
+    setActiveKey(activeKey.length ? [] : ['1']);
+  };
   return (
-
     <>
-    <Breadcrumb pageName="Lots" />
-     <div className="p-4  relative">
-        <button className="mb-4 p-2 bg-blue-500 text-white rounded hover:-translate-y-1 hover:shadow-lg transition-transform">
-          Create Lots
-        </button>
-        <input
-          type="text"
-          placeholder="Search by Code, Name,..."
-          onChange={(e) => setSearch(e.target.value)}
-          value={search}
-          onKeyDown={handleSearch}
-          className="p-2 border border-gray-400  rounded w-2/5 absolute right-4"
-        />
-        <table className="w-full  table-auto border-collapse">
-          <thead>
-            <tr>
-              <th className="border p-2 bg-yellow-100">ID</th>
-              <th className="border p-2 bg-gray-200">Code</th>
-              <th className="border p-2 bg-gray-200">Name</th>
-              <th className="border p-2 bg-gray-200">Location</th>
-              <th className="border p-2 bg-gray-200">Capacity</th>
-              <th className="border p-2 bg-gray-200">Shelf</th>
-              <th className="border p-2 bg-gray-200" >Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lots.map((lot) => (
-              <tr key={lot.id}>
-               
-                <td className="border p-2 text-center"> {lot.id}</td>
-                <td className="border p-2 text-center">{lot.code}</td>
-                <td className="border p-2 text-center" >{lot.name}</td>
-                <td className="border p-2 text-center">{lot.location}</td>
-                <td className="border p-2 text-center">{lot.capacity}</td>
-                <td className="border p-2 text-center">{lot.shelfId}</td>
-                <td className="border p-2 flex justify-center ">
-                  <button className="p-2 bg-yellow-500 text-white rounded mr-2 hover:-translate-y-1 hover:shadow-lg transition-transform">
-                    Update
-                  </button>
-                  <button className="p-2 mr-2 bg-red-500 text-white rounded hover:-translate-y-1 hover:shadow-lg transition-transform">
-                    Delete
-                  </button>
-                  <button onClick={() => navigate(`/products?lotId=${lot.id}&shelfId=${lot.shelfId}`)} className="p-2 bg-green-500 text-white rounded hover:-translate-y-1 hover:shadow-lg transition-transform">
-                    View Products
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  )
-}
+      <Breadcrumb pageName="Lots" />
+      <Collapse
+        activeKey={activeKey}
+        onChange={toggleCollapse}
+        style={{ marginBottom: '20px' }}
+      >
+        <Panel header="Create New Lot" key="1">
+          <div className="bg-white p-8 rounded-md w-full">
+            <Form
+              {...LAYOUT_LOT}
+              name="lots"
+              form={form}
+              onFinish={onFinish}
+              style={{ maxWidth: 600 }}
+              validateMessages={VALIDATE_MESSAGES}
 
-export default Lots
+            >
+              <Form.Item
+                name={['lotCode']}
+                label="Lot Code"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name={['shelfId']}
+                label="Choose Shelf"
+                rules={[{ required: true }]}
+              >
+                <Select>
+                  {shelfs.map((item) => (
+                    <Select.Option key={item.shelfId} value={item.shelfId}>
+                      {item.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name={['productId']}
+                label="Choose Product"
+                rules={[{ required: true }]}
+              >
+                <Select>
+                  {products.map((item) => (
+                    <Select.Option key={item.productId} value={item.productId}>
+                      {item.productName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                name={['manufactureDate']} 
+                label="Manufacture Date"
+                rules={[{ required: true}, validateManufactureDate()]}
+              >
+                <DatePicker format={dateFormat} />
+              </Form.Item>
+              <Form.Item
+                name={['expiryDate']}
+                label="Expiry Date"
+                dependencies={['manufactureDate']}
+                rules={[
+                  { required: true },
+                  validateExpiryDate(form.getFieldValue)
+                ]}
+              >
+                <DatePicker format={dateFormat} />
+              </Form.Item>
+              <Form.Item
+                name={['quantity']}
+                label="Quantity"
+                rules={[{ type: 'number', required: true, min: 0, max: 200 }]}
+              >
+                <InputNumber />
+              </Form.Item>
+              <Form.Item label={null}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  style={{
+                    backgroundColor: '#1890ff',
+                    borderColor: '#1890ff',
+                    color: '#fff',
+                    marginRight: '20px',
+                  }}
+                >
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
+        </Panel>
+      </Collapse>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginBottom: '20px',
+        }}
+      >
+        <Search
+          placeholder="Search by Code, BUG UPDATE, DON'T HAVE DELETE"
+          enterButton="Search"
+          size="large"
+          loading={searchLoading}
+          onSearch={handleSearch}
+          className="custom-search-button"
+          style={{ width: '50%' }}
+        />
+      </div>
+      <div>
+        <Table<Lot>
+          className={styles.customTable}
+          rowKey="lotId"
+          pagination={{
+            current: pagination.pageNumber,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+          }}
+          onChange={handleTalbeChange}
+          columns={lotColumns(handleEdit, handleSelectedDelete, handleView)}
+          dataSource={lots}
+          scroll={{ x: 'max-content' }}
+        />
+      </div>
+      {openModal && (
+        <div className="fixed z-999 inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-8 rounded-md w-1/3">
+            <h2 className="text-center text-2xl font-bold mb-8">Edit Lot</h2>
+            <Form
+              {...LAYOUT_LOT}
+              name="lots"
+              onFinish={onFinish}
+              style={{ maxWidth: 600 }}
+              validateMessages={VALIDATE_MESSAGES}
+              initialValues={selectedLot || undefined}
+            >
+              <Form.Item
+                name={['lotCode']}
+                label="Lot Code"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name={['shelfId']}
+                label="Choose Shelf"
+                rules={[{ required: true }]}
+              >
+                <Select>
+                  {shelfs.map((item) => (
+                    <Select.Option key={item.shelfId} value={item.shelfId}>
+                      {item.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name={['productId']}
+                label="Choose Product"
+                rules={[{ required: true }]}
+              >
+                <Select>
+                  {products.map((item) => (
+                    <Select.Option key={item.productId} value={item.productId}>
+                      {item.productName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                name={['quantity']}
+                label="Quantity"
+                rules={[{ type: 'number', required: true, min: 0, max: 200 }]}
+              >
+                <InputNumber />
+              </Form.Item>
+              <div className="flex justify-center">
+                <Form.Item label={null}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{
+                      backgroundColor: '#1890ff',
+                      borderColor: '#1890ff',
+                      color: '#fff',
+                      marginRight: '20px',
+                    }}
+                  >
+                    Submit
+                  </Button>
+                </Form.Item>
+                <Form.Item label={null}>
+                  <Button
+                    type="primary"
+                    onClick={() => setOpenModal(false)}
+                    style={{
+                      backgroundColor: 'red',
+                      borderColor: 'red',
+                      color: '#fff',
+                    }}
+                    htmlType="button"
+                  >
+                    Close
+                  </Button>
+                </Form.Item>
+              </div>
+            </Form>
+          </div>
+        </div>
+      )}
+      <DeleteModal
+        open={openModalDelete}
+        onClose={() => setModalDelete(false)}
+        onDelete={handleDelete}
+        selected={selectedLotDelete}
+        type="Lot"
+      />
+    </>
+  );
+};
+
+export default Lots;

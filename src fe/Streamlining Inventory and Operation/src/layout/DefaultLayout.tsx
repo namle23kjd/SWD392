@@ -1,26 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { Outlet, useNavigation } from 'react-router-dom';
 import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { getUserInfo } from '../util/auth';
+import { useCheckRole } from '../hooks/useCheckRole';
+import { Spin } from 'antd';
 
 const DefaultLayout: React.FC = () => {
-  const navigate = useNavigate();
-  useEffect(() => {
-    const userInfo = getUserInfo();
-    console.log(userInfo);
-    if (userInfo && userInfo?.role === 'admin') {
-      navigate("/staff/reports");
-    } else if (userInfo && userInfo?.role === 'manager') {
-      navigate("/staff/reports");
-    } else if (userInfo && userInfo?.role === 'staff') {
-      navigate("/staff/reports");
-    } else {
-      navigate("/auth/signin");
-    }
-  }, [navigate]);
-
+  useCheckRole()
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigation = useNavigation()
 
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">
@@ -39,6 +27,7 @@ const DefaultLayout: React.FC = () => {
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+              {navigation.state === 'loading' && <Spin>Loading...</Spin>}
               <Outlet />
             </div>
           </main>

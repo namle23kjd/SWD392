@@ -1,8 +1,72 @@
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { resetConfirmResetPassword } from '../../services/userApi';
 
 const RecoverPassword: React.FC = () => {
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState('');
+  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tokenParam = params.get('token');
+    const emailParam = params.get('email');
+    console.log('token', tokenParam);
+    
+    if (tokenParam && emailParam) {
+      setToken(tokenParam.replace(/ /g, '+'));
+      setEmail(emailParam);
+    }
+  }, [location.search]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (password.length < 8) {
+      toast.error('Passwords must be at least 8 characters.');
+      return;
+    }
+    if (!/[a-z]/.test(password)) {
+      toast.error("Passwords must have at least one lowercase ('a'-'z').");
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      toast.error("Passwords must have at least one uppercase ('A'-'Z').");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setLoading(true);
+    const requestBody = {
+      email: email,
+      token: token,
+      newPassword: password,
+    };
+    console.log(requestBody);
+
+    try {
+      await resetConfirmResetPassword(requestBody);
+      toast.success('Password updated successfully');
+      setTimeout(() => {
+        navigate('/auth/signin');
+      }, 1500);
+    } catch (error) {
+      toast.error('An error occurred, please try again later');
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className='flex justify-center items-center h-screen'>
+    <div className="flex justify-center items-center h-screen">
       <div className="w-2/5 m-auto rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="flex flex-wrap items-center">
           <div className="w-full border-stroke dark:border-strokedark xl:w-full xl:border-l-2">
@@ -10,9 +74,11 @@ const RecoverPassword: React.FC = () => {
               <h2 className="mb-4 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
                 Recover password
               </h2>
-              <span className="mb-4 block font-medium">Type your new password and confirm</span>
+              <span className="mb-4 block font-medium">
+                Type your new password and confirm
+              </span>
 
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-6">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Password
@@ -20,8 +86,12 @@ const RecoverPassword: React.FC = () => {
                   <div className="relative">
                     <input
                       type="password"
+                      required
                       placeholder="6+ Characters, 1 Capital letter"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
                     />
 
                     <span className="absolute right-4 top-4">
@@ -55,8 +125,12 @@ const RecoverPassword: React.FC = () => {
                   <div className="relative">
                     <input
                       type="password"
+                      required
                       placeholder="6+ Characters, 1 Capital letter"
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={loading}
                     />
 
                     <span className="absolute right-4 top-4">
@@ -86,8 +160,9 @@ const RecoverPassword: React.FC = () => {
                 <div className="mb-5">
                   <input
                     type="submit"
-                    value="Save"
+                    value={loading ? 'Saving...' : 'Save'}
                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+                    disabled={loading}
                   />
                 </div>
 
