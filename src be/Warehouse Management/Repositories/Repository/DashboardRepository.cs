@@ -77,18 +77,24 @@ namespace Warehouse_Management.Repositories.Repository
         //}
         public IEnumerable<object> GetLowStockProducts()
         {
-            var warningDate = DateTime.UtcNow.AddMonths(3); // Tính toán ngày cảnh báo (CreateAt + 3 tháng)
+            var warningDate = DateTime.UtcNow.AddMonths(3); // Ngày cảnh báo hết hạn
 
             return _context.Lots
-                           .Where(l => l.ExpiryDate <= warningDate) // Kiểm tra ngày hết hạn trong vòng 3 tháng
-                           .GroupBy(l => l.LotId) // Nhóm theo LotId
+                           .Where(l => l.ExpiryDate <= warningDate) // Chỉ lấy các lô sắp hết hạn
+                           .GroupBy(l => l.ProductId) // Nhóm theo sản phẩm
                            .Select(g => new
                            {
-                               lot = $"lot{g.Key}", // Tạo key "lot1", "lot2", ...
-                               products = g.Count() // Số lượng sản phẩm trong Lot có ngày hết hạn gần
+                               productName = _context.Products
+                                                     .Where(p => p.ProductId == g.Key)
+                                                     .Select(p => p.ProductName)
+                                                     .FirstOrDefault(),
+                               quantity = g.Sum(l => l.Quantity) // Tổng số lượng còn lại của sản phẩm
                            })
+                           .Where(p => p.quantity > 0) // Chỉ lấy sản phẩm còn hàng
+                           .OrderBy(p => p.quantity) // Sắp xếp tăng dần để dễ cảnh báo
                            .ToList();
         }
+
 
         public IEnumerable<object> GetTopOrderProducts()
         {
